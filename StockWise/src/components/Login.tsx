@@ -1,11 +1,10 @@
-// src/components/Login.tsx
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-// Import the Firebase authentication instance
 import { auth } from "../../firebaseConfig";
 
-
 const Login: React.FC = () => {
+  const history = useHistory();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
@@ -14,6 +13,7 @@ const Login: React.FC = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert("Logged in successfully!");
+      history.push("/home"); // Redirect to the home page after login
     } catch (error: any) {
       alert(error.message);
     }
