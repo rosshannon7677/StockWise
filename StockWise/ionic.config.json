@@ -1,0 +1,7 @@
+{
+  "name": "StockWise",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
