@@ -1,0 +1,41 @@
+/* src/pages/Home.css */
+.home-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 16px;
+}
+
+.home-buttons {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.home-buttons ion-button {
+  margin-bottom: 10px;
+}
+
+/* Home.css */
+.home-content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.home-title {
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+}
+
+.home-subtext {
+  font-size: 1.2em;
+  color: #555;
+}
+
+

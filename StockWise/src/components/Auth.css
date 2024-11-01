@@ -1,0 +1,34 @@
+.auth-content {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .auth-title {
+    font-size: 2em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .auth-subtext {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 20px;
+  }
+  
+  .auth-item {
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .auth-button {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+  }
+  
