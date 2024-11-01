@@ -1,5 +1,5 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
+import React from 'react';
+import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/react';
 import './Home.css';
 
 const Home: React.FC = () => {
@@ -7,16 +7,12 @@ const Home: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Blank</IonTitle>
+          <IonTitle>Welcome to StockWise</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Blank</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <ExploreContainer />
+      <IonContent className="home-content">
+        <h2 className="home-title">Hello, User!</h2>
+        <p className="home-subtext">Your inventory management starts here.</p>
       </IonContent>
     </IonPage>
   );

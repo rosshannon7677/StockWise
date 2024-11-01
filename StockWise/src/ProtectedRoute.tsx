@@ -1,22 +1,14 @@
-import React from "react";
-import { Route, Redirect, RouteComponentProps } from "react-router-dom";
-import { auth } from "../firebaseConfig";
+// src/components/ProtectedRoute.tsx
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
-  component: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>;
-  path: string;
-  exact?: boolean;
+  children: JSX.Element;
+  isAuthenticated: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component, ...rest }) => {
-  return (
-    <Route
-      {...rest}
-      render={(props) =>
-        auth.currentUser ? <Component {...props} /> : <Redirect to="/login" />
-      }
-    />
-  );
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isAuthenticated }) => {
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;
