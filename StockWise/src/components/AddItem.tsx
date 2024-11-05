@@ -1,5 +1,6 @@
 // src/components/AddItem.tsx
 import React, { useState } from "react";
+import { addInventoryItem } from ".././firestoreService";
 
 const AddItem: React.FC = () => {
   const [name, setName] = useState("");
@@ -8,7 +9,13 @@ const AddItem: React.FC = () => {
   const [description, setDescription] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-   
+    e.preventDefault();
+    await addInventoryItem({ name, quantity, price, description });
+    setName("");
+    setQuantity(0);
+    setPrice(0);
+    setDescription("");
+    alert("Item added successfully!");
   };
 
   return (
