@@ -1,6 +1,7 @@
 // src/components/AddItem.tsx
 import React, { useState } from "react";
-import { addInventoryItem } from ".././firestoreService";
+import { addInventoryItem } from "../firestoreService";
+
 
 const AddItem: React.FC = () => {
   const [name, setName] = useState("");
