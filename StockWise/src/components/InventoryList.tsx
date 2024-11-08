@@ -1,6 +1,14 @@
 // src/components/InventoryList.tsx
 import React from "react";
 
+interface InventoryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  description?: string;
+}
+
 const InventoryList: React.FC<{ items: any[] }> = ({ items }) => {
     return (
       <div>
