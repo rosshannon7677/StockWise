@@ -15,3 +15,14 @@ export const addInventoryItem = async (item: { name: string; quantity: number; p
   }
 };
 
+// Function to listen to inventory items in real-time
+export const getInventoryItems = (callback: (items: any[]) => void) => {
+  const collectionRef = collection(db, "inventoryItems");
+  onSnapshot(collectionRef, (snapshot: QuerySnapshot<DocumentData>) => {
+    const items = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    callback(items);
+  });
+};
