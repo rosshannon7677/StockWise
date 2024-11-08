@@ -1,10 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
 import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/react';
 import './Home.css';
+import InventoryList from "../components/InventoryList";
+import { getInventoryItems } from "../firestoreService";
+
 import AddItem from '../components/AddItem';
 
 
 const Home: React.FC = () => {
+
+  const [items, setItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    getInventoryItems((fetchedItems) => {
+      setItems(fetchedItems); // Ensure `setItems` updates your state
+    });
+  }, []);
+
   return (
     <IonPage>
       <IonHeader>
@@ -19,6 +31,7 @@ const Home: React.FC = () => {
       <h1>Inventory Management System</h1>
       <AddItem />
       {/* Additional home page content can go here */}
+      <InventoryList items={items} />
     </div>
       </IonContent>
     </IonPage>
