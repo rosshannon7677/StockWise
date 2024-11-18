@@ -1,0 +1,26 @@
+.inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Reduce spacing between items */
+    margin: 0 auto; /* Center the list horizontally */
+    max-width: 600px; /* Limit the width of the inventory list */
+  }
+  
+  .inventory-item {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px; /* Reduce padding within each box */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+  }
+  
+  .inventory-item h3 {
+    margin: 0 0 6px;
+    font-size: 1.25em;
+  }
+  
+  .inventory-item p {
+    margin: 2px 0;
+    font-size: 0.95em;
+  }
+  

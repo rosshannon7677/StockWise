@@ -1,5 +1,7 @@
 // src/components/InventoryList.tsx
 import React from "react";
+import "./InventoryList.css";
+
 
 interface InventoryItem {
   id: string;
@@ -9,22 +11,19 @@ interface InventoryItem {
   description?: string;
 }
 
-const InventoryList: React.FC<{ items: any[] }> = ({ items }) => {
-    return (
-      <div>
-        <h3>Inventory List</h3>
-        <ul>
-          {items.map((item) => (
-            <li key={item.id}>
-              <strong>Name:</strong> {item.name || "N/A"} <br />
-              <strong>Quantity:</strong> {item.quantity || 0} <br />
-              <strong>Price:</strong> ${Number(item.price).toFixed(2)} <br />
-              <strong>Description:</strong> {item.description || "No description"}
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  };
+const InventoryList: React.FC<{ items: InventoryItem[] }> = ({ items }) => {
+  return (
+    <div className="inventory-list">
+      {items.map((item) => (
+        <div key={item.id} className="inventory-item">
+          <h3>{item.name}</h3>
+          <p><strong>Quantity:</strong> {item.quantity}</p>
+          <p><strong>Price:</strong> ${item.price.toFixed(2)}</p>
+          <p><strong>Description:</strong> {item.description || "No description"}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default InventoryList;
