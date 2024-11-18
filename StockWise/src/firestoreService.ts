@@ -1,6 +1,7 @@
 // src/firestoreService.ts
 import { addDoc, collection, getFirestore, onSnapshot, QuerySnapshot, DocumentData, updateDoc, doc } from "firebase/firestore";
-import { app } from "./../firebaseConfig"; // Adjust path as needed
+import { app } from "./../firebaseConfig";
+import { deleteDoc } from "firebase/firestore"; 
 
 
 interface InventoryItem {
@@ -44,5 +45,16 @@ export const updateInventoryItem = async (id: string, updatedItem: Partial<Inven
     console.log("Document updated with ID: ", id);
   } catch (error) {
     console.error("Error updating document: ", error);
+  }
+};
+
+// Function to delete an inventory item
+export const deleteInventoryItem = async (id: string) => {
+  try {
+    const itemRef = doc(db, "inventoryItems", id); // Reference the document by ID
+    await deleteDoc(itemRef);
+    console.log("Document deleted with ID: ", id);
+  } catch (error) {
+    console.error("Error deleting document: ", error);
   }
 };
