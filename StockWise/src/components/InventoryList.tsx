@@ -15,12 +15,18 @@ const InventoryList: React.FC<{ items: InventoryItem[] }> = ({ items }) => {
   const [editItemId, setEditItemId] = useState<string | null>(null);
   const [updatedItem, setUpdatedItem] = useState<Partial<InventoryItem>>({});
 
-  const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
-    if (confirmDelete) {
-      await deleteInventoryItem(id);
-    }
-  };
+  // This function handles the deletion of an inventory item.
+const handleDelete = async (id: string) => {
+  // Display a confirmation dialog to the user.
+  const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+  
+  // If the user confirms the deletion:
+  if (confirmDelete) {
+    // Call the deleteInventoryItem function, passing the item's ID to delete it from Firestore.
+    await deleteInventoryItem(id);
+  }
+};
+
 
   const handleEdit = (item: InventoryItem) => {
     setEditItemId(item.id);
