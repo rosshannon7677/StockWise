@@ -1,4 +1,5 @@
-PS C:\Users\rossh\OneDrive - Atlantic TU\FYP\StockWise> # installs fnm (Fast Node Manager)
+PS C:\Users\rossh\OneDrive - Atlantic TU\FYP\StockWise> 
+# installs fnm (Fast Node Manager)
 >> winget install Schniz.fnm
 >> # configure fnm environment
 >> fnm env --use-on-cd | Out-String | Invoke-Expression

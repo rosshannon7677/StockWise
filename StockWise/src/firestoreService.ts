@@ -1,6 +1,15 @@
 // src/firestoreService.ts
-import { addDoc, collection, getFirestore, onSnapshot, QuerySnapshot, DocumentData } from "firebase/firestore";
+import { addDoc, collection, getFirestore, onSnapshot, QuerySnapshot, DocumentData, updateDoc, doc } from "firebase/firestore";
 import { app } from "./../firebaseConfig"; // Adjust path as needed
+
+
+interface InventoryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  description?: string;
+}
 
 // Initialize Firestore
 const db = getFirestore(app);
