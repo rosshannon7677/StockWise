@@ -35,3 +35,14 @@ export const getInventoryItems = (callback: (items: any[]) => void) => {
     callback(items);
   });
 };
+
+// Function to update an inventory item
+export const updateInventoryItem = async (id: string, updatedItem: Partial<InventoryItem>) => {
+  try {
+    const itemRef = doc(db, "inventoryItems", id);
+    await updateDoc(itemRef, updatedItem);
+    console.log("Document updated with ID: ", id);
+  } catch (error) {
+    console.error("Error updating document: ", error);
+  }
+};
