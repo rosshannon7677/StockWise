@@ -20,6 +20,17 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const Layout: 
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const location = useLocation();
+
+  const menuItems = [
+    { title: 'Home', path: '/home', icon: homeOutline },
+    { title: 'Inventory', path: '/inventory', icon: listOutline },
+    { title: 'Reports', path: '/reports', icon: statsChartOutline },
+    { title: 'Settings', path: '/settings', icon: settingsOutline },
+  ];
+
+
+};
 
 export default Layout;
