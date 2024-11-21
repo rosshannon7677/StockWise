@@ -30,7 +30,40 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { title: 'Settings', path: '/settings', icon: settingsOutline },
   ];
 
-
+  return (
+    <IonPage>
+      <IonSplitPane contentId="main">
+        <IonMenu contentId="main">
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>StockWise</IonTitle>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent>
+            <IonList>
+              {menuItems.map((item) => (
+                <IonMenuToggle key={item.path} autoHide={false}>
+                  <IonItem 
+                    className={location.pathname === item.path ? 'selected' : ''} 
+                    routerLink={item.path} 
+                    routerDirection="none"
+                    lines="none"
+                    detail={false}
+                  >
+                    <IonIcon slot="start" icon={item.icon} />
+                    <IonLabel>{item.title}</IonLabel>
+                  </IonItem>
+                </IonMenuToggle>
+              ))}
+            </IonList>
+          </IonContent>
+        </IonMenu>
+        <IonPage id="main">
+          {children}
+        </IonPage>
+      </IonSplitPane>
+    </IonPage>
+  );
 };
 
 export default Layout;
