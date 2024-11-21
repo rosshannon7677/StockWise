@@ -25,14 +25,19 @@ const Home: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className="home-content">
-        <h2 className="home-title">Hello, User!</h2>
+        <h2 className="home-title">Welcome to StockWise</h2>
         <p className="home-subtext">Your inventory management starts here.</p>
-        <div>
-      <h1>Inventory Management System</h1>
-      <AddItem />
-      {/* Additional home page content can go here */}
-      <InventoryList items={items} />
-    </div>
+        
+        <div className="inventory-container">
+          <div className="add-item-section">
+            <AddItem />
+          </div>
+          
+          <div className="inventory-section">
+            <h2>Current Inventory</h2>
+            <InventoryList items={items} />
+          </div>
+        </div>
       </IonContent>
     </IonPage>
   );

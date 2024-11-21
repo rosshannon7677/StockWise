@@ -38,4 +38,32 @@
   color: #555;
 }
 
+.inventory-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  gap: 30px;
+}
+
+.add-item-section {
+  flex: 1;
+  max-width: 400px;
+}
+
+.inventory-section {
+  flex: 2;
+}
+
+@media (max-width: 768px) {
+  .inventory-container {
+    flex-direction: column;
+  }
+  
+  .add-item-section {
+    max-width: 100%;
+  }
+}
+
 
