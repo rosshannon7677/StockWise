@@ -1,25 +1,8 @@
-PS C:\Users\rossh\OneDrive - Atlantic TU\FYP\StockWise> 
-# installs fnm (Fast Node Manager)
->> winget install Schniz.fnm
->> # configure fnm environment
->> fnm env --use-on-cd | Out-String | Invoke-Expression
->> # download and install Node.js
->> fnm use --install-if-missing 20
->> # verifies the right Node.js version is in the environment
->> node -v # should print `v20.18.0`
->> # verifies the right npm version is in the environment
->> npm -v # should print `10.8.2
->> # installs fnm (Fast Node Manager)
->> winget install Schniz.fnm
->> # configure fnm environment
->> fnm env --use-on-cd | Out-String | Invoke-Expression
->> # download and install Node.js
->> fnm use --install-if-missing 20
->> # verifies the right Node.js version is in the environment
->> node -v # should print `v20.18.0`
->> # verifies the right npm version is in the environment
->> npm -v # should print `10.8.2
->> fnm use --install-if-missing 20
+winget install Schniz.fnm
+fnm env --use-on-cd | Out-String | Invoke-Expression
+fnm use --install-if-missing 20
+node -v  # Should print something like `v20.18.0`
+npm -v   # Should print the npm version, e.g., `10.8.2`
 
 npm install -g @ionic/cli
 
