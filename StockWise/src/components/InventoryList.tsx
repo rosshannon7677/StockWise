@@ -9,9 +9,15 @@ interface InventoryItem {
   quantity: number;
   price: number;
   description?: string;
+  category: string;
 }
 
-const InventoryList: React.FC<{ items: InventoryItem[] }> = ({ items }) => {
+interface InventoryListProps {
+  items: InventoryItem[];
+  categories: string[];
+}
+
+const InventoryList: React.FC<InventoryListProps> = ({ items, categories }) => {
   const [editItemId, setEditItemId] = useState<string | null>(null);
   const [updatedItem, setUpdatedItem] = useState<Partial<InventoryItem>>({});
 
@@ -47,37 +53,53 @@ const handleDelete = async (id: string) => {
       {items.map((item) => (
         <div key={item.id} className="inventory-item">
           {editItemId === item.id ? (
-            <div>
-              <input
-                type="text"
-                value={updatedItem.name || ""}
-                onChange={(e) => handleChange("name", e.target.value)}
-                placeholder="Name"
-              />
-              <input
-                type="number"
-                value={updatedItem.quantity || 0}
-                onChange={(e) => handleChange("quantity", Number(e.target.value))}
-                placeholder="Quantity"
-              />
-              <input
-                type="number"
-                value={updatedItem.price || 0}
-                onChange={(e) => handleChange("price", Number(e.target.value))}
-                placeholder="Price"
-              />
-              <input
-                type="text"
-                value={updatedItem.description || ""}
-                onChange={(e) => handleChange("description", e.target.value)}
-                placeholder="Description"
-              />
-              <button onClick={() => handleUpdate(item.id)}>Save</button>
-              <button onClick={() => setEditItemId(null)}>Cancel</button>
+            <div className="edit-form">
+              <div className="form-group">
+                <label>Name:</label>
+                <input
+                  type="text"
+                  value={updatedItem.name || ""}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  placeholder="Name"
+                />
+              </div>
+              <div className="form-group">
+                <label>Quantity:</label>
+                <input
+                  type="number"
+                  value={updatedItem.quantity || 0}
+                  onChange={(e) => handleChange("quantity", Number(e.target.value))}
+                  placeholder="Quantity"
+                />
+              </div>
+              <div className="form-group">
+                <label>Price:</label>
+                <input
+                  type="number"
+                  value={updatedItem.price || 0}
+                  onChange={(e) => handleChange("price", Number(e.target.value))}
+                  placeholder="Price"
+                  step="0.01"
+                />
+              </div>
+              <div className="form-group">
+                <label>Description:</label>
+                <textarea
+                  value={updatedItem.description || ""}
+                  onChange={(e) => handleChange("description", e.target.value)}
+                  placeholder="Description"
+                  rows={3}
+                />
+              </div>
+              <div className="button-group">
+                <button onClick={() => handleUpdate(item.id)} className="save-button">Save</button>
+                <button onClick={() => setEditItemId(null)} className="cancel-button">Cancel</button>
+              </div>
             </div>
           ) : (
             <div>
               <h3>{item.name}</h3>
+              <p><strong>Category:</strong> {item.category}</p>
               <p><strong>Quantity:</strong> {item.quantity}</p>
               <p><strong>Price:</strong> ${item.price.toFixed(2)}</p>
               <p><strong>Description:</strong> {item.description || "No description"}</p>
