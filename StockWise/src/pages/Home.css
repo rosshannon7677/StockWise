@@ -56,6 +56,41 @@
   flex: 2;
 }
 
+.task-selector {
+  width: 100%;
+  max-width: 300px;
+  margin: 20px auto;
+}
+
+.task-selector ion-select {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  --background: white;
+  --border-radius: 8px;
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: #ddd;
+  width: 100%;
+}
+
+ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+}
+
+ion-button {
+  --padding-start: 10px;
+  --padding-end: 10px;
+}
+
+.page-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 @media (max-width: 768px) {
   .inventory-container {
     flex-direction: column;

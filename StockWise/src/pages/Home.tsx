@@ -1,42 +1,48 @@
-import React, { useState, useEffect } from "react";
-import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/react';
+import React, { useState } from "react";
+import { 
+  IonPage, 
+  IonContent, 
+  IonHeader, 
+  IonTitle, 
+  IonToolbar,
+  IonButtons,
+  IonButton,
+  IonIcon
+} from '@ionic/react';
+import { 
+  logOutOutline 
+} from 'ionicons/icons';
 import './Home.css';
-import InventoryList from "../components/InventoryList";
-import { getInventoryItems } from "../firestoreService";
-
-import AddItem from '../components/AddItem';
-
+import { auth } from '../../firebaseConfig';
+import { useNavigate } from 'react-router-dom';
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
 
-  const [items, setItems] = useState<any[]>([]);
-
-  useEffect(() => {
-    getInventoryItems((fetchedItems) => {
-      setItems(fetchedItems); // Ensure `setItems` updates your state
-    });
-  }, []);
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar>
-          <IonTitle>Welcome to StockWise</IonTitle>
+        <IonToolbar>     
+          <IonButtons slot="end">  
+            <IonButton onClick={handleSignOut}>
+              <IonIcon slot="start" icon={logOutOutline} />
+              Sign Out
+            </IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="home-content">
-        <h2 className="home-title">Welcome to StockWise</h2>
-        <p className="home-subtext">Your inventory management starts here.</p>
-        
-        <div className="inventory-container">
-          <div className="add-item-section">
-            <AddItem />
-          </div>
-          
-          <div className="inventory-section">
-            <h2>Current Inventory</h2>
-            <InventoryList items={items} />
-          </div>
+      <IonContent>
+        <div className="home-content">
+          <h2 className="home-title">Welcome to StockWise</h2>
+          <p className="home-subtext">Your inventory management starts here.</p>
         </div>
       </IonContent>
     </IonPage>
