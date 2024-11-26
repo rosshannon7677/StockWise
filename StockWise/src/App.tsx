@@ -2,12 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './../firebaseConfig';
+import { auth } from '../firebaseConfig'; // Fix the import path
+import Layout from './components/Layout';
 
+// Import pages
 import Home from './pages/Home';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import InventoryManagement from './components/InventoryManagement';
+
+// Import components
 import Login from './components/Login';
 import Signup from './components/Signup';
 import ProtectedRoute from './ProtectedRoute';
+  // Move ProtectedRoute to components folder
 
 setupIonicReact();
 
@@ -32,17 +40,49 @@ const App: React.FC = () => {
       <Router>
         <IonRouterOutlet>
           <Routes>
+            <Route path="/" element={<Navigate to="/home" />} />
             <Route
               path="/home"
               element={
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <Home />
+                  <Layout>
+                    <Home />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inventory"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <Layout>
+                    <InventoryManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <Layout>
+                    <Reports />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <Layout>
+                    <Settings />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/" element={<Navigate to="/home" />} />
           </Routes>
         </IonRouterOutlet>
       </Router>
