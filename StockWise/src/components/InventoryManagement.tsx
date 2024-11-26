@@ -55,7 +55,24 @@ const InventoryManagement: React.FC = () => {
     setFilteredItems(sorted);
   }, [searchText, sortBy, items]);
 
-
+  const handleSearchChange = (event: CustomEvent<SearchbarInputEventDetail>) => {
+    const value = event.detail.value || '';
+    setSearchText(value);
+    
+    if (value.trim()) {
+      const searchSuggestions = items
+        .filter(item => 
+          item.name.toLowerCase().includes(value.toLowerCase()) ||
+          (item.description && item.description.toLowerCase().includes(value.toLowerCase()))
+        )
+        .slice(0, 5);
+      setSuggestions(searchSuggestions.map(item => item.name));
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
 
   const selectSuggestion = (value: string) => {
     setSearchText(value);
@@ -123,13 +140,44 @@ const InventoryManagement: React.FC = () => {
         </div>
         <div className="inventory-section">
           <h2>Current Inventory</h2>
-          
-              
+          <div className="search-filter-container">
+            <div className="search-container">
+              <IonSearchbar
+                value={searchText}
+                onIonInput={handleSearchChange}
+                placeholder="Search items..."
+                className="search-bar"
+                debounce={100}
+                animated={true}
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="suggestions-dropdown">
+                  {suggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      className="suggestion-item"
+                      onClick={() => selectSuggestion(suggestion)}
+                    >
+                      {suggestion}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <IonSelect
-             
-       
-    
+              value={sortBy}
+              onIonChange={e => setSortBy(e.detail.value)}
+              interface="popover"
+              className="sort-select"
+            >
+              <IonSelectOption value="name">Sort by Name</IonSelectOption>
+              <IonSelectOption value="quantity">Sort by Quantity</IonSelectOption>
+              <IonSelectOption value="price">Sort by Price</IonSelectOption>
+            </IonSelect>
+          </div>
+          <InventoryList items={filteredItems} categories={[]} />
+        </div>
+      </div>
     </IonContent>
   );
 };
