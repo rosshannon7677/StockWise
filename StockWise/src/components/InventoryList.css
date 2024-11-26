@@ -71,3 +71,88 @@ input {
   margin-right: 5px;
   padding: 5px;
 }
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 10px;
+}
+
+.edit-form input,
+.edit-form select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.edit-form button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-form .category-select {
+  background-color: white;
+}
+
+.edit-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.edit-form .form-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.edit-form input,
+.edit-form select,
+.edit-form textarea {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.edit-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.save-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #6c757d;
+  color: white;
+}
+
+.save-button,
+.cancel-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.save-button:hover {
+  background-color: #218838;
+}
+
+.cancel-button:hover {
+  background-color: #5a6268;
+}
