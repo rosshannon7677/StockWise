@@ -42,6 +42,9 @@ const Reports: React.FC = () => {
     });
   }, []);
 
+  const lowStockItems = inventoryItems.filter(item => Number(item.quantity) < 10);
+  const topItems = [...inventoryItems].sort((a, b) => b.quantity - a.quantity).slice(0, 5);
+
   const totalInventoryValue = inventoryItems.reduce((total, item) => {
     return total + (item.price * item.quantity);
   }, 0);
@@ -51,27 +54,44 @@ const Reports: React.FC = () => {
   }
 
   return (
-    <IonContent>
-      <div className="dashboard-container">
-        <h1 className="dashboard-title">Reports & Analytics</h1>
-        <IonGrid>
-          <IonRow>
-            <IonCol>
-              <IonCard>
-                <IonCardHeader>
-                  <IonIcon icon={barChartOutline} className="card-icon" />
-                  <IonCardTitle>Inventory Summary</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <p>Total Items: {inventoryItems.length}</p>
-                  <p>Total Value: ${totalInventoryValue.toFixed(2)}</p>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-          </IonRow>
-        </IonGrid>
-      </div>
-    </IonContent>
+    <IonRow>
+  <IonCol>
+    <IonCard>
+      <IonCardHeader>
+        <IonIcon icon={alertCircleOutline} className="card-icon" />
+        <IonCardTitle>Low Stock Alerts</IonCardTitle>
+      </IonCardHeader>
+      <IonCardContent>
+        {lowStockItems.length === 0 ? (
+          <p>No items are low in stock</p>
+        ) : (
+          lowStockItems.map(item => (
+            <div key={item.id} className="report-item">
+              <span>{item.name}</span>
+              <span className="quantity-alert">Qty: {item.quantity}</span>
+            </div>
+          ))
+        )}
+      </IonCardContent>
+    </IonCard>
+  </IonCol>
+  <IonCol>
+    <IonCard>
+      <IonCardHeader>
+        <IonIcon icon={trendingUpOutline} className="card-icon" />
+        <IonCardTitle>Top Items</IonCardTitle>
+      </IonCardHeader>
+      <IonCardContent>
+        {topItems.map(item => (
+          <div key={item.id} className="report-item">
+            <span>{item.name}</span>
+            <span>Qty: {item.quantity}</span>
+          </div>
+        ))}
+      </IonCardContent>
+    </IonCard>
+  </IonCol>
+</IonRow>
   );
 };
   
