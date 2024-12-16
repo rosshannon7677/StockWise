@@ -1,0 +1,63 @@
+:root {
+    /* Light Theme Variables */
+    --ion-color-primary: #3880ff;
+    --ion-color-secondary: #3dc2ff;
+    --ion-color-tertiary: #5260ff;
+    --ion-background-color: #ffffff;
+    --ion-text-color: #000000;
+  }
+  
+  .dark {
+    /* Dark Theme Variables */
+    --ion-color-primary: #222428;
+    --ion-color-secondary: #3a3a3a;
+    --ion-color-tertiary: #92949c;
+    --ion-background-color: #000000;
+    --ion-text-color: #ffffff;
+  }
+  
+  .settings-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .settings-title {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--ion-color-primary);
+    margin-bottom: 2rem;
+  }
+  
+  .settings-list {
+    background: var(--ion-card-background);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+  
+  ion-list-header {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--ion-color-primary);
+    padding-top: 1rem;
+  }
+  
+  ion-item {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --padding-top: 0.75rem;
+    --padding-bottom: 0.75rem;
+  }
+  
+  .settings-actions {
+    padding: 1rem 0;
+  }
+  
+  ion-button {
+    margin: 1rem 0;
+  }
+  
+  ion-select {
+    width: 100%;
+    max-width: 200px;
+  }
