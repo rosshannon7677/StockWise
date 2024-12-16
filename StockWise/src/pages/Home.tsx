@@ -1,51 +1,86 @@
-import React, { useState } from "react";
+import React from "react";
 import { 
-  IonPage, 
-  IonContent, 
-  IonHeader, 
-  IonTitle, 
-  IonToolbar,
-  IonButtons,
-  IonButton,
-  IonIcon
+  IonContent,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonIcon,
+  IonButton
 } from '@ionic/react';
 import { 
-  logOutOutline 
+  logOutOutline,
+  cubeOutline,
+  statsChartOutline,
+  settingsOutline 
 } from 'ionicons/icons';
 import './Home.css';
 import { auth } from '../../firebaseConfig';
-import { useNavigate } from 'react-router-dom';
+import { useIonRouter } from '@ionic/react';
 
 const Home: React.FC = () => {
-  const navigate = useNavigate();
+  const navigation = useIonRouter();
 
   const handleSignOut = async () => {
     try {
       await auth.signOut();
+      navigation.push('/login', 'root', 'replace');
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
 
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>     
-          <IonButtons slot="end">  
-            <IonButton onClick={handleSignOut}>
-              <IonIcon slot="start" icon={logOutOutline} />
-              Sign Out
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent>
-        <div className="home-content">
-          <h2 className="home-title">Welcome to StockWise</h2>
-          <p className="home-subtext">Your inventory management starts here.</p>
-        </div>
-      </IonContent>
-    </IonPage>
+    <IonContent>
+      <div className="dashboard-container">
+        <h1 className="dashboard-title">Welcome to StockWise</h1>
+        
+        <IonGrid>
+          <IonRow>
+            <IonCol sizeMd="4" sizeSm="6" size="12">
+              <IonCard className="dashboard-card" onClick={() => navigation.push('/inventory')}>
+                <IonCardHeader>
+                  <IonIcon icon={cubeOutline} className="card-icon" />
+                  <IonCardTitle>Inventory</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  Manage your inventory items and stock levels
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+
+            <IonCol sizeMd="4" sizeSm="6" size="12">
+              <IonCard className="dashboard-card" onClick={() => navigation.push('/reports')}>
+                <IonCardHeader>
+                  <IonIcon icon={statsChartOutline} className="card-icon" />
+                  <IonCardTitle>Reports</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  View analytics and generate reports
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+
+            <IonCol sizeMd="4" sizeSm="6" size="12">
+              <IonCard className="dashboard-card" onClick={() => navigation.push('/settings')}>
+                <IonCardHeader>
+                  <IonIcon icon={settingsOutline} className="card-icon" />
+                  <IonCardTitle>Settings</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  Configure your application preferences
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
+
+       
+      </div>
+    </IonContent>
   );
 };
 

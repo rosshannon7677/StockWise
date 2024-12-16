@@ -1,104 +1,65 @@
-/* src/pages/Home.css */
-.home-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 16px;
+.dashboard-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.home-buttons {
-  margin-top: 20px;
-  width: 100%;
-}
-
-.home-buttons ion-button {
-  margin-bottom: 10px;
-}
-
-/* Home.css */
-.home-content {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.home-title {
-  font-size: 2em;
+.dashboard-title {
+  font-size: 2.5em;
   font-weight: bold;
-  color: #333;
+  color: var(--ion-color-primary);
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.home-subtext {
-  font-size: 1.2em;
-  color: #555;
+.dashboard-card {
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+  background: var(--ion-card-background, #fff);
+  border-radius: 12px;
 }
 
-.inventory-container {
-  width: 100%;
-  max-width: 1200px;
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+  font-size: 3rem;
+  color: var(--ion-color-primary);
+  margin-bottom: 1rem;
+  display: block;
   margin: 0 auto;
-  padding: 20px;
-  display: flex;
-  gap: 30px;
 }
 
-.add-item-section {
-  flex: 1;
-  max-width: 400px;
+ion-card-header {
+  text-align: center;
+  padding: 1.5rem 1rem 1rem;
 }
 
-.inventory-section {
-  flex: 2;
+ion-card-content {
+  text-align: center;
+  color: var(--ion-text-color);
+  opacity: 0.8;
+  padding: 0 1rem 1.5rem;
 }
 
-.task-selector {
-  width: 100%;
-  max-width: 300px;
-  margin: 20px auto;
-}
-
-.task-selector ion-select {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --padding-top: 10px;
-  --padding-bottom: 10px;
-  --background: white;
-  --border-radius: 8px;
-  --border-width: 1px;
-  --border-style: solid;
-  --border-color: #ddd;
-  width: 100%;
-}
-
-ion-toolbar {
-  --background: var(--ion-color-primary);
-  --color: var(--ion-color-primary-contrast);
-}
-
-ion-button {
-  --padding-start: 10px;
-  --padding-end: 10px;
-}
-
-.page-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+.dashboard-actions {
+  margin-top: 2rem;
+  padding: 0 1rem;
 }
 
 @media (max-width: 768px) {
-  .inventory-container {
-    flex-direction: column;
+  .dashboard-container {
+    padding: 1rem;
   }
-  
-  .add-item-section {
-    max-width: 100%;
+
+  .dashboard-title {
+    font-size: 2em;
+  }
+
+  ion-col {
+    margin-bottom: 1rem;
   }
 }
-
-
