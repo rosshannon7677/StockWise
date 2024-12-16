@@ -59,11 +59,6 @@ const Settings: React.FC = () => {
           </IonItem>
         </IonList>
 
-        <div className="settings-actions">
-          <IonButton expand="block" color="primary">
-            Save Changes
-          </IonButton>
-        </div>
       </div>
     </IonContent>
   );
