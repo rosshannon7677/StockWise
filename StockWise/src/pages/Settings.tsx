@@ -37,7 +37,13 @@ const Settings: React.FC = () => {
             />
           </IonItem>
 
-     
+          <IonListHeader>Preferences</IonListHeader>
+          <IonItem>
+            <IonLabel>Notifications</IonLabel>
+            <IonToggle 
+              checked={notifications} 
+              onIonChange={e => setNotifications(e.detail.checked)}
+            />
           </IonItem>
 
           <IonItem>
