@@ -1,5 +1,5 @@
 {
-  "name": "StockWise",
+  "name": "stockwise",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -17,8 +17,8 @@
     "@capacitor/haptics": "6.0.1",
     "@capacitor/keyboard": "6.0.2",
     "@capacitor/status-bar": "6.0.1",
-    "@ionic/react": "^8.3.4",
-    "@ionic/react-router": "^8.3.4",
+    "@ionic/react": "^7.0.0",
+    "@ionic/react-router": "^7.0.0",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
     "firebase": "^11.0.1",
