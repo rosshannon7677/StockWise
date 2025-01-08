@@ -25,6 +25,7 @@ interface InventoryItem {
   quantity: number;
   price: number;
   description?: string;
+  category?: string;
 }
 
 const Reports: React.FC = () => {

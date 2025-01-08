@@ -12,9 +12,18 @@ import {
   IonIcon,
   IonLabel,
   IonMenuToggle,
+  IonButton,
 } from '@ionic/react';
-import { homeOutline, listOutline, statsChartOutline, settingsOutline } from 'ionicons/icons';
+import { 
+  homeOutline, 
+  listOutline, 
+  statsChartOutline, 
+  settingsOutline,
+  logOutOutline 
+} from 'ionicons/icons';
 import { useLocation } from 'react-router';
+import { auth } from '../../firebaseConfig';
+import { useIonRouter } from '@ionic/react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,6 +31,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+  const navigation = useIonRouter();
 
   const menuItems = [
     { title: 'Home', path: '/home', icon: homeOutline },
@@ -29,6 +39,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { title: 'Reports', path: '/reports', icon: statsChartOutline },
     { title: 'Settings', path: '/settings', icon: settingsOutline },
   ];
+
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      navigation.push('/login', 'root', 'replace');
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <IonPage>
@@ -55,6 +74,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </IonItem>
                 </IonMenuToggle>
               ))}
+              
+              <IonItem 
+                onClick={handleSignOut}
+                button
+                lines="none"
+                className="sign-out-button"
+              >
+                <IonIcon slot="start" icon={logOutOutline} />
+                <IonLabel>Sign Out</IonLabel>
+              </IonItem>
             </IonList>
           </IonContent>
         </IonMenu>
