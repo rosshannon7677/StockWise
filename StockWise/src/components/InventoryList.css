@@ -75,7 +75,7 @@ input {
 .edit-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 1.5rem;
   padding: 10px;
 }
 
@@ -155,4 +155,47 @@ input {
 
 .cancel-button:hover {
   background-color: #5a6268;
+}
+
+.item-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.details-section {
+  background: var(--ion-color-light);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.details-section h4 {
+  color: var(--ion-color-primary);
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.details-section p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.item-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-section {
+  background: var(--ion-background-color);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
 }
