@@ -12,6 +12,7 @@ interface InventoryItem {
   quantity: number;
   price: number;
   description?: string;
+  category: string;
   dimensions: {
     length: number;
     width: number;
@@ -34,6 +35,7 @@ const InventoryManagement: React.FC = () => {
   const [quantity, setQuantity] = useState<number>(0);
   const [price, setPrice] = useState<number>(0);
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
   const [dimensions, setDimensions] = useState({
     length: 0,
     width: 0,
@@ -49,6 +51,8 @@ const InventoryManagement: React.FC = () => {
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized')));
 
   useEffect(() => {
     getInventoryItems((fetchedItems) => {
@@ -61,7 +65,8 @@ const InventoryManagement: React.FC = () => {
     const filtered = items.filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(searchText.toLowerCase()) ||
         item.description?.toLowerCase().includes(searchText.toLowerCase());
-      return matchesSearch;
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      return matchesSearch && matchesCategory;
     });
 
     const sorted = [...filtered].sort((a, b) => {
@@ -78,7 +83,7 @@ const InventoryManagement: React.FC = () => {
     });
 
     setFilteredItems(sorted);
-  }, [searchText, sortBy, items]);
+  }, [searchText, sortBy, items, selectedCategory]);
 
   const handleSearchChange = (event: CustomEvent<SearchbarInputEventDetail>) => {
     const value = event.detail.value || '';
@@ -123,6 +128,7 @@ const InventoryManagement: React.FC = () => {
       quantity,
       price,
       description,
+      category, // Add this line
       dimensions: {
         length: dimensions.length,
         width: dimensions.width,
@@ -143,6 +149,7 @@ const InventoryManagement: React.FC = () => {
     setQuantity(0);
     setPrice(0);
     setDescription("");
+    setCategory(""); // Add this line with other reset statements
     setDimensions({
       length: 0,
       width: 0,
@@ -196,6 +203,25 @@ const InventoryManagement: React.FC = () => {
                   onChange={handlePriceChange}
                   required 
                 />
+              </div>
+            </div>
+
+            <div className="form-section">
+              <h4>Category</h4>
+              <div className="form-group">
+                <label>Category:</label>
+                <input 
+                  type="text"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="Enter category"
+                  list="categories"
+                />
+                <datalist id="categories">
+                  {categories.map(cat => (
+                    <option key={cat} value={cat} />
+                  ))}
+                </datalist>
               </div>
             </div>
 
@@ -307,6 +333,19 @@ const InventoryManagement: React.FC = () => {
                 </div>
               )}
             </div>
+            <IonSelect
+              value={selectedCategory}
+              onIonChange={e => setSelectedCategory(e.detail.value)}
+              interface="popover"
+              className="category-select"
+            >
+              <IonSelectOption value="all">All Categories</IonSelectOption>
+              {categories.map(category => (
+                <IonSelectOption key={category} value={category}>
+                  {category}
+                </IonSelectOption>
+              ))}
+            </IonSelect>
             <IonSelect
               value={sortBy}
               onIonChange={e => setSortBy(e.detail.value)}

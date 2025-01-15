@@ -9,6 +9,7 @@ const AddItem: React.FC = () => {
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
   const [dimensions, setDimensions] = useState({
     length: 0,
     width: 0,
@@ -29,6 +30,7 @@ const AddItem: React.FC = () => {
       quantity,
       price,
       description,
+      category, // Add category
       dimensions: {
         length: dimensions.length,
         width: dimensions.width,

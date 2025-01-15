@@ -11,6 +11,7 @@ interface InventoryItem {
   quantity: number;
   price: number;
   description?: string;
+  category: string;
   dimensions: {
     length: number;
     width: number;
@@ -25,7 +26,6 @@ interface InventoryItem {
     addedBy: string;
     addedDate: string;
   };
-  category?: string;
 }
 
 // Initialize Firestore
