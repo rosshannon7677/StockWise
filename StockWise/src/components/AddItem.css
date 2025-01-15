@@ -1,101 +1,169 @@
 .add-item-form {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
+  background: var(--ion-background-color);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 600px; /* Reduced from 800px */
   margin: 0 auto;
+  border: 1px solid var(--ion-color-medium-shade);
 }
 
 .add-item-form h3 {
   color: var(--ion-color-primary);
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.4rem; /* Increased from 1.2rem */
+  margin-bottom: 1rem;
   text-align: center;
+  border-bottom: 2px solid var(--ion-color-primary);
+  padding-bottom: 0.5rem;
+  font-weight: 700; /* Make title bolder */
+  text-transform: uppercase; /* Make title stand out */
+  letter-spacing: 0.5px;
 }
 
 .form-section {
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
+  background: var(--ion-color-light);
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--ion-color-medium-tint);
 }
 
 .form-section h4 {
-  color: var(--ion-color-primary);
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
+  color: var(--ion-color-dark);
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem; /* Increased from 1rem */
+  font-weight: 600; /* Make section titles bolder */
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-left: 3px solid var(--ion-color-primary);
+  padding-left: 0.5rem;
 }
 
 .form-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Makes two equal columns */
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .form-group {
+  margin-bottom: 0.75rem;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
 }
 
 .form-group label {
-  margin-bottom: 0.5rem;
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem; /* Increased from 0.8rem */
+  color: var(--ion-color-dark);
   font-weight: 500;
-  color: var(--ion-text-color);
-  font-size: 0.9rem;
+}
+
+.added-by-input {
+  background-color: var(--ion-color-light) !important;
+  cursor: not-allowed;
+  opacity: 0.8;
+  border: 2px solid #ddd;
+  padding: 0.5rem;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.form-section {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--ion-color-medium-tint);
+  background: var(--ion-color-light);
 }
 
 .form-group input,
 .form-group textarea {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.9rem;
   width: 100%;
-  transition: border-color 0.2s ease;
-  background: var(--ion-background-color);
+  max-width: 100%;
+  padding: 0.5rem;
+  border: 2px solid #ddd; /* Made border more visible */
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background: white; /* Changed from var(--ion-color-light) */
+  color: var(--ion-color-dark);
+}
+
+.form-group input {
+  max-width: none; /* Remove max-width restriction */
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: var(--ion-color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.1);
+}
+
+.form-group input:hover,
+.form-group textarea:hover {
+  border-color: var(--ion-color-medium);
 }
 
 .form-group textarea {
-  resize: vertical;
   min-height: 60px;
-  max-height: 120px;
+  resize: vertical;
+  max-width: 100%; /* Allow textareas to be full width */
 }
 
 .submit-button {
-  width: 100%;
-  max-width: 200px;
-  padding: 10px;
+  background: var(--ion-color-primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  width: auto;
+  min-width: 120px;
   margin: 1rem auto 0;
   display: block;
-  background-color: var(--ion-color-primary);
-  color: white;
-  border: none;
-  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
   transition: background-color 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .submit-button:hover {
-  background-color: var(--ion-color-primary-shade);
+  background: var(--ion-color-primary-shade);
+  transform: translateY(-1px);
 }
 
-@media (max-width: 600px) {
+/* Color variations for different sections */
+.form-section:nth-child(2) {
+  border-left: 3px solid var(--ion-color-success);
+}
+
+.form-section:nth-child(3) {
+  border-left: 3px solid var(--ion-color-warning);
+}
+
+.form-section:nth-child(4) {
+  border-left: 3px solid var(--ion-color-tertiary);
+}
+
+.form-section:nth-child(5) {
+  border-left: 3px solid var(--ion-color-secondary);
+}
+
+@media (max-width: 768px) {
   .form-row {
-    flex-direction: column;
-    gap: 0;
+    grid-template-columns: 1fr;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    max-width: 100%;
   }
   
   .add-item-form {
-    padding: 1rem;
+    margin: 0.5rem;
   }
 }
 
@@ -119,4 +187,14 @@
   gap: 1rem;
   align-items: center;
   margin-bottom: 1rem;
+}
+
+.added-by-input {
+  background-color: var(--ion-color-light) !important;
+  cursor: not-allowed;
+  opacity: 0.8;
+  border: 2px solid #ddd;
+  padding: 0.5rem;
+  width: 100%;
+  border-radius: 4px;
 }

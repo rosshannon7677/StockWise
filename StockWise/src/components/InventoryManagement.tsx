@@ -140,7 +140,7 @@ const InventoryManagement: React.FC = () => {
         section: location.section
       },
       metadata: {
-        addedBy: currentUser?.uid || 'unknown',
+        addedBy: currentUser?.email || 'unknown',
         addedDate: new Date().toISOString()
       }
     });

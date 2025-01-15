@@ -5,6 +5,7 @@ import { auth } from '../../firebaseConfig';
 import './AddItem.css';
 
 const AddItem: React.FC = () => {
+  const currentUser = auth.currentUser; // Add this line
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
@@ -23,14 +24,13 @@ const AddItem: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const currentUser = auth.currentUser;
     
     await addInventoryItem({
       name,
       quantity,
       price,
       description,
-      category, // Add category
+      category,
       dimensions: {
         length: dimensions.length,
         width: dimensions.width,
@@ -42,7 +42,7 @@ const AddItem: React.FC = () => {
         section: location.section
       },
       metadata: {
-        addedBy: currentUser?.uid || 'unknown',
+        addedBy: currentUser?.email || 'unknown',
         addedDate: new Date().toISOString()
       }
     });
@@ -93,6 +93,32 @@ const AddItem: React.FC = () => {
             required 
             step="0.01"
           />
+        </div>
+      </div>
+
+      {/* Category & Added By Section */}
+      <div className="form-section">
+        <h4>Category & Added By</h4>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Category:</label>
+            <input 
+              type="text" 
+              value={category} 
+              onChange={(e) => setCategory(e.target.value)} 
+              placeholder="Enter category"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label>Added By:</label>
+            <input 
+              type="text" 
+              value={currentUser?.email || 'Unknown'} 
+              disabled
+              className="added-by-input"
+            />
+          </div>
         </div>
       </div>
 
