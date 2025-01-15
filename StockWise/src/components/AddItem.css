@@ -98,3 +98,25 @@
     padding: 1rem;
   }
 }
+
+.category-select {
+  min-width: 150px;
+  margin-left: 1rem;
+}
+
+.category-input-group {
+  position: relative;
+  width: 100%;
+}
+
+.category-input-group input {
+  width: 100%;
+  padding-right: 30px;
+}
+
+.search-filter-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}

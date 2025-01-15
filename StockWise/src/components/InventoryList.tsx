@@ -1,7 +1,8 @@
 // src/components/InventoryList.tsx
 import React, { useState } from "react";
 import "./InventoryList.css";
-import { deleteInventoryItem, updateInventoryItem } from "../firestoreService";
+import { addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../firestoreService';
+import { auth } from '../../firebaseConfig';
 
 interface InventoryItem {
   id: string;
@@ -9,6 +10,7 @@ interface InventoryItem {
   quantity: number;
   price: number;
   description?: string;
+  category: string;
   dimensions: {
     length: number;
     width: number;
@@ -33,6 +35,21 @@ interface InventoryListProps {
 const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = [] }) => {
   const [editItemId, setEditItemId] = useState<string | null>(null);
   const [updatedItem, setUpdatedItem] = useState<Partial<InventoryItem>>({});
+  const [name, setName] = useState("");
+  const [quantity, setQuantity] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [dimensions, setDimensions] = useState({
+    length: 0,
+    width: 0,
+    height: 0
+  });
+  const [location, setLocation] = useState({
+    aisle: "",
+    shelf: "",
+    section: ""
+  });
 
   if (!items || items.length === 0) {
     return <div className="no-items">No inventory items found</div>;
@@ -80,6 +97,50 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     } else {
       setUpdatedItem(prev => ({ ...prev, [key]: value }));
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const currentUser = auth.currentUser;
+    
+    await addInventoryItem({
+      name,
+      quantity,
+      price,
+      description,
+      category,
+      dimensions: {
+        length: dimensions.length,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      location: {
+        aisle: location.aisle,
+        shelf: location.shelf,
+        section: location.section
+      },
+      metadata: {
+        addedBy: currentUser?.uid || 'unknown',
+        addedDate: new Date().toISOString()
+      }
+    });
+  
+    setName("");
+    setQuantity(0);
+    setPrice(0);
+    setDescription("");
+    setCategory("");
+    setDimensions({
+      length: 0,
+      width: 0,
+      height: 0
+    });
+    setLocation({
+      aisle: "",
+      shelf: "",
+      section: ""
+    });
+    alert("Item added successfully!");
   };
 
   return (
@@ -206,6 +267,27 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
                 </div>
               </div>
 
+              <div className="form-section">
+                <h4>Category</h4>
+                <div className="form-group">
+                  <label>Category:</label>
+                  <div className="category-input-group">
+                    <input
+                      type="text"
+                      value={updatedItem.category || ""}
+                      onChange={(e) => handleChange("category", e.target.value)}
+                      placeholder="Enter or select category"
+                      list="categories"
+                    />
+                    <datalist id="categories">
+                      {Array.from(new Set(items.map(item => item.category))).map(cat => (
+                        <option key={cat} value={cat} />
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
+              </div>
+
               <div className="button-group">
                 <button onClick={() => handleUpdate(item.id)} className="save-button">Save</button>
                 <button onClick={() => setEditItemId(null)} className="cancel-button">Cancel</button>
@@ -239,6 +321,11 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
                   <h4>Metadata</h4>
                   <p>Added By: {item.metadata?.addedBy || 'Unknown'}</p>
                   <p>Added Date: {item.metadata?.addedDate ? new Date(item.metadata.addedDate).toLocaleDateString() : 'Unknown'}</p>
+                </div>
+
+                <div className="details-section">
+                  <h4>Category</h4>
+                  <p>{item.category || 'Uncategorized'}</p>
                 </div>
               </div>
 
