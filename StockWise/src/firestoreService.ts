@@ -2,6 +2,7 @@
 import { addDoc, collection, getFirestore, onSnapshot, QuerySnapshot, DocumentData, updateDoc, doc } from "firebase/firestore";
 import { app } from "./../firebaseConfig";
 import { deleteDoc } from "firebase/firestore"; 
+import { auth } from '../firebaseConfig';
 
 
 interface InventoryItem {
@@ -10,29 +11,52 @@ interface InventoryItem {
   quantity: number;
   price: number;
   description?: string;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  location: {
+    aisle: string;
+    shelf: string;
+    section: string;
+  };
+  metadata: {
+    addedBy: string;
+    addedDate: string;
+  };
+  category?: string;
 }
 
 // Initialize Firestore
 const db = getFirestore(app);
 
 // Function to add an inventory item
-export const addInventoryItem = async (item: { name: string; quantity: number; price: number; description?: string }) => {
+export const addInventoryItem = async (item: Omit<InventoryItem, 'id'>) => {
   try {
-    const docRef = await addDoc(collection(db, "inventoryItems"), item);
-    console.log("Document written with ID: ", docRef.id);
+    await addDoc(collection(db, "inventoryItems"), {
+      ...item,
+      dimensions: item.dimensions || { length: 0, width: 0, height: 0 },
+      location: item.location || { aisle: '', shelf: '', section: '' },
+      metadata: {
+        addedBy: item.metadata?.addedBy || 'unknown',
+        addedDate: item.metadata?.addedDate || new Date().toISOString()
+      }
+    });
   } catch (error) {
     console.error("Error adding document: ", error);
+    throw error;
   }
 };
 
 // Function to listen to inventory items in real-time
-export const getInventoryItems = (callback: (items: any[]) => void) => {
+export const getInventoryItems = (callback: (items: InventoryItem[]) => void) => {
   const collectionRef = collection(db, "inventoryItems");
-  onSnapshot(collectionRef, (snapshot: QuerySnapshot<DocumentData>) => {
+  return onSnapshot(collectionRef, (snapshot: QuerySnapshot<DocumentData>) => {
     const items = snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data(),
-    }));
+      ...doc.data()
+    })) as InventoryItem[];
     callback(items);
   });
 };

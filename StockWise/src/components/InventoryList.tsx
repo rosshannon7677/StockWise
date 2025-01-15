@@ -217,7 +217,7 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
               <div className="item-details">
                 <div className="details-section">
                   <p><strong>Quantity:</strong> {item.quantity || 0}</p>
-                  <p><strong>Price:</strong> ${(item.price || 0).toFixed(2)}</p>
+                  <p><strong>Price:</strong> €{(item.price || 0).toFixed(2)}</p>
                   <p><strong>Description:</strong> {item.description || "No description"}</p>
                 </div>
                 

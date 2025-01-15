@@ -34,7 +34,11 @@ const AddItem: React.FC = () => {
         width: dimensions.width,
         height: dimensions.height
       },
-      location: `Aisle ${location.aisle}, Shelf ${location.shelf}, Section ${location.section}`,
+      location: {
+        aisle: location.aisle,
+        shelf: location.shelf,
+        section: location.section
+      },
       metadata: {
         addedBy: currentUser?.uid || 'unknown',
         addedDate: new Date().toISOString()

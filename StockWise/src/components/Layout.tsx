@@ -12,7 +12,7 @@ import {
   IonIcon,
   IonLabel,
   IonMenuToggle,
-  IonButton,
+  useIonRouter
 } from '@ionic/react';
 import { 
   homeOutline, 
@@ -23,7 +23,6 @@ import {
 } from 'ionicons/icons';
 import { useLocation } from 'react-router';
 import { auth } from '../../firebaseConfig';
-import { useIonRouter } from '@ionic/react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,7 +30,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const navigation = useIonRouter();
+  const ionRouter = useIonRouter();
 
   const menuItems = [
     { title: 'Home', path: '/home', icon: homeOutline },
@@ -43,7 +42,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const handleSignOut = async () => {
     try {
       await auth.signOut();
-      navigation.push('/login', 'root', 'replace');
+      if (ionRouter.canGoBack()) {
+        await ionRouter.push('/login', 'root', 'replace');
+      }
     } catch (error) {
       console.error("Error signing out:", error);
     }
