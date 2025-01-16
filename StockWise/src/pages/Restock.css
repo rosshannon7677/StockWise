@@ -1,0 +1,153 @@
+.main-content {
+  --padding-bottom: 80px; /* Increased padding for footer */
+  --padding-top: 56px; /* Height of header */
+}
+
+.restock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: calc(100vh - 500px); /* Adjust for header and footer */
+  overflow-y: auto;
+  padding-bottom: 2rem;
+  margin-bottom: 2rem;
+}
+
+.restock-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  border-left: 4px solid transparent;
+  margin-bottom: 0.5rem; /* Add spacing between items */
+}
+
+.restock-item.high {
+  border-left-color: var(--ion-color-danger);
+}
+
+.restock-item.medium {
+  border-left-color: var(--ion-color-warning);
+}
+
+.restock-item.low {
+  border-left-color: var(--ion-color-success);
+}
+
+.item-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--ion-color-dark);
+}
+
+.item-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cost {
+  font-weight: bold;
+  color: var(--ion-color-dark);
+  margin: 0;
+}
+
+.analysis-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--ion-color-light);
+  border-radius: 6px;
+}
+
+.stat-item label {
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}
+
+.stat-item span {
+  font-weight: bold;
+  color: var(--ion-color-dark);
+}
+
+.warning {
+  color: var(--ion-color-warning);
+}
+
+.danger {
+  color: var(--ion-color-danger);
+}
+
+.dashboard-card {
+  height: 100%;
+  margin-bottom: 2rem; /* Add space between cards */
+  overflow: hidden; /* Ensure content doesn't overflow */
+}
+
+.dashboard-container {
+  padding: 1rem 2rem;
+  padding-bottom: 80px; /* Increased padding at bottom */
+  max-width: 1200px;
+  margin: 0 auto;
+  height: calc(100% - 80px); /* Adjust for footer space */
+  overflow-y: auto;
+}
+
+.footer-content {
+  text-align: center;
+  padding: 1rem;
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}
+
+/* Make header and footer fixed */
+ion-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+ion-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--ion-background-color);
+}
+
+/* Ensure content doesn't get hidden behind header/footer */
+ion-content {
+  --offset-top: 56px;
+  --offset-bottom: 80px; /* Increased offset */
+}
+
+/* Add this new style for pagination controls */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+  background: var(--ion-background-color);
+  border-top: 1px solid var(--ion-color-light-shade);
+  margin-bottom: 60px; /* Add space above footer */
+  position: relative;
+  z-index: 1;
+}
