@@ -7,14 +7,14 @@ import { IonButton } from '@ionic/react';
 
 interface AddItemProps {
   onClose: () => void;
+  categories?: string[]; // Add this line
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onClose }) => {
+const AddItem: React.FC<AddItemProps> = ({ onClose, categories = [] }) => {
   const currentUser = auth.currentUser; // Add this line
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
-  const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [dimensions, setDimensions] = useState({
     length: 0,
@@ -27,6 +27,31 @@ const AddItem: React.FC<AddItemProps> = ({ onClose }) => {
     section: ""
   });
 
+  // Add state for showing suggestions
+  const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
+  const [filteredCategories, setFilteredCategories] = useState<string[]>([]);
+
+  // Add category suggestion handler
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCategory(value);
+    
+    if (value.trim()) {
+      const suggestions = categories.filter(cat => 
+        cat.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredCategories(suggestions);
+      setShowCategorySuggestions(true);
+    } else {
+      setShowCategorySuggestions(false);
+    }
+  };
+
+  const selectCategory = (selectedCategory: string) => {
+    setCategory(selectedCategory);
+    setShowCategorySuggestions(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -34,7 +59,6 @@ const AddItem: React.FC<AddItemProps> = ({ onClose }) => {
       name,
       quantity,
       price,
-      description,
       category,
       dimensions: {
         length: dimensions.length,
@@ -56,7 +80,6 @@ const AddItem: React.FC<AddItemProps> = ({ onClose }) => {
     setName("");
     setQuantity(0);
     setPrice(0);
-    setDescription("");
     setCategory("");
     setDimensions({ length: 0, width: 0, height: 0 });
     setLocation({ aisle: "", shelf: "", section: "" });
@@ -113,12 +136,31 @@ const AddItem: React.FC<AddItemProps> = ({ onClose }) => {
           <div className="form-row">
             <div className="form-group">
               <label>Category:</label>
-              <input 
-                type="text" 
-                value={category} 
-                onChange={(e) => setCategory(e.target.value)} 
-                placeholder="Enter category"
-              />
+              <div className="category-input-container">
+                <input 
+                  type="text" 
+                  value={category} 
+                  onChange={handleCategoryChange}
+                  onFocus={() => {
+                    setFilteredCategories(categories);
+                    setShowCategorySuggestions(true);
+                  }}
+                  placeholder="Enter or select category"
+                />
+                {showCategorySuggestions && (
+                  <div className="category-suggestions">
+                    {(filteredCategories.length > 0 ? filteredCategories : categories).map((suggestion, index) => (
+                      <div
+                        key={index}
+                        className="category-suggestion-item"
+                        onClick={() => selectCategory(suggestion)}
+                      >
+                        {suggestion}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="form-group">
@@ -199,18 +241,6 @@ const AddItem: React.FC<AddItemProps> = ({ onClose }) => {
                 onChange={(e) => setLocation({...location, section: e.target.value})}
               />
             </div>
-          </div>
-        </div>
-        
-        <div className="form-section">
-          <h4>Additional Information</h4>
-          <div className="form-group">
-            <label>Description:</label>
-            <textarea 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-            />
           </div>
         </div>
         
