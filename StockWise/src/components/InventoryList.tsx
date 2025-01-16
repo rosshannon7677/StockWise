@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import "./InventoryList.css";
 import { addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../firestoreService';
 import { auth } from '../../firebaseConfig';
+import { IonIcon } from '@ionic/react';
+import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 
 interface InventoryItem {
   id: string;
@@ -50,6 +52,8 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     shelf: "",
     section: ""
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   if (!items || items.length === 0) {
     return <div className="no-items">No inventory items found</div>;
@@ -232,6 +236,11 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     }
   ];
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+
   return (
     <div className="inventory-table">
       <div className="table-header">
@@ -242,7 +251,7 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
         ))}
       </div>
       <div className="table-body">
-        {items.map((item) => (
+        {currentItems.map((item) => (
           <div key={item.id} className={`table-row ${editItemId === item.id ? 'editing' : ''}`}>
             {editItemId === item.id ? (
               <>
@@ -362,6 +371,25 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
             )}
           </div>
         ))}
+      </div>
+      <div className="pagination-controls">
+        <button 
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="pagination-button"
+        >
+          <IonIcon icon={chevronBackOutline} />
+        </button>
+        <span className="page-info">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button 
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="pagination-button"
+        >
+          <IonIcon icon={chevronForwardOutline} />
+        </button>
       </div>
     </div>
   );

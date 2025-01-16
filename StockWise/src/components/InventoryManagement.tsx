@@ -33,21 +33,6 @@ interface InventoryItem {
 
 const InventoryManagement: React.FC = () => {
   const [items, setItems] = useState<InventoryItem[]>([]);
-  const [name, setName] = useState("");
-  const [quantity, setQuantity] = useState<number>(0);
-  const [price, setPrice] = useState<number>(0);
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [dimensions, setDimensions] = useState({
-    length: 0,
-    width: 0,
-    height: 0
-  });
-  const [location, setLocation] = useState({
-    aisle: "",
-    shelf: "",
-    section: ""
-  });
   const [sortBy, setSortBy] = useState("name");
   const [searchText, setSearchText] = useState("");
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
@@ -112,66 +97,10 @@ const InventoryManagement: React.FC = () => {
     setShowSuggestions(false);
   };
 
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setQuantity(value === '' ? 0 : Math.max(0, parseInt(value) || 0));
-  };
-
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPrice(value === '' ? 0 : Math.max(0, parseFloat(value) || 0));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const currentUser = auth.currentUser;
-    
-    await addInventoryItem({
-      name,
-      quantity,
-      price,
-      description,
-      category, // Add this line
-      dimensions: {
-        length: dimensions.length,
-        width: dimensions.width,
-        height: dimensions.height
-      },
-      location: {
-        aisle: location.aisle,
-        shelf: location.shelf,
-        section: location.section
-      },
-      metadata: {
-        addedBy: currentUser?.email || 'unknown',
-        addedDate: new Date().toISOString()
-      }
-    });
-  
-    setName("");
-    setQuantity(0);
-    setPrice(0);
-    setDescription("");
-    setCategory(""); // Add this line with other reset statements
-    setDimensions({
-      length: 0,
-      width: 0,
-      height: 0
-    });
-    setLocation({
-      aisle: "",
-      shelf: "",
-      section: ""
-    });
-    alert("Item added successfully!");
-  };
-
   return (
     <IonContent>
-      <div className="inventory-container">
-        
+      <div className="inventory-container">     
         <div className="inventory-section">
-          <h2>Current Inventory</h2>
           <div className="search-filter-container">
             <IonButton 
               onClick={() => setShowAddModal(true)}
@@ -237,7 +166,10 @@ const InventoryManagement: React.FC = () => {
         onDidDismiss={() => setShowAddModal(false)}
         className="add-item-modal"
       >
-        <AddItem onClose={() => setShowAddModal(false)} />
+        <AddItem 
+          onClose={() => setShowAddModal(false)} 
+          categories={categories}
+        />
       </IonModal>
     </IonContent>
   );
