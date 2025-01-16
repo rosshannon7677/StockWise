@@ -64,20 +64,38 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
 
   const handleEdit = (item: InventoryItem) => {
     setEditItemId(item.id);
-    setUpdatedItem({
-      ...item,
-      dimensions: item.dimensions || { length: 0, width: 0, height: 0 },
-      location: item.location || { aisle: '', shelf: '', section: '' },
-      metadata: item.metadata || { addedBy: '', addedDate: new Date().toISOString() }
-    });
+    // Set all the form values with the item's current values
+    setUpdatedItem(item);
+    setName(item.name);
+    setQuantity(item.quantity);
+    setPrice(item.price);
+    setDescription(item.description || "");
+    setCategory(item.category);
+    setDimensions(item.dimensions);
+    setLocation(item.location);
   };
 
   const handleUpdate = async (id: string) => {
-    if (!updatedItem) return;
-    
     try {
-      await updateInventoryItem(id, updatedItem);
-      setEditItemId(null);
+      await updateInventoryItem(id, {
+        name,
+        quantity,
+        price,
+        description,
+        category,
+        dimensions,
+        location,
+        metadata: updatedItem.metadata
+      });
+      setEditItemId(null); // Reset edit mode
+      // Reset form values
+      setName("");
+      setQuantity(0);
+      setPrice(0);
+      setDescription("");
+      setCategory("");
+      setDimensions({ length: 0, width: 0, height: 0 });
+      setLocation({ aisle: "", shelf: "", section: "" });
     } catch (error) {
       console.error('Error updating item:', error);
     }
@@ -143,200 +161,208 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     alert("Item added successfully!");
   };
 
+  const columns = [
+    {
+      field: 'name',
+      headerName: 'Name',
+      width: 200,
+    },
+    {
+      field: 'category',
+      headerName: 'Category',
+      width: 150,
+    },
+    {
+      field: 'quantity',
+      headerName: 'Quantity',
+      width: 100,
+    },
+    {
+      field: 'price',
+      headerName: 'Price',
+      width: 100,
+      valueGetter: (item: InventoryItem) => `€${item.price.toFixed(2)}`,
+    },
+    {
+      field: 'location',
+      headerName: 'Location',
+      width: 150,
+      valueGetter: (item: InventoryItem) => 
+        `${item.location.aisle}-${item.location.shelf}-${item.location.section}`,
+    },
+    {
+      field: 'dimensions',
+      headerName: 'Dimensions',
+      width: 150,
+      valueGetter: (item: InventoryItem) => 
+        `${item.dimensions.length}x${item.dimensions.width}x${item.dimensions.height}`,
+    },
+    {
+      field: 'addedBy',
+      headerName: 'Added By',
+      width: 150,
+      valueGetter: (item: InventoryItem) => item.metadata.addedBy,
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      renderCell: (item: InventoryItem) => (
+        <div className="actions-cell" style={{ width: columns[7].width }}>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(item);
+            }} 
+            className="edit-button"
+          >
+            Edit
+          </button>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(item.id);
+            }} 
+            className="delete-button"
+          >
+            Delete
+          </button>
+        </div>
+      ),
+    }
+  ];
+
   return (
-    <div className="inventory-list">
-      {items.map((item) => (
-        <div key={item.id} className="inventory-item">
-          {editItemId === item.id ? (
-            <div className="edit-form">
-              <div className="form-section">
-                <h4>Basic Information</h4>
-                <div className="form-group">
-                  <label>Name:</label>
-                  <input
-                    type="text"
-                    value={updatedItem.name || ""}
-                    onChange={(e) => handleChange("name", e.target.value)}
-                    placeholder="Name"
+    <div className="inventory-table">
+      <div className="table-header">
+        {columns.map((col) => (
+          <div key={col.field} className="header-cell" style={{ width: col.width }}>
+            {col.headerName}
+          </div>
+        ))}
+      </div>
+      <div className="table-body">
+        {items.map((item) => (
+          <div key={item.id} className={`table-row ${editItemId === item.id ? 'editing' : ''}`}>
+            {editItemId === item.id ? (
+              <>
+                <div className="table-cell">
+                  <input 
+                    type="text" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)}
                   />
                 </div>
-                <div className="form-group">
-                  <label>Quantity:</label>
-                  <input
-                    type="number"
-                    value={updatedItem.quantity || 0}
-                    onChange={(e) => handleChange("quantity", Number(e.target.value))}
-                    placeholder="Quantity"
+                <div className="table-cell">
+                  <input 
+                    type="text" 
+                    value={category} 
+                    onChange={(e) => setCategory(e.target.value)}
                   />
                 </div>
-                <div className="form-group">
-                  <label>Price:</label>
-                  <input
-                    type="number"
-                    value={updatedItem.price || 0}
-                    onChange={(e) => handleChange("price", Number(e.target.value))}
-                    placeholder="Price"
+                <div className="table-cell">
+                  <input 
+                    type="number" 
+                    value={quantity} 
+                    onChange={(e) => setQuantity(Number(e.target.value))}
+                  />
+                </div>
+                <div className="table-cell">
+                  <input 
+                    type="number" 
+                    value={price} 
+                    onChange={(e) => setPrice(Number(e.target.value))}
                     step="0.01"
                   />
                 </div>
-              </div>
-
-              <div className="form-section">
-                <h4>Dimensions</h4>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Length:</label>
-                    <input
-                      type="number"
-                      value={updatedItem.dimensions?.length || 0}
-                      onChange={(e) => handleChange("dimensions.length", Number(e.target.value))}
-                      step="0.1"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Width:</label>
-                    <input
-                      type="number"
-                      value={updatedItem.dimensions?.width || 0}
-                      onChange={(e) => handleChange("dimensions.width", Number(e.target.value))}
-                      step="0.1"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Height:</label>
-                    <input
-                      type="number"
-                      value={updatedItem.dimensions?.height || 0}
-                      onChange={(e) => handleChange("dimensions.height", Number(e.target.value))}
-                      step="0.1"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-section">
-                <h4>Location</h4>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Aisle:</label>
-                    <input
-                      type="text"
-                      value={updatedItem.location?.aisle || ""}
-                      onChange={(e) => handleChange("location.aisle", e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Shelf:</label>
-                    <input
-                      type="text"
-                      value={updatedItem.location?.shelf || ""}
-                      onChange={(e) => handleChange("location.shelf", e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Section:</label>
-                    <input
-                      type="text"
-                      value={updatedItem.location?.section || ""}
-                      onChange={(e) => handleChange("location.section", e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-section">
-                <h4>Additional Information</h4>
-                <div className="form-group">
-                  <label>Description:</label>
-                  <textarea
-                    value={updatedItem.description || ""}
-                    onChange={(e) => handleChange("description", e.target.value)}
-                    placeholder="Description"
-                    rows={3}
+                <div className="table-cell">
+                  <input 
+                    type="text" 
+                    value={location.aisle} 
+                    onChange={(e) => setLocation({...location, aisle: e.target.value})}
+                    placeholder="Aisle"
+                  />
+                  <input 
+                    type="text" 
+                    value={location.shelf} 
+                    onChange={(e) => setLocation({...location, shelf: e.target.value})}
+                    placeholder="Shelf"
+                  />
+                  <input 
+                    type="text" 
+                    value={location.section} 
+                    onChange={(e) => setLocation({...location, section: e.target.value})}
+                    placeholder="Section"
                   />
                 </div>
-                
-                <div className="form-group">
-                  <label>Added By:</label>
-                  <input
-                    type="text"
-                    value={updatedItem.metadata?.addedBy || ""}
-                    onChange={(e) => handleChange("metadata.addedBy", e.target.value)}
-                    placeholder="Enter name"
+                <div className="table-cell">
+                  <input 
+                    type="number" 
+                    value={dimensions.length} 
+                    onChange={(e) => setDimensions({...dimensions, length: Number(e.target.value)})}
+                    placeholder="Length"
+                  />
+                  <input 
+                    type="number" 
+                    value={dimensions.width} 
+                    onChange={(e) => setDimensions({...dimensions, width: Number(e.target.value)})}
+                    placeholder="Width"
+                  />
+                  <input 
+                    type="number" 
+                    value={dimensions.height} 
+                    onChange={(e) => setDimensions({...dimensions, height: Number(e.target.value)})}
+                    placeholder="Height"
                   />
                 </div>
-              </div>
-
-              <div className="form-section">
-                <h4>Category</h4>
-                <div className="form-group">
-                  <label>Category:</label>
-                  <div className="category-input-group">
-                    <input
-                      type="text"
-                      value={updatedItem.category || ""}
-                      onChange={(e) => handleChange("category", e.target.value)}
-                      placeholder="Enter or select category"
-                      list="categories"
-                    />
-                    <datalist id="categories">
-                      {Array.from(new Set(items.map(item => item.category))).map(cat => (
-                        <option key={cat} value={cat} />
-                      ))}
-                    </datalist>
-                  </div>
+                <div className="table-cell">{item.metadata.addedBy}</div>
+                <div className="actions-cell">
+                  <button onClick={() => handleUpdate(item.id)} className="save-button">Save</button>
+                  <button onClick={() => setEditItemId(null)} className="cancel-button">Cancel</button>
                 </div>
-              </div>
-
-              <div className="button-group">
-                <button onClick={() => handleUpdate(item.id)} className="save-button">Save</button>
-                <button onClick={() => setEditItemId(null)} className="cancel-button">Cancel</button>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <h3>{item.name || 'Unnamed Item'}</h3>
-              <div className="item-details">
-                <div className="details-section">
-                  <p><strong>Quantity:</strong> {item.quantity || 0}</p>
-                  <p><strong>Price:</strong> €{(item.price || 0).toFixed(2)}</p>
-                  <p><strong>Description:</strong> {item.description || "No description"}</p>
+              </>
+            ) : (
+              <>
+                <div className="table-cell" style={{ width: columns[0].width }}>{item.name}</div>
+                <div className="table-cell" style={{ width: columns[1].width }}>{item.category}</div>
+                <div className="table-cell" style={{ width: columns[2].width }}>{item.quantity}</div>
+                <div className="table-cell" style={{ width: columns[3].width }}>
+                  €{item.price.toFixed(2)}
                 </div>
-                
-                <div className="details-section">
-                  <h4>Dimensions</h4>
-                  <p>Length: {item.dimensions?.length || 0}cm</p>
-                  <p>Width: {item.dimensions?.width || 0}cm</p>
-                  <p>Height: {item.dimensions?.height || 0}cm</p>
+                <div className="table-cell" style={{ width: columns[4].width }}>
+                  {`${item.location.aisle}-${item.location.shelf}-${item.location.section}`}
                 </div>
-
-                <div className="details-section">
-                  <h4>Location</h4>
-                  <p>Aisle: {item.location?.aisle || 'Not set'}</p>
-                  <p>Shelf: {item.location?.shelf || 'Not set'}</p>
-                  <p>Section: {item.location?.section || 'Not set'}</p>
+                <div className="table-cell" style={{ width: columns[5].width }}>
+                  {`${item.dimensions.length}x${item.dimensions.width}x${item.dimensions.height}`}
                 </div>
-
-                <div className="details-section">
-                  <h4>Metadata</h4>
-                  <p>Added By: {item.metadata?.addedBy || 'Unknown'}</p>
-                  <p>Added Date: {item.metadata?.addedDate ? new Date(item.metadata.addedDate).toLocaleDateString() : 'Unknown'}</p>
+                <div className="table-cell" style={{ width: columns[6].width }}>
+                  {item.metadata.addedBy}
                 </div>
-
-                <div className="details-section">
-                  <h4>Category</h4>
-                  <p>{item.category || 'Uncategorized'}</p>
+                <div className="actions-cell" style={{ width: columns[7].width }}>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(item);
+                    }} 
+                    className="edit-button"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(item.id);
+                    }} 
+                    className="delete-button"
+                  >
+                    Delete
+                  </button>
                 </div>
-              </div>
-
-              <div className="item-actions">
-                <button onClick={() => handleEdit(item)}>Edit Item</button>
-                <button onClick={() => handleDelete(item.id)} className="delete-button">Delete Item</button>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
