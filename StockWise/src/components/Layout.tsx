@@ -12,6 +12,7 @@ import {
   IonIcon,
   IonLabel,
   IonMenuToggle,
+  IonFooter,
   useIonRouter
 } from '@ionic/react';
 import { 
@@ -19,7 +20,8 @@ import {
   listOutline, 
   statsChartOutline, 
   settingsOutline,
-  logOutOutline 
+  logOutOutline,
+  reloadOutline 
 } from 'ionicons/icons';
 import { useLocation } from 'react-router';
 import { auth } from '../../firebaseConfig';
@@ -35,6 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const menuItems = [
     { title: 'Home', path: '/home', icon: homeOutline },
     { title: 'Inventory', path: '/inventory', icon: listOutline },
+    { title: 'Restock', path: '/restock', icon: reloadOutline },
     { title: 'Reports', path: '/reports', icon: statsChartOutline },
     { title: 'Settings', path: '/settings', icon: settingsOutline },
   ];
@@ -89,7 +92,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </IonContent>
         </IonMenu>
         <IonPage id="main">
-          {children}
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>StockWise - Inventory Management</IonTitle>
+            </IonToolbar>
+          </IonHeader>
+
+          <IonContent className="main-content">
+            {children}
+          </IonContent>
+
+          <IonFooter>
+            <IonToolbar>
+              <div className="footer-content">
+                <p>© 2024 StockWise. All rights reserved.</p>
+              </div>
+            </IonToolbar>
+          </IonFooter>
         </IonPage>
       </IonSplitPane>
     </IonPage>
