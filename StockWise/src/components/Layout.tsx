@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <IonPage>
-      <IonSplitPane contentId="main">
+      <IonSplitPane contentId="main" when="md" style={{ '--side-width': '200px' }}>
         <IonMenu contentId="main">
           <IonHeader>
             <IonToolbar>
