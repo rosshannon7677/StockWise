@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { IonContent, IonSearchbar, IonSelect, IonSelectOption } from '@ionic/react';
+import { IonContent, IonSearchbar, IonSelect, IonSelectOption, IonButton, IonModal, IonIcon } from '@ionic/react';
 import { SearchbarInputEventDetail } from '@ionic/core';
 import InventoryList from './InventoryList';
 import { getInventoryItems, addInventoryItem } from '../firestoreService';
 import './AddItem.css';
 import { auth } from '../../firebaseConfig';
+import { addOutline } from 'ionicons/icons';
+import AddItem from './AddItem';
 
 interface InventoryItem {
   id: string;
@@ -52,6 +54,7 @@ const InventoryManagement: React.FC = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showAddModal, setShowAddModal] = useState(false);
   const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized')));
 
   useEffect(() => {
@@ -166,150 +169,19 @@ const InventoryManagement: React.FC = () => {
   return (
     <IonContent>
       <div className="inventory-container">
-        <div className="add-item-section">
-          <form onSubmit={handleSubmit} className="add-item-form">
-            <h3>Add New Inventory Item</h3>
-            
-            <div className="form-section">
-              <h4>Basic Information</h4>
-              <div className="form-group">
-                <label>Name:</label>
-                <input 
-                  type="text" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  required 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Quantity:</label>
-                <input 
-                  type="number"
-                  min="0"
-                  value={quantity || ''}
-                  onChange={handleQuantityChange}
-                  required 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Price:</label>
-                <input 
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={price || ''}
-                  onChange={handlePriceChange}
-                  required 
-                />
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h4>Category</h4>
-              <div className="form-group">
-                <label>Category:</label>
-                <input 
-                  type="text"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  placeholder="Enter category"
-                  list="categories"
-                />
-                <datalist id="categories">
-                  {categories.map(cat => (
-                    <option key={cat} value={cat} />
-                  ))}
-                </datalist>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h4>Dimensions (in cm)</h4>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Length:</label>
-                  <input 
-                    type="number"
-                    value={dimensions.length}
-                    onChange={(e) => setDimensions({...dimensions, length: parseFloat(e.target.value) || 0})}
-                    step="0.1"
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Width:</label>
-                  <input 
-                    type="number"
-                    value={dimensions.width}
-                    onChange={(e) => setDimensions({...dimensions, width: parseFloat(e.target.value) || 0})}
-                    step="0.1"
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Height:</label>
-                  <input 
-                    type="number"
-                    value={dimensions.height}
-                    onChange={(e) => setDimensions({...dimensions, height: parseFloat(e.target.value) || 0})}
-                    step="0.1"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h4>Warehouse Location</h4>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Aisle:</label>
-                  <input 
-                    type="text"
-                    value={location.aisle}
-                    onChange={(e) => setLocation({...location, aisle: e.target.value})}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Shelf:</label>
-                  <input 
-                    type="text"
-                    value={location.shelf}
-                    onChange={(e) => setLocation({...location, shelf: e.target.value})}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Section:</label>
-                  <input 
-                    type="text"
-                    value={location.section}
-                    onChange={(e) => setLocation({...location, section: e.target.value})}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h4>Additional Information</h4>
-              <div className="form-group">
-                <label>Description:</label>
-                <textarea 
-                  value={description} 
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                />
-              </div>
-            </div>
-
-            <button type="submit" className="submit-button">Add Item</button>
-          </form>
-        </div>
+        
         <div className="inventory-section">
           <h2>Current Inventory</h2>
           <div className="search-filter-container">
+            <IonButton 
+              onClick={() => setShowAddModal(true)}
+              color="primary"
+              className="add-item-button"
+            >
+              <IonIcon slot="start" icon={addOutline} />
+              Add Item
+            </IonButton>
+
             <div className="search-container">
               <IonSearchbar
                 value={searchText}
@@ -357,9 +229,16 @@ const InventoryManagement: React.FC = () => {
               <IonSelectOption value="price">Sort by Price</IonSelectOption>
             </IonSelect>
           </div>
-          <InventoryList items={filteredItems} categories={[]} />
+          <InventoryList items={filteredItems} categories={categories} />
         </div>
       </div>
+      <IonModal 
+        isOpen={showAddModal} 
+        onDidDismiss={() => setShowAddModal(false)}
+        className="add-item-modal"
+      >
+        <AddItem onClose={() => setShowAddModal(false)} />
+      </IonModal>
     </IonContent>
   );
 };
