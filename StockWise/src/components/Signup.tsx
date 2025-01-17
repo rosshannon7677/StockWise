@@ -1,23 +1,28 @@
 import React, { useState } from 'react';
 import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonInput, IonItem, IonLabel, IonButton } from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../../firebaseConfig'; // Adjust the path as needed
 import './Auth.css';
 
 const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState(''); // Add name state
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleSignup = async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      setError(null); // Clear any previous errors
-      navigate('/home'); // Redirect to home on successful signup
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // After creating the auth user, update their profile with the name
+      await updateProfile(userCredential.user, {
+        displayName: name
+      });
+      setError(null);
+      navigate('/home');
     } catch (err: any) {
-      setError(err.message); // Display the error message if signup fails
+      setError(err.message);
     }
   };
 
@@ -31,6 +36,16 @@ const Signup: React.FC = () => {
       <IonContent className="auth-content">
         <h2 className="auth-title">Create an Account</h2>
         <p className="auth-subtext">Please fill out the form to sign up.</p>
+
+        <IonItem className="auth-item">
+          <IonLabel position="floating">Name</IonLabel>
+          <IonInput
+            type="text"
+            value={name}
+            onIonChange={(e) => setName(e.detail.value!)}
+            required
+          />
+        </IonItem>
 
         <IonItem className="auth-item">
           <IonLabel position="floating">Email</IonLabel>

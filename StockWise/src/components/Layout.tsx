@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IonPage,
   IonSplitPane,
@@ -33,6 +33,16 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const ionRouter = useIonRouter();
+
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get current user's display name
+    const user = auth.currentUser;
+    if (user) {
+      setUserName(user.displayName);
+    }
+  }, []);
 
   const menuItems = [
     { title: 'Home', path: '/home', icon: homeOutline },
@@ -143,6 +153,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <IonTitle style={{ textAlign: 'center', fontSize: '1.1rem' }}>
                 StockWise Inventory Management
               </IonTitle>
+              {userName && (
+                <div style={{ 
+                  position: 'absolute',
+                  right: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: '0.9rem',
+                  color: 'var(--ion-color-medium)'
+                }}>
+                  Welcome, {userName}
+                </div>
+              )}
             </IonToolbar>
           </IonHeader>
 
