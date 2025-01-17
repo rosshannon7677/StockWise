@@ -4,7 +4,6 @@ import { app } from "./../firebaseConfig";
 import { deleteDoc } from "firebase/firestore"; 
 import { auth } from '../firebaseConfig';
 
-
 interface InventoryItem {
   id: string;
   name: string;
@@ -22,6 +21,19 @@ interface InventoryItem {
     shelf: string;
     section: string;
   };
+  metadata: {
+    addedBy: string;
+    addedDate: string;
+  };
+}
+
+interface Supplier {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  notes?: string;
   metadata: {
     addedBy: string;
     addedDate: string;
@@ -80,5 +92,49 @@ export const deleteInventoryItem = async (id: string) => {
     console.log("Document deleted with ID: ", id);
   } catch (error) {
     console.error("Error deleting document: ", error);
+  }
+};
+
+export const addSupplier = async (supplier: Omit<Supplier, 'id'>) => {
+  try {
+    await addDoc(collection(db, "suppliers"), {
+      ...supplier,
+      metadata: {
+        addedBy: supplier.metadata?.addedBy || 'unknown',
+        addedDate: supplier.metadata?.addedDate || new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error("Error adding supplier: ", error);
+    throw error;
+  }
+};
+
+export const getSuppliers = (callback: (suppliers: Supplier[]) => void) => {
+  const collectionRef = collection(db, "suppliers");
+  return onSnapshot(collectionRef, (snapshot: QuerySnapshot<DocumentData>) => {
+    const suppliers = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Supplier[];
+    callback(suppliers);
+  });
+};
+
+export const updateSupplier = async (id: string, updatedSupplier: Partial<Supplier>) => {
+  try {
+    const supplierRef = doc(db, "suppliers", id);
+    await updateDoc(supplierRef, updatedSupplier);
+  } catch (error) {
+    console.error("Error updating supplier: ", error);
+  }
+};
+
+export const deleteSupplier = async (id: string) => {
+  try {
+    const supplierRef = doc(db, "suppliers", id);
+    await deleteDoc(supplierRef);
+  } catch (error) {
+    console.error("Error deleting supplier: ", error);
   }
 };
