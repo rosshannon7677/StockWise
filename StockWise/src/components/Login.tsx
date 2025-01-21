@@ -9,13 +9,13 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Change this line
 
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setError(null); // Clear any previous errors
-      navigate('/home'); // Redirect to home on successful login
+      navigate('/home'); // Change this line
     } catch (err: any) {
       setError(err.message); // Display the error message if login fails
     }

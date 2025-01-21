@@ -11,6 +11,7 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import InventoryManagement from './components/InventoryManagement';
 import Restock from './pages/Restock'; // Add this import
+import Suppliers from './pages/Suppliers'; // Add this import
 
 // Import components
 import Login from './components/Login';
@@ -88,6 +89,16 @@ const App: React.FC = () => {
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
                   <Layout>
                     <Restock />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/suppliers"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <Layout>
+                    <Suppliers />
                   </Layout>
                 </ProtectedRoute>
               }

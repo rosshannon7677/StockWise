@@ -11,6 +11,7 @@ import {
   IonIcon,
   IonButton
 } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
 import { 
   logOutOutline,
   cubeOutline,
@@ -25,7 +26,29 @@ import './Home.css';
 import { auth } from '../../firebaseConfig';
 import { useIonRouter } from '@ionic/react';
 import { getInventoryItems } from '../firestoreService';
-import { InventoryItem } from '../firestoreService';
+
+interface InventoryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  description?: string;
+  category: string;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  location: {
+    aisle: string;
+    shelf: string;
+    section: string;
+  };
+  metadata: {
+    addedBy: string;
+    addedDate: string;
+  };
+}
 
 const Home: React.FC = () => {
   const navigation = useIonRouter();

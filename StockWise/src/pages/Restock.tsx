@@ -40,7 +40,7 @@ const Restock: React.FC = () => {
     getInventoryItems((fetchedItems) => {
       setItems(fetchedItems);
       
-      // Calculate restock suggestions
+      // Calculate restock suggestions with proper type assertion
       const suggestions = fetchedItems
         .filter(item => item.quantity < 10)
         .map(item => ({
@@ -50,7 +50,7 @@ const Restock: React.FC = () => {
           recommendedQuantity: 20 - item.quantity,
           price: item.price,
           category: item.category,
-          urgency: item.quantity < 5 ? 'high' : 'medium',
+          urgency: item.quantity < 5 ? ('high' as const) : ('medium' as const),
           lastRestocked: item.metadata?.addedDate
         }));
       

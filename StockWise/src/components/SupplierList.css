@@ -1,0 +1,186 @@
+.supplier-table {
+    width: 100%;
+    border: 1px solid var(--ion-color-medium-tint);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 60px; /* Add space above footer */
+  }
+  
+  .table-header {
+    display: flex;
+    background: var(--ion-color-primary);
+    color: white;
+    font-weight: bold;
+    padding: 12px 8px;
+    width: 100%;
+  }
+  
+  .table-body {
+    background: var(--ion-background-color);
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+  }
+  
+  .table-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--ion-color-light-shade);
+    padding: 8px;
+    transition: background-color 0.2s ease;
+    width: 100%;
+  }
+  
+  .table-row:hover {
+    background-color: var(--ion-color-light);
+  }
+  
+  .header-cell,
+  .table-cell {
+    padding: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .header-cell {
+    padding: 8px;
+    text-align: left;
+    flex-shrink: 0;
+  }
+  
+  .table-cell {
+    padding: 8px;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  /* Set specific widths for cells */
+  .table-cell:nth-child(1), .header-cell:nth-child(1) { 
+    width: 15%; /* Name */
+  }
+
+  .table-cell:nth-child(2), .header-cell:nth-child(2) { 
+    width: 20%; /* Email */
+  }
+
+  .table-cell:nth-child(3), .header-cell:nth-child(3) { 
+    width: 15%; /* Phone */
+  }
+
+  .table-cell:nth-child(4), .header-cell:nth-child(4) { 
+    width: 30%; /* Address */
+  }
+
+  .table-cell:nth-child(5), .header-cell:nth-child(5) { 
+    width: 10%; /* Actions */
+  }
+  
+  .actions-cell {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    width: 10%;  /* Match the header width */
+    padding: 4px;
+    flex-shrink: 0;
+  }
+  
+  .editing {
+    background-color: var(--ion-color-light-tint) !important;
+  }
+  
+  .editing input {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid var(--ion-color-medium);
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  
+  .save-button,
+  .cancel-button,
+  .edit-button,
+  .delete-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 60px;
+    color: white;
+  }
+ 
+  .pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+    background: var(--ion-background-color);
+    border-top: 1px solid var(--ion-color-light-shade);
+    margin-bottom: 60px; /* Add space above footer */
+  }
+  
+  .pagination-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    background: var(--ion-color-primary);
+    color: white;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+  
+  .pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .page-info {
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+  }
+  
+  .supplier-container {
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .supplier-section {
+    width: 100%;
+  }
+  
+  .search-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--ion-background-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .edit-input {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid var(--ion-color-medium);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background-color: var(--ion-background-color);
+    color: var(--ion-color-dark);
+  }
+
+  .editing .table-cell {
+    padding: 4px 8px;
+  }
+
+ 
