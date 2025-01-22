@@ -1,0 +1,83 @@
+.orders-container {
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: calc(100vh - 150px); /* Adjust for header/footer */
+}
+
+.order-card {
+  height: auto; /* Change from 100% to auto */
+  background: var(--ion-card-background, #fff);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--ion-color-light);
+}
+
+.order-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.order-actions ion-button {
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+  height: 30px;
+  font-size: 0.9rem;
+}
+
+.order-items {
+  padding: 1rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.order-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--ion-color-light);
+  display: flex;
+  justify-content: space-between;
+  background: var(--ion-background-color);
+}
+
+@media (max-width: 768px) {
+  .orders-container {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    padding: 0.5rem;
+  }
+  
+  .order-card {
+    margin-bottom: 0.5rem;
+  }
+}
