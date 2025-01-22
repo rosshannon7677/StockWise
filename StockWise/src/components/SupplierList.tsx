@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import "./SupplierList.css";
 import { addSupplier, updateSupplier, deleteSupplier } from '../firestoreService';
-import { IonIcon } from '@ionic/react';
+import { IonIcon, IonModal } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
+import { getSupplierLocation, GOOGLE_MAPS_API_KEY, WORKSHOP_LOCATION } from '../services/mapsService';
 
 interface Supplier {
   id: string;
@@ -30,6 +31,10 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
   const [notes, setNotes] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const [showMap, setShowMap] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [selectedDistance, setSelectedDistance] = useState<string>('');
 
   const columns = [
     { field: 'name', headerName: 'Name', width: '15%' },
@@ -68,6 +73,19 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
       resetForm();
     } catch (error) {
       console.error('Error updating supplier:', error);
+    }
+  };
+
+  const handleAddressClick = async (address: string) => {
+    try {
+      const { location, formattedAddress } = await getSupplierLocation(address);
+      setSelectedLocation({
+        ...location,
+        formattedAddress
+      });
+      setShowMap(true);
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -140,7 +158,13 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
                 <div className="table-cell">{supplier.name}</div>
                 <div className="table-cell">{supplier.email}</div>
                 <div className="table-cell">{supplier.phone}</div>
-                <div className="table-cell">{supplier.address}</div>
+                <div 
+                  className="table-cell address-cell" 
+                  onClick={() => handleAddressClick(supplier.address)}
+                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  {supplier.address}
+                </div>
                 <div className="actions-cell">
                   <button onClick={() => handleEdit(supplier)} className="edit-button">Edit</button>
                   <button onClick={() => handleDelete(supplier.id)} className="delete-button">Delete</button>
@@ -169,6 +193,46 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
           <IonIcon icon={chevronForwardOutline} />
         </button>
       </div>
+      <IonModal isOpen={showMap} onDidDismiss={() => setShowMap(false)} className="map-modal">
+        <div style={{ width: '100%', height: '80vh' }}>
+          {selectedLocation && (
+            <>
+              <div style={{ 
+                padding: '1.5rem',
+                borderBottom: '1px solid var(--ion-color-light-shade)',
+                background: 'var(--ion-background-color)'
+              }}>
+                <h2 style={{ 
+                  margin: '0 0 1rem 0',
+                  color: 'var(--ion-color-primary)',
+                  fontSize: '1.5rem'
+                }}>Location Details</h2>
+                <div style={{ 
+                  display: 'grid',
+                  gap: '0.5rem',
+                  fontSize: '1.1rem'
+                }}>
+                  <p style={{ margin: 0 }}>
+                    <strong>{WORKSHOP_LOCATION.name}</strong> ↔ 
+                    <strong> {selectedLocation.formattedAddress}</strong>
+                  </p>
+                </div>
+              </div>
+              <iframe
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                src={`https://www.google.com/maps/embed/v1/directions?key=${GOOGLE_MAPS_API_KEY}
+                  &origin=${WORKSHOP_LOCATION.lat},${WORKSHOP_LOCATION.lng}
+                  &destination=${selectedLocation.lat},${selectedLocation.lng}
+                  &mode=driving`}
+              />
+            </>
+          )}
+        </div>
+      </IonModal>
     </div>
   );
 };

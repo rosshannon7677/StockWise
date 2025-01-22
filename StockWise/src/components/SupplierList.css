@@ -183,4 +183,17 @@
     padding: 4px 8px;
   }
 
- 
+  .address-cell {
+    color: var(--ion-color-primary);
+    cursor: pointer;
+  }
+
+  .address-cell:hover {
+    text-decoration: underline;
+  }
+
+  .map-modal {
+    --height: 80%;
+    --width: 90%;
+    --border-radius: 8px;
+  }
