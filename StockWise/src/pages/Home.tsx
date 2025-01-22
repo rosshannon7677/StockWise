@@ -11,7 +11,6 @@ import {
   IonIcon,
   IonButton
 } from '@ionic/react';
-import { useHistory } from 'react-router-dom';
 import { 
   logOutOutline,
   cubeOutline,
