@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonInput, IonItem, IonLabel, IonButton } from '@ionic/react';
+import { 
+  IonPage, 
+  IonContent,
+  IonInput, 
+  IonItem, 
+  IonButton,
+  IonCard,
+  IonCardContent
+} from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../../firebaseConfig'; // Adjust the path as needed
@@ -30,64 +38,68 @@ const Signup: React.FC = () => {
     <IonPage>
       <IonContent className="auth-content" fullscreen>
         <div className="auth-container">
-          <h2 className="auth-title">Create an Account</h2>
-          <p className="auth-subtext">Please fill out the form to sign up.</p>
+          <IonCard className="auth-card">
+            <IonCardContent>
+              <h2 className="auth-title">Create an Account</h2>
+              <p className="auth-subtext">Please fill out the form to sign up.</p>
 
-          <IonItem className="auth-item">
-            <IonInput
-              type="text"
-              value={name}
-              onIonChange={(e) => setName(e.detail.value!)}
-              required
-              label="Name"
-              labelPlacement="floating"
-              aria-label="Name"
-            />
-          </IonItem>
+              <IonItem className="auth-item">
+                <IonInput
+                  type="text"
+                  value={name}
+                  onIonChange={(e) => setName(e.detail.value!)}
+                  required
+                  label="Name"
+                  labelPlacement="floating"
+                  aria-label="Name"
+                />
+              </IonItem>
 
-          <IonItem className="auth-item">
-            <IonInput
-              type="email"
-              value={email}
-              onIonChange={(e) => setEmail(e.detail.value!)}
-              required
-              label="Email"
-              labelPlacement="floating"
-              aria-label="Email"
-            />
-          </IonItem>
+              <IonItem className="auth-item">
+                <IonInput
+                  type="email"
+                  value={email}
+                  onIonChange={(e) => setEmail(e.detail.value!)}
+                  required
+                  label="Email"
+                  labelPlacement="floating"
+                  aria-label="Email"
+                />
+              </IonItem>
 
-          <IonItem className="auth-item">
-            <IonInput
-              type="password"
-              value={password}
-              onIonChange={(e) => setPassword(e.detail.value!)}
-              required
-              label="Password"
-              labelPlacement="floating"
-              aria-label="Password"
-            />
-          </IonItem>
+              <IonItem className="auth-item">
+                <IonInput
+                  type="password"
+                  value={password}
+                  onIonChange={(e) => setPassword(e.detail.value!)}
+                  required
+                  label="Password"
+                  labelPlacement="floating"
+                  aria-label="Password"
+                />
+              </IonItem>
 
-          {error && <p className="error-message">{error}</p>}
+              {error && <p className="error-message">{error}</p>}
 
-          <IonButton 
-            expand="block" 
-            onClick={handleSignup} 
-            className="auth-button"
-          >
-            Sign Up
-          </IonButton>
+              <IonButton 
+                expand="block" 
+                onClick={handleSignup} 
+                className="auth-button"
+              >
+                Sign Up
+              </IonButton>
 
-          <IonButton 
-            expand="block" 
-            fill="clear" 
-            onClick={() => navigate('/login')} 
-            className="auth-button"
-            style={{ '--color': 'white' }}
-          >
-            Already have an account? Log In
-          </IonButton>
+              <IonButton 
+                expand="block" 
+                fill="clear" 
+                onClick={() => navigate('/login')} 
+                className="auth-button"
+                color="medium"
+              >
+                Already have an account? Log In
+              </IonButton>
+            </IonCardContent>
+          </IonCard>
         </div>
       </IonContent>
     </IonPage>

@@ -9,7 +9,9 @@ import {
   IonItem, 
   IonLabel, 
   IonButton,
-  IonIcon
+  IonIcon,
+  IonCard,
+  IonCardContent
 } from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -69,76 +71,77 @@ const Login: React.FC = () => {
     <IonPage>
       <IonContent className="auth-content" fullscreen>
         <div className="auth-container">
-          <h2 className="auth-title">Welcome Back!</h2>
-          <p className="auth-subtext">Please log in to continue.</p>
+          <IonCard className="auth-card">
+            <IonCardContent>
+              <div className="social-login-buttons">
+                <IonButton 
+                  expand="block" 
+                  onClick={() => handleSocialLogin(new GoogleAuthProvider())}
+                  className="google-button"
+                >
+                  <IonIcon slot="start" icon={logoGoogle} />
+                  Continue with Google
+                </IonButton>
 
-          <div className="social-login-buttons">
-            <IonButton 
-              expand="block" 
-              onClick={() => handleSocialLogin(new GoogleAuthProvider())}
-              className="google-button"
-            >
-              <IonIcon slot="start" icon={logoGoogle} />
-              Continue with Google
-            </IonButton>
+                <IonButton 
+                  expand="block" 
+                  onClick={() => handleSocialLogin(new OAuthProvider('apple'))}
+                  className="apple-button"
+                >
+                  <IonIcon slot="start" icon={logoApple} />
+                  Continue with Apple
+                </IonButton>
+              </div>
 
-            <IonButton 
-              expand="block" 
-              onClick={() => handleSocialLogin(new OAuthProvider('apple'))}
-              className="apple-button"
-            >
-              <IonIcon slot="start" icon={logoApple} />
-              Continue with Apple
-            </IonButton>
-          </div>
+              <div className="separator">
+                <span>or</span>
+              </div>
 
-          <div className="separator">
-            <span>or</span>
-          </div>
+              <IonItem className="auth-item">
+                <IonInput
+                  type="email"
+                  value={email}
+                  onIonChange={(e) => setEmail(e.detail.value!)}
+                  required
+                  label="Email"
+                  labelPlacement="floating"
+                  aria-label="Email"
+                />
+              </IonItem>
 
-          <IonItem className="auth-item">
-            <IonInput
-              type="email"
-              value={email}
-              onIonChange={(e) => setEmail(e.detail.value!)}
-              required
-              label="Email"
-              labelPlacement="floating"
-              aria-label="Email"
-            />
-          </IonItem>
+              <IonItem className="auth-item">
+                <IonInput
+                  type="password"
+                  value={password}
+                  onIonChange={(e) => setPassword(e.detail.value!)}
+                  required
+                  label="Password"
+                  labelPlacement="floating"
+                  aria-label="Password"
+                />
+              </IonItem>
 
-          <IonItem className="auth-item">
-            <IonInput
-              type="password"
-              value={password}
-              onIonChange={(e) => setPassword(e.detail.value!)}
-              required
-              label="Password"
-              labelPlacement="floating"
-              aria-label="Password"
-            />
-          </IonItem>
+              {error && <p className="error-message">{error}</p>}
 
-          {error && <p className="error-message">{error}</p>}
+              <IonButton 
+                expand="block" 
+                onClick={() => handleEmailLogin(email, password)} 
+                className="auth-button"
+              >
+                Log In with Email
+              </IonButton>
 
-          <IonButton 
-            expand="block" 
-            onClick={() => handleEmailLogin(email, password)} 
-            className="auth-button"
-          >
-            Log In with Email
-          </IonButton>
-
-          <IonButton 
-            expand="block" 
-            fill="clear" 
-            onClick={() => navigate('/signup')} 
-            className="auth-button"
-            style={{ '--color': 'white' }}
-          >
-            Don't have an account? Sign Up
-          </IonButton>
+              <IonButton 
+                expand="block" 
+                fill="clear" 
+                onClick={() => navigate('/signup')} 
+                className="auth-button"
+                color="medium"
+              >
+                Don't have an account? Sign Up
+              </IonButton>
+            </IonCardContent>
+          </IonCard>
         </div>
       </IonContent>
     </IonPage>
