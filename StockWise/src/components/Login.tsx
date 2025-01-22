@@ -1,66 +1,145 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonInput, IonItem, IonLabel, IonButton } from '@ionic/react';
+import { 
+  IonPage, 
+  IonContent, 
+  IonHeader, 
+  IonTitle, 
+  IonToolbar, 
+  IonInput, 
+  IonItem, 
+  IonLabel, 
+  IonButton,
+  IonIcon
+} from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebaseConfig'; // Adjust the path as needed
+import { 
+  signInWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider,
+  OAuthProvider,
+  setPersistence,
+  browserLocalPersistence
+} from 'firebase/auth';
+import { auth } from '../../firebaseConfig';
+import { logoGoogle, logoApple } from 'ionicons/icons';
 import './Auth.css';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate(); // Change this line
+  const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleEmailLogin = async (email: string, password: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      setError(null); // Clear any previous errors
-      navigate('/home'); // Change this line
+      setError(null);
+      navigate('/home');
     } catch (err: any) {
-      setError(err.message); // Display the error message if login fails
+      setError(err.message);
+    }
+  };
+
+  const handleSocialLogin = async (provider: GoogleAuthProvider | OAuthProvider | GithubAuthProvider | FacebookAuthProvider) => {
+    try {
+      // Set persistence to LOCAL to maintain the session
+      await setPersistence(auth, browserLocalPersistence);
+      const result = await signInWithPopup(auth, provider);
+      
+      // Get the Google Access Token
+      if (provider instanceof GoogleAuthProvider) {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential?.accessToken;
+        // You can store the token if needed
+      }
+      
+      setError(null);
+      navigate('/home');
+    } catch (err: any) {
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Sign-in popup was closed before completion');
+      } else {
+        setError(err.message);
+      }
+      console.error('Social login error:', err);
     }
   };
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Login</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="auth-content">
-        <h2 className="auth-title">Welcome Back!</h2>
-        <p className="auth-subtext">Please log in to continue.</p>
+      <IonContent className="auth-content" fullscreen>
+        <div className="auth-container">
+          <h2 className="auth-title">Welcome Back!</h2>
+          <p className="auth-subtext">Please log in to continue.</p>
 
-        <IonItem className="auth-item">
-          <IonLabel position="floating">Email</IonLabel>
-          <IonInput
-            type="email"
-            value={email}
-            onIonChange={(e) => setEmail(e.detail.value!)}
-            required
-          />
-        </IonItem>
+          <div className="social-login-buttons">
+            <IonButton 
+              expand="block" 
+              onClick={() => handleSocialLogin(new GoogleAuthProvider())}
+              className="google-button"
+            >
+              <IonIcon slot="start" icon={logoGoogle} />
+              Continue with Google
+            </IonButton>
 
-        <IonItem className="auth-item">
-          <IonLabel position="floating">Password</IonLabel>
-          <IonInput
-            type="password"
-            value={password}
-            onIonChange={(e) => setPassword(e.detail.value!)}
-            required
-          />
-        </IonItem>
+            <IonButton 
+              expand="block" 
+              onClick={() => handleSocialLogin(new OAuthProvider('apple'))}
+              className="apple-button"
+            >
+              <IonIcon slot="start" icon={logoApple} />
+              Continue with Apple
+            </IonButton>
+          </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+          <div className="separator">
+            <span>or</span>
+          </div>
 
-        <IonButton expand="block" onClick={handleLogin} className="auth-button">
-          Log In
-        </IonButton>
+          <IonItem className="auth-item">
+            <IonInput
+              type="email"
+              value={email}
+              onIonChange={(e) => setEmail(e.detail.value!)}
+              required
+              label="Email"
+              labelPlacement="floating"
+              aria-label="Email"
+            />
+          </IonItem>
 
-        <IonButton expand="block" fill="clear" onClick={() => navigate('/signup')} className="auth-button">
-          Don’t have an account? Sign Up
-        </IonButton>
+          <IonItem className="auth-item">
+            <IonInput
+              type="password"
+              value={password}
+              onIonChange={(e) => setPassword(e.detail.value!)}
+              required
+              label="Password"
+              labelPlacement="floating"
+              aria-label="Password"
+            />
+          </IonItem>
+
+          {error && <p className="error-message">{error}</p>}
+
+          <IonButton 
+            expand="block" 
+            onClick={() => handleEmailLogin(email, password)} 
+            className="auth-button"
+          >
+            Log In with Email
+          </IonButton>
+
+          <IonButton 
+            expand="block" 
+            fill="clear" 
+            onClick={() => navigate('/signup')} 
+            className="auth-button"
+            style={{ '--color': 'white' }}
+          >
+            Don't have an account? Sign Up
+          </IonButton>
+        </div>
       </IonContent>
     </IonPage>
   );

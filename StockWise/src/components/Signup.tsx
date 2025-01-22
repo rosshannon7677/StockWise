@@ -28,54 +28,67 @@ const Signup: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Sign Up</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="auth-content">
-        <h2 className="auth-title">Create an Account</h2>
-        <p className="auth-subtext">Please fill out the form to sign up.</p>
+      <IonContent className="auth-content" fullscreen>
+        <div className="auth-container">
+          <h2 className="auth-title">Create an Account</h2>
+          <p className="auth-subtext">Please fill out the form to sign up.</p>
 
-        <IonItem className="auth-item">
-          <IonLabel position="floating">Name</IonLabel>
-          <IonInput
-            type="text"
-            value={name}
-            onIonChange={(e) => setName(e.detail.value!)}
-            required
-          />
-        </IonItem>
+          <IonItem className="auth-item">
+            <IonInput
+              type="text"
+              value={name}
+              onIonChange={(e) => setName(e.detail.value!)}
+              required
+              label="Name"
+              labelPlacement="floating"
+              aria-label="Name"
+            />
+          </IonItem>
 
-        <IonItem className="auth-item">
-          <IonLabel position="floating">Email</IonLabel>
-          <IonInput
-            type="email"
-            value={email}
-            onIonChange={(e) => setEmail(e.detail.value!)}
-            required
-          />
-        </IonItem>
+          <IonItem className="auth-item">
+            <IonInput
+              type="email"
+              value={email}
+              onIonChange={(e) => setEmail(e.detail.value!)}
+              required
+              label="Email"
+              labelPlacement="floating"
+              aria-label="Email"
+            />
+          </IonItem>
 
-        <IonItem className="auth-item">
-          <IonLabel position="floating">Password</IonLabel>
-          <IonInput
-            type="password"
-            value={password}
-            onIonChange={(e) => setPassword(e.detail.value!)}
-            required
-          />
-        </IonItem>
+          <IonItem className="auth-item">
+            <IonInput
+              type="password"
+              value={password}
+              onIonChange={(e) => setPassword(e.detail.value!)}
+              required
+              label="Password"
+              labelPlacement="floating"
+              aria-label="Password"
+            />
+          </IonItem>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && <p className="error-message">{error}</p>}
 
-        <IonButton expand="block" onClick={handleSignup} className="auth-button">
-          Sign Up
-        </IonButton>
+          <IonButton 
+            expand="block" 
+            onClick={handleSignup} 
+            className="auth-button"
+          >
+            Sign Up
+          </IonButton>
 
-        <IonButton expand="block" fill="clear" onClick={() => navigate('/login')} className="auth-button">
-          Already have an account? Log In
-        </IonButton>
+          <IonButton 
+            expand="block" 
+            fill="clear" 
+            onClick={() => navigate('/login')} 
+            className="auth-button"
+            style={{ '--color': 'white' }}
+          >
+            Already have an account? Log In
+          </IonButton>
+        </div>
       </IonContent>
     </IonPage>
   );
