@@ -103,39 +103,40 @@ const Home: React.FC = () => {
   return (
     <IonContent>
       <div className="dashboard-container">
-        <h1 className="dashboard-title">Dashboard Overview</h1>
-        
         <IonGrid>
-          {/* Info Cards */}
           <IonRow>
             {cardComponent.map((card, index) => (
               <IonCol sizeMd="3" sizeSm="6" size="12" key={index}>
-                <IonCard className="dashboard-card">
-                  <IonCardHeader>
+                <IonCard className="dashboard-card" style={{ height: 'auto', padding: '0.5rem' }}>
+                  <IonCardHeader style={{ padding: '0.5rem' }}>
                     <IonIcon icon={card.icon} className="card-icon" color={card.color} />
-                    <IonCardTitle>{card.title}</IonCardTitle>
+                    <IonCardTitle style={{ fontSize: '1rem' }}>{card.title}</IonCardTitle>
                   </IonCardHeader>
-                  <IonCardContent>
-                    <h2 className="metric-value">{card.subTitle}</h2>
+                  <IonCardContent style={{ padding: '0.5rem' }}>
+                    <div className="metric-value" style={{ fontSize: '1.2rem' }}>{card.subTitle}</div>
                   </IonCardContent>
                 </IonCard>
               </IonCol>
             ))}
           </IonRow>
 
-          {/* Charts and Tables */}
           <IonRow>
             <IonCol sizeMd="8" sizeSm="12">
               <IonCard className="dashboard-card">
                 <IonCardHeader>
                   <IonIcon icon={trendingUpOutline} className="card-icon" />
-                  <IonCardTitle>Inventory Overview</IonCardTitle>
+                  <IonCardTitle>Stock Location Map</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <div className="overview-stats">
-                    <p>Total Categories: {new Set(inventoryItems.map(item => item.category)).size}</p>
-                    <p>Average Stock Level: {(inventoryItems.reduce((sum, item) => sum + item.quantity, 0) / inventoryItems.length || 0).toFixed(0)} units</p>
-                    <p>Average Item Value: €{(inventoryItems.reduce((sum, item) => sum + item.price, 0) / inventoryItems.length || 0).toFixed(2)}</p>
+                  <div className="location-grid">
+                    {Array.from(new Set(inventoryItems.map(item => item.location.aisle))).map(aisle => (
+                      <div key={aisle} className="location-card">
+                        <div className="location-title">Aisle {aisle}</div>
+                        <div className="location-count">
+                          {inventoryItems.filter(item => item.location.aisle === aisle).length} items
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </IonCardContent>
               </IonCard>
@@ -144,6 +145,7 @@ const Home: React.FC = () => {
             <IonCol sizeMd="4" sizeSm="12">
               <IonCard className="dashboard-card">
                 <IonCardHeader>
+                  <IonIcon icon={statsChartOutline} className="card-icon" />
                   <IonCardTitle>Top Products</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
