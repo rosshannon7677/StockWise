@@ -227,3 +227,15 @@
 .category-suggestion-item:hover {
   background-color: var(--ion-color-light);
 }
+
+.address-input-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.map-modal {
+  --height: 80%;
+  --width: 90%;
+  --border-radius: 8px;
+}

@@ -5,13 +5,13 @@ import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBYat8b41fkc15eIdoLSywsvgWIjJLBKdA",
-  authDomain: "stockwise-8351f.firebaseapp.com",
-  projectId: "stockwise-8351f",
-  storageBucket: "stockwise-8351f.appspot.com",
-  messagingSenderId: "151501605989",
-  appId: "1:151501605989:web:181214a27c061355678a8c",
-  measurementId: "G-4951NEZY9V"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
