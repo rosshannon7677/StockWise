@@ -3,7 +3,6 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import HttpApi from "i18next-http-backend";
 
-// Import translations
 import enTranslations from "./translations/en.json";
 import esTranslations from "./translations/es.json";
 
@@ -21,9 +20,12 @@ i18n
       }
     },
     fallbackLng: "en",
-    debug: true,
+    debug: process.env.NODE_ENV === 'development', // Only show debug in development
     interpolation: {
       escapeValue: false
+    },
+    detection: {
+      order: ['localStorage', 'navigator']
     }
   });
 

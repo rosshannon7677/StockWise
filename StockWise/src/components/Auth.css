@@ -1,34 +1,139 @@
 .auth-content {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    text-align: center;
-  }
-  
-  .auth-title {
-    font-size: 2em;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-  }
-  
-  .auth-subtext {
-    font-size: 1.1em;
-    color: #555;
-    margin-bottom: 20px;
-  }
-  
-  .auth-item {
-    width: 100%;
-    max-width: 400px;
-  }
-  
-  .auth-button {
-    margin-top: 20px;
-    width: 100%;
-    max-width: 400px;
-  }
-  
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+  --background: linear-gradient(135deg, #3880ff 0%, #2dd36f 100%);
+  overflow-y: auto; /* Add scroll if content overflows */
+}
+
+.auth-title {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.auth-subtext {
+  font-size: 1.2em;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 30px;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.auth-item {
+  width: 100%;
+  margin-bottom: 10px; /* Reduce margin */
+  --background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  --border-radius: 10px;
+  --highlight-height: 0;
+}
+
+.auth-button {
+  margin-top: 10px; /* Reduce margin */
+  margin-bottom: 10px; /* Add bottom margin */
+  width: 100%;
+  --border-radius: 10px;
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.social-login-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Reduce gap */
+  margin: 15px 0; /* Reduce margin */
+}
+
+.google-button {
+  --background: #ffffff;
+  --color: #757575;
+  --border-radius: 25px;
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --color: #000000;
+  --border-radius: 10px;
+  font-weight: 500;
+}
+
+.github-button {
+  --background: #24292e;
+  --color: #fff;
+}
+
+.facebook-button {
+  --background: #1877f2;
+  --color: #fff;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.separator span {
+  padding: 0 1rem;
+  font-size: 1rem;
+}
+
+.error-message {
+  color: #ff4444;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 5px;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.email-button {
+  margin-top: 1rem;
+}
+
+.apple-button {
+  --background: #000000;
+  --color: #ffffff;
+  --border-radius: 25px;
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --border-radius: 10px;
+  font-weight: 500;
+}
+
+ion-input {
+  --padding-start: 15px;
+  --padding-end: 15px;
+  text-align: center;
+}
+
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  gap: 15px; /* Consistent spacing between elements */
+}
+
+/* Add padding at the bottom to ensure last button is visible */
+.auth-container > :last-child {
+  margin-bottom: 20px;
+}
