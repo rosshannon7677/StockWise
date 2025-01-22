@@ -14,8 +14,10 @@ import InventoryManagement from './components/InventoryManagement';
 import Restock from './pages/Restock'; // Add this import
 import Suppliers from './pages/Suppliers'; // Add this import
 
+
 // Import components
 import Login from './components/Login';
+import Orders from './pages/Orders';
 import Signup from './components/Signup';
 import ProtectedRoute from './ProtectedRoute';
   // Move ProtectedRoute to components folder
@@ -100,6 +102,16 @@ const App: React.FC = () => {
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
                   <Layout>
                     <Suppliers />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <Layout>
+                    <Orders />
                   </Layout>
                 </ProtectedRoute>
               }

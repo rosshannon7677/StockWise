@@ -22,7 +22,8 @@ import {
   settingsOutline,
   logOutOutline,
   reloadOutline,
-  peopleOutline // Add this import
+  peopleOutline, // Add this import
+  cartOutline // Add this import
 } from 'ionicons/icons';
 import { useLocation } from 'react-router';
 import { auth } from '../../firebaseConfig';
@@ -48,7 +49,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const menuItems = [
     { title: 'Home', path: '/home', icon: homeOutline },
     { title: 'Inventory', path: '/inventory', icon: listOutline },
-    { title: 'Suppliers', path: '/suppliers', icon: peopleOutline }, // Add this line
+    { title: 'Orders', path: '/orders', icon: cartOutline }, // Add this line
+    { title: 'Suppliers', path: '/suppliers', icon: peopleOutline },
     { title: 'Restock', path: '/restock', icon: reloadOutline },
     { title: 'Reports', path: '/reports', icon: statsChartOutline },
     { title: 'Settings', path: '/settings', icon: settingsOutline },

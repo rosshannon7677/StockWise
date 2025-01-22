@@ -42,7 +42,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleSocialLogin = async (provider: GoogleAuthProvider | OAuthProvider | GithubAuthProvider | FacebookAuthProvider) => {
+  const handleSocialLogin = async (provider: GoogleAuthProvider | OAuthProvider) => {
     try {
       // Set persistence to LOCAL to maintain the session
       await setPersistence(auth, browserLocalPersistence);

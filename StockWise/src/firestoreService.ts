@@ -1,10 +1,20 @@
 // src/firestoreService.ts
-import { addDoc, collection, getFirestore, onSnapshot, QuerySnapshot, DocumentData, updateDoc, doc } from "firebase/firestore";
+import { 
+  addDoc, 
+  collection, 
+  getFirestore, 
+  onSnapshot, 
+  QuerySnapshot, 
+  DocumentData, 
+  updateDoc, 
+  doc,
+  deleteDoc,
+  increment // Add this import
+} from "firebase/firestore";
 import { app } from "./../firebaseConfig";
-import { deleteDoc } from "firebase/firestore"; 
 import { auth } from '../firebaseConfig';
 
-interface InventoryItem {
+export interface InventoryItem {
   id: string;
   name: string;
   quantity: number;
@@ -37,6 +47,32 @@ interface Supplier {
   metadata: {
     addedBy: string;
     addedDate: string;
+  };
+}
+
+export interface CustomerOrder {
+  id: string;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
+  items: {
+    itemId: string;
+    name: string;
+    quantity: number;
+    price: number;
+  }[];
+  status: 'pending' | 'inProgress' | 'shipped' | 'delivered';
+  totalAmount: number;
+  orderDate: string;
+  expectedDeliveryDate?: string;
+  notes?: string;
+  metadata: {
+    addedBy: string;
+    addedDate: string;
+    lastUpdated: string;
   };
 }
 
@@ -137,4 +173,32 @@ export const deleteSupplier = async (id: string) => {
   } catch (error) {
     console.error("Error deleting supplier: ", error);
   }
+};
+
+export const addOrder = async (order: Omit<CustomerOrder, 'id'>) => {
+  try {
+    const orderRef = await addDoc(collection(db, "customerOrders"), order);
+    // Update inventory quantities
+    for (const item of order.items) {
+      const itemRef = doc(db, "inventoryItems", item.itemId);
+      await updateDoc(itemRef, {
+        quantity: increment(-item.quantity) // This will now work correctly
+      });
+    }
+    return orderRef.id;
+  } catch (error) {
+    console.error("Error adding order:", error);
+    throw error;
+  }
+};
+
+export const getOrders = (callback: (orders: CustomerOrder[]) => void) => {
+  const collectionRef = collection(db, "customerOrders");
+  return onSnapshot(collectionRef, (snapshot) => {
+    const orders = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as CustomerOrder[];
+    callback(orders);
+  });
 };
