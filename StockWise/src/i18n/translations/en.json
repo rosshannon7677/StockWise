@@ -1,0 +1,58 @@
+{
+    "settings": {
+      "title": "Settings",
+      "appearance": "Appearance",
+      "darkMode": "Dark Mode",
+      "notifications": "Notifications",
+      "language": "Language",
+      "languages": {
+        "en": "🇬🇧 English",
+        "es": "🇪🇸 Spanish",
+        "fr": "🇫🇷 French", 
+        "ga": "🇮🇪 Irish"
+      }
+    },
+    "header": {
+      "title": "StockWise Inventory Management",
+      "welcome": "Welcome, {name}"
+    },
+    "navigation": {
+      "home": "Home",
+      "inventory": "Inventory",
+      "suppliers": "Suppliers",
+      "restock": "Restock",
+      "reports": "Reports",
+      "settings": "Settings",
+      "signOut": "Sign Out"
+    },
+    "dashboard": {
+      "title": "Control Panel",
+      "overview": "Overview",
+      "totalItems": "Total Items",
+      "inStock": "In Stock",
+      "lowStock": "Low Stock",
+      "totalValue": "Total Value",
+      "inventoryOverview": "Inventory Overview",
+      "totalCategories": "Total Categories",
+      "averageStockLevel": "Average Stock Level",
+      "averageItemValue": "Average Item Value",
+      "units": "units",
+      "topProducts": "Top Products",
+      "quantity": "Qty"
+    },
+    "inventory": {
+      "title": "Inventory Management",
+      "addItem": "Add Item",
+      "search": "Search items..."
+    },
+    "suppliers": {
+      "title": "Supplier Management",
+      "addSupplier": "Add Supplier"
+    },
+    "common": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit"
+    }
+  }

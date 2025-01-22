@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   IonContent,
   IonItem,
@@ -7,15 +7,28 @@ import {
   IonList,
   IonListHeader,
   IonSelect,
-  IonSelectOption,
-  IonButton
+  IonSelectOption
 } from '@ionic/react';
+import { useTranslation } from 'react-i18next';
+import '../i18n/config';  // Add this import
 import './Settings.css';
 
 const Settings: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
-  const [language, setLanguage] = useState('en');
+
+  const handleLanguageChange = (language: string) => {
+    i18n.changeLanguage(language);
+    localStorage.setItem('preferred-language', language);
+  };
+
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('preferred-language');
+    if (savedLanguage) {
+      i18n.changeLanguage(savedLanguage);
+    }
+  }, [i18n]);
 
   const handleDarkModeToggle = () => {
     setDarkMode(!darkMode);
@@ -25,21 +38,20 @@ const Settings: React.FC = () => {
   return (
     <IonContent>
       <div className="settings-container">
-        <h1 className="settings-title">Settings</h1>
+        <h1 className="settings-title">{t('settings.title')}</h1>
         
         <IonList className="settings-list">
-          <IonListHeader>Appearance</IonListHeader>
+          <IonListHeader>{t('settings.appearance')}</IonListHeader>
           <IonItem>
-            <IonLabel>Dark Mode</IonLabel>
+            <IonLabel>{t('settings.darkMode')}</IonLabel>
             <IonToggle 
               checked={darkMode} 
               onIonChange={handleDarkModeToggle}
             />
           </IonItem>
 
-          <IonListHeader>Preferences</IonListHeader>
           <IonItem>
-            <IonLabel>Notifications</IonLabel>
+            <IonLabel>{t('settings.notifications')}</IonLabel>
             <IonToggle 
               checked={notifications} 
               onIonChange={e => setNotifications(e.detail.checked)}
@@ -47,18 +59,19 @@ const Settings: React.FC = () => {
           </IonItem>
 
           <IonItem>
-            <IonLabel>Language</IonLabel>
+            <IonLabel>{t('settings.language')}</IonLabel>
             <IonSelect 
-              value={language}
-              onIonChange={e => setLanguage(e.detail.value)}
+              value={i18n.language}
+              onIonChange={e => handleLanguageChange(e.detail.value)}
+              interface="popover"
             >
-              <IonSelectOption value="en">English</IonSelectOption>
-              <IonSelectOption value="es">Spanish</IonSelectOption>
-              <IonSelectOption value="fr">French</IonSelectOption>
+              <IonSelectOption value="en">{t('settings.languages.en')}</IonSelectOption>
+              <IonSelectOption value="es">{t('settings.languages.es')}</IonSelectOption>
+              <IonSelectOption value="fr">{t('settings.languages.fr')}</IonSelectOption>
+              <IonSelectOption value="ga">{t('settings.languages.ga')}</IonSelectOption>
             </IonSelect>
           </IonItem>
         </IonList>
-
       </div>
     </IonContent>
   );

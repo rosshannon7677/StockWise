@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import './i18n/config';  // Add this line at the top
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
