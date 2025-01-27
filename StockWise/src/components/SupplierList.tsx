@@ -5,7 +5,8 @@ import { IonIcon, IonModal } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 import { getSupplierLocation, GOOGLE_MAPS_API_KEY, WORKSHOP_LOCATION } from '../services/mapsService';
 
-interface Supplier {
+// Change from 'interface Supplier' to 'export interface Supplier'
+export interface Supplier {
   id: string;
   name: string;
   email: string;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { IonCard, IonCardHeader, IonCardContent, IonBadge, IonButton } from '@ionic/react';
 import './OrderList.css';
+import { SupplierOrder } from '../firestoreService';
 
 interface OrderItem {
   itemId: string;
@@ -9,29 +10,8 @@ interface OrderItem {
   price: number;
 }
 
-interface CustomerOrder {
-  id: string;
-  customer: {
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-  };
-  items: OrderItem[];
-  status: 'pending' | 'inProgress' | 'shipped' | 'delivered';
-  totalAmount: number;
-  orderDate: string;
-  expectedDeliveryDate?: string;
-  notes?: string;
-  metadata: {
-    addedBy: string;
-    addedDate: string;
-    lastUpdated: string;
-  };
-}
-
 interface OrderListProps {
-  orders: CustomerOrder[];
+  orders: SupplierOrder[];
 }
 
 const OrderList: React.FC<OrderListProps> = ({ orders }) => {
@@ -41,57 +21,43 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   const getStatusColor = (status: string): string => {
     switch (status) {
       case 'pending': return 'warning';
-      case 'inProgress': return 'primary';
-      case 'shipped': return 'secondary';
-      case 'delivered': return 'success';
+      case 'sent': return 'primary';
+      case 'received': return 'success';
       default: return 'medium';
     }
   };
 
-  const handleEdit = (order: CustomerOrder) => {
-    // Will implement edit functionality
-    console.log('Edit order:', order);
-  };
-
-  const handleDelete = async (orderId: string) => {
-    if (window.confirm('Are you sure you want to delete this order?')) {
-      // Will implement delete functionality
-      console.log('Delete order:', orderId);
-    }
+  const generateEmailBody = (order: SupplierOrder): string => {
+    return `Dear ${order.supplier.name},\n\nWe would like to request the following items:\n\n${order.items.map(item => `${item.name} x${item.quantity}`).join('\n')}\n\nThank you,\nYour Company`;
   };
 
   return (
     <div className="orders-container">
-      {orders.map((order: CustomerOrder) => (
+      {orders.map((order) => (
         <IonCard key={order.id} className="order-card">
           <IonCardHeader>
             <div className="order-header">
-              <h3>{order.customer.name}</h3>
+              <h3>{order.supplier.name}</h3>
               <div className="order-actions">
                 <IonBadge color={getStatusColor(order.status)}>
                   {order.status}
                 </IonBadge>
                 <IonButton 
                   fill="clear" 
-                  size="small" 
-                  onClick={() => handleEdit(order)}
+                  size="small"
+                  onClick={() => {
+                    const mailtoLink = `mailto:${order.supplier.email}?subject=Stock Order Request&body=${encodeURIComponent(generateEmailBody(order))}`;
+                    window.location.href = mailtoLink;
+                  }}
                 >
-                  Edit
-                </IonButton>
-                <IonButton 
-                  fill="clear" 
-                  color="danger" 
-                  size="small" 
-                  onClick={() => handleDelete(order.id)}
-                >
-                  Delete
+                  Send Email
                 </IonButton>
               </div>
             </div>
           </IonCardHeader>
           <IonCardContent>
             <div className="order-items">
-              {order.items.map((item: OrderItem, index: number) => (
+              {order.items.map((item, index) => (
                 <div key={index} className="order-item">
                   <span>{item.name}</span>
                   <span>x{item.quantity}</span>

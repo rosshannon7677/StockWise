@@ -9,7 +9,7 @@ import {
   updateDoc, 
   doc,
   deleteDoc,
-  increment // Add this import
+  increment
 } from "firebase/firestore";
 import { app } from "./../firebaseConfig";
 import { auth } from '../firebaseConfig';
@@ -37,7 +37,7 @@ export interface InventoryItem {
   };
 }
 
-interface Supplier {
+export interface Supplier {
   id: string;
   name: string;
   email: string;
@@ -68,6 +68,31 @@ export interface CustomerOrder {
   totalAmount: number;
   orderDate: string;
   expectedDeliveryDate?: string;
+  notes?: string;
+  metadata: {
+    addedBy: string;
+    addedDate: string;
+    lastUpdated: string;
+  };
+}
+
+export interface SupplierOrder {
+  id: string;
+  supplier: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+  };
+  items: {
+    itemId: string;
+    name: string;
+    quantity: number;
+    price: number;
+  }[];
+  status: 'pending' | 'sent' | 'received';
+  totalAmount: number;
+  orderDate: string;
   notes?: string;
   metadata: {
     addedBy: string;
@@ -175,14 +200,14 @@ export const deleteSupplier = async (id: string) => {
   }
 };
 
-export const addOrder = async (order: Omit<CustomerOrder, 'id'>) => {
+export const addOrder = async (order: Omit<SupplierOrder, 'id'>) => {
   try {
-    const orderRef = await addDoc(collection(db, "customerOrders"), order);
+    const orderRef = await addDoc(collection(db, "supplierOrders"), order);
     // Update inventory quantities
     for (const item of order.items) {
       const itemRef = doc(db, "inventoryItems", item.itemId);
       await updateDoc(itemRef, {
-        quantity: increment(-item.quantity) // This will now work correctly
+        quantity: increment(-item.quantity)
       });
     }
     return orderRef.id;
@@ -192,13 +217,34 @@ export const addOrder = async (order: Omit<CustomerOrder, 'id'>) => {
   }
 };
 
-export const getOrders = (callback: (orders: CustomerOrder[]) => void) => {
-  const collectionRef = collection(db, "customerOrders");
+export const getOrders = (callback: (orders: SupplierOrder[]) => void) => {
+  const collectionRef = collection(db, "supplierOrders");
   return onSnapshot(collectionRef, (snapshot) => {
     const orders = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data()
-    })) as CustomerOrder[];
+    })) as SupplierOrder[];
+    callback(orders);
+  });
+};
+
+export const addSupplierOrder = async (order: Omit<SupplierOrder, 'id'>) => {
+  try {
+    const orderRef = await addDoc(collection(db, "supplierOrders"), order);
+    return orderRef.id;
+  } catch (error) {
+    console.error("Error adding supplier order:", error);
+    throw error;
+  }
+};
+
+export const getSupplierOrders = (callback: (orders: SupplierOrder[]) => void) => {
+  const collectionRef = collection(db, "supplierOrders");
+  return onSnapshot(collectionRef, (snapshot) => {
+    const orders = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as SupplierOrder[];
     callback(orders);
   });
 };

@@ -5,13 +5,14 @@ import {
 } from '@ionic/react';
 import { addOutline, addCircleOutline, removeCircleOutline } from 'ionicons/icons';
 import OrderList from '../components/OrderList';
-import { getOrders, addOrder, getInventoryItems } from '../firestoreService';
-import type { CustomerOrder, InventoryItem } from '../firestoreService';
+import { getOrders, addOrder, getInventoryItems, getSuppliers } from '../firestoreService';
+import type { SupplierOrder, InventoryItem, Supplier } from '../firestoreService';
 import './Orders.css';
 
 const Orders: React.FC = () => {
-  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const [orders, setOrders] = useState<SupplierOrder[]>([]);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState<{
     itemId: string;
@@ -19,24 +20,8 @@ const Orders: React.FC = () => {
     quantity: number;
     price: number;
   }[]>([]);
-  const [newOrder, setNewOrder] = useState({
-    customer: {
-      name: '',
-      email: '',
-      phone: '',
-      address: ''
-    },
-    items: [],
-    status: 'pending' as const,
-    totalAmount: 0,
-    orderDate: new Date().toISOString(),
-    metadata: {
-      addedBy: '',
-      addedDate: new Date().toISOString(),
-      lastUpdated: new Date().toISOString()
-    }
-  });
-
+  const [selectedSupplier, setSelectedSupplier] = useState<string>('');
+  
   useEffect(() => {
     const unsubscribeOrders = getOrders((fetchedOrders) => {
       setOrders(fetchedOrders);
@@ -46,9 +31,14 @@ const Orders: React.FC = () => {
       setInventoryItems(items);
     });
 
+    const unsubscribeSuppliers = getSuppliers((fetchedSuppliers) => {
+      setSuppliers(fetchedSuppliers);
+    });
+
     return () => {
       unsubscribeOrders();
       unsubscribeInventory();
+      unsubscribeSuppliers();
     };
   }, []);
 
@@ -85,11 +75,27 @@ const Orders: React.FC = () => {
 
   const handleCreateOrder = async () => {
     try {
-      const orderData = {
-        ...newOrder,
+      const supplier = suppliers.find(s => s.id === selectedSupplier);
+      if (!supplier) return;
+
+      const orderData: Omit<SupplierOrder, 'id'> = {
+        supplier: {
+          id: supplier.id,
+          name: supplier.name,
+          email: supplier.email,
+          phone: supplier.phone
+        },
         items: selectedItems,
+        status: 'pending',
         totalAmount: calculateTotal(),
+        orderDate: new Date().toISOString(),
+        metadata: {
+          addedBy: '',
+          addedDate: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        }
       };
+
       await addOrder(orderData);
       setShowModal(false);
       resetForm();
@@ -99,19 +105,8 @@ const Orders: React.FC = () => {
   };
 
   const resetForm = () => {
-    setNewOrder({
-      customer: { name: '', email: '', phone: '', address: '' },
-      items: [],
-      status: 'pending',
-      totalAmount: 0,
-      orderDate: new Date().toISOString(),
-      metadata: {
-        addedBy: '',
-        addedDate: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
-      }
-    });
     setSelectedItems([]);
+    setSelectedSupplier('');
   };
 
   return (
@@ -128,58 +123,22 @@ const Orders: React.FC = () => {
 
         <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
           <div className="modal-content">
-            <h2>Create New Order</h2>
+            <h2>Create Supply Order</h2>
             
-            {/* Customer Information */}
             <div className="form-section">
-              <h3>Customer Information</h3>
-              <IonList>
-                <IonItem>
-                  <IonLabel position="floating">Customer Name</IonLabel>
-                  <IonInput
-                    value={newOrder.customer.name}
-                    onIonChange={e => setNewOrder({
-                      ...newOrder,
-                      customer: { ...newOrder.customer, name: e.detail.value! }
-                    })}
-                  />
-                </IonItem>
-                <IonItem>
-                  <IonLabel position="floating">Email</IonLabel>
-                  <IonInput
-                    type="email"
-                    value={newOrder.customer.email}
-                    onIonChange={e => setNewOrder({
-                      ...newOrder,
-                      customer: { ...newOrder.customer, email: e.detail.value! }
-                    })}
-                  />
-                </IonItem>
-                <IonItem>
-                  <IonLabel position="floating">Phone</IonLabel>
-                  <IonInput
-                    type="tel"
-                    value={newOrder.customer.phone}
-                    onIonChange={e => setNewOrder({
-                      ...newOrder,
-                      customer: { ...newOrder.customer, phone: e.detail.value! }
-                    })}
-                  />
-                </IonItem>
-                <IonItem>
-                  <IonLabel position="floating">Address</IonLabel>
-                  <IonInput
-                    value={newOrder.customer.address}
-                    onIonChange={e => setNewOrder({
-                      ...newOrder,
-                      customer: { ...newOrder.customer, address: e.detail.value! }
-                    })}
-                  />
-                </IonItem>
-              </IonList>
+              <h3>Select Supplier</h3>
+              <IonItem>
+                <IonLabel position="floating">Supplier</IonLabel>
+                <IonSelect value={selectedSupplier} onIonChange={e => setSelectedSupplier(e.detail.value)}>
+                  {suppliers.map(supplier => (
+                    <IonSelectOption key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </IonSelectOption>
+                  ))}
+                </IonSelect>
+              </IonItem>
             </div>
 
-            {/* Order Items */}
             <div className="form-section">
               <h3>Order Items</h3>
               <IonButton onClick={handleAddItem} size="small">
@@ -231,9 +190,9 @@ const Orders: React.FC = () => {
                 Cancel
               </IonButton>
               <IonButton 
-                color=""
+                color="primary"
                 onClick={handleCreateOrder}
-                disabled={selectedItems.length === 0 || !newOrder.customer.name}
+                disabled={!selectedSupplier || selectedItems.length === 0}
               >
                 Submit Order
               </IonButton>
