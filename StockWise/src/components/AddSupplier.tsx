@@ -49,14 +49,21 @@ const AddSupplier: React.FC<AddSupplierProps> = ({ onClose }) => {
 
   const handleAddressSearch = async () => {
     try {
+      if (!searchAddress.trim()) {
+        alert('Please enter an address to search');
+        return;
+      }
+
       const { location, formattedAddress } = await getSupplierLocation(searchAddress);
       setSelectedLocation({
         ...location,
         formattedAddress
       });
       setAddress(formattedAddress);
-    } catch (error) {
+      setSearchAddress(formattedAddress);
+    } catch (error: any) {
       console.error('Error:', error);
+      alert(error.message || 'Error finding location. Please try again.');
     }
   };
 

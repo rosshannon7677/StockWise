@@ -15,32 +15,55 @@ interface LocationResponse {
 
 export const getSupplierLocation = async (address: string): Promise<LocationResponse> => {
   try {
-    // First check if we have an API key
+    // Check for API key
     if (!GOOGLE_MAPS_API_KEY) {
       throw new Error('Google Maps API key is not configured');
     }
 
-    // Add error handling for empty address
-    if (!address.trim()) {
+    // Validate address
+    if (!address || !address.trim()) {
       throw new Error('Please enter an address');
     }
 
+    // Add 'Ireland' to the search query if not already present
+    const searchAddress = address.toLowerCase().includes('ireland') 
+      ? address 
+      : `${address}, Ireland`;
+
+    // Format address for API
+    const formattedAddress = encodeURIComponent(searchAddress.trim());
+    
+    // Make API request
     const geocodeResponse = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`
+      `https://maps.googleapis.com/maps/api/geocode/json?` + 
+      `address=${formattedAddress}` +
+      `&key=${GOOGLE_MAPS_API_KEY}` +
+      `&region=IE` +
+      `&components=country:IE` +
+      `&types=establishment`
     );
 
     const geocodeData = await geocodeResponse.json();
     
-    // Add better error handling for API response
+    // Handle API response status
     if (geocodeData.status === 'ZERO_RESULTS') {
-      throw new Error('No location found for this address');
+      throw new Error('No location found for this address. Try adding more details like city or county.');
+    }
+
+    if (geocodeData.status === 'INVALID_REQUEST') {
+      throw new Error('Invalid address format. Please enter a valid address.');
+    }
+
+    if (geocodeData.status === 'REQUEST_DENIED') {
+      throw new Error('API request denied. Please check your API key configuration.');
     }
 
     if (geocodeData.status !== 'OK') {
       throw new Error(`Geocoding failed: ${geocodeData.status}`);
     }
 
-    if (geocodeData.results.length > 0) {
+    // Extract location data
+    if (geocodeData.results && geocodeData.results.length > 0) {
       const location = geocodeData.results[0].geometry.location;
       const formattedAddress = geocodeData.results[0].formatted_address;
 
@@ -50,7 +73,7 @@ export const getSupplierLocation = async (address: string): Promise<LocationResp
       };
     }
     
-    throw new Error('Location not found');
+    throw new Error('Could not find location coordinates for this address');
   } catch (error) {
     console.error('Error getting location:', error);
     throw error;

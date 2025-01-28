@@ -71,15 +71,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <IonPage>
       <IonSplitPane contentId="main" when="md" style={{ '--side-width': '180px' }}>
         <IonMenu contentId="main" style={{ 
-          '--background': 'var(--ion-color-primary-tint)',  // Light blue background
+          '--background': '#f0f8ff',
+          '--padding-top': '20px', // Reduced padding
         }}>
           <IonContent style={{ 
-            '--background': '#f0f8ff',  // Light blue background
-            '--padding-top': '46px',
+            '--background': '#f0f8ff',
+            '--padding-top': '20px', // Reduced padding
             borderRight: '1px solid var(--ion-color-light-shade)'
           }}>
             <IonList style={{ 
-              marginTop: '10px',
+              marginTop: '5px', // Reduced margin
               background: 'transparent'  // Make list background transparent
             }}>
               {menuItems.map((item) => (
@@ -89,15 +90,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     routerLink={item.path} 
                     routerDirection="none"
                     lines="none"
-                    detail={false}
+                    button
                     style={{ 
-                      minHeight: '44px',
+                      minHeight: '36px', // Reduced from 44px
                       '--padding-start': '16px',
                       '--background': 'transparent',
                       '--background-hover': 'rgba(var(--ion-color-primary-rgb), 0.1)',
                       '--color': 'var(--ion-color-dark)',
                       borderRadius: '8px',
-                      margin: '4px 8px'
+                      margin: '2px 8px' // Reduced from 4px to 2px
                     }}
                   >
                     <IonIcon 
@@ -124,13 +125,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 lines="none"
                 className="sign-out-button"
                 style={{ 
-                  minHeight: '44px',
+                  minHeight: '36px', // Reduced from 44px
                   '--padding-start': '16px',
                   '--background': 'transparent',
                   '--background-hover': 'rgba(var(--ion-color-danger-rgb), 0.1)',
                   '--color': 'var(--ion-color-danger)',
                   borderRadius: '8px',
-                  margin: '4px 8px'
+                  margin: '2px 8px', // Reduced from 4px to 2px
+                  marginBottom: '10px' // Add some space above footer
                 }}
               >
                 <IonIcon 
