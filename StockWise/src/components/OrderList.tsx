@@ -3,6 +3,8 @@ import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption } fr
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 import './OrderList.css';
 import { SupplierOrder, deleteOrder, updateOrder } from '../firestoreService';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 interface OrderListProps {
   orders: SupplierOrder[];
@@ -66,6 +68,47 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
     return `Dear ${order.supplier.name},\n\nWe would like to request the following items:\n\n${order.items.map(item => `${item.name} x${item.quantity}`).join('\n')}\n\nThank you,\nYour Company`;
   };
 
+  const generatePDF = (order: SupplierOrder) => {
+    const doc = new jsPDF();
+    
+    // Add header
+    doc.setFontSize(20);
+    doc.text('Supply Order', 14, 15);
+    
+    // Add order info
+    doc.setFontSize(12);
+    doc.text(`Order Date: ${new Date(order.orderDate).toLocaleDateString()}`, 14, 25);
+    doc.text(`Order ID: ${order.id}`, 14, 32);
+    
+    // Add supplier info
+    doc.text('Supplier Details:', 14, 42);
+    doc.setFontSize(11);
+    doc.text(`Name: ${order.supplier.name}`, 14, 49);
+    doc.text(`Email: ${order.supplier.email}`, 14, 56);
+    doc.text(`Phone: ${order.supplier.phone}`, 14, 63);
+    
+    // Add items table
+    doc.autoTable({
+      startY: 75,
+      head: [['Item', 'Quantity', 'Price', 'Total']],
+      body: order.items.map(item => [
+        item.name,
+        item.quantity,
+        `€${item.price.toFixed(2)}`,
+        `€${(item.quantity * item.price).toFixed(2)}`
+      ]),
+      foot: [[
+        'Total',
+        '',
+        '',
+        `€${order.totalAmount.toFixed(2)}`
+      ]],
+    });
+    
+    // Save the PDF
+    doc.save(`order-${order.id}.pdf`);
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
@@ -103,6 +146,12 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
                 onClick={() => handleDelete(order.id)}
               >
                 Delete
+              </button>
+              <button 
+                className="pdf-button"
+                onClick={() => generatePDF(order)}
+              >
+                PDF
               </button>
               <button 
                 className="email-button"

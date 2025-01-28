@@ -45,46 +45,73 @@
 
 /* Set specific widths for cells */
 .table-cell:nth-child(1), .header-cell:nth-child(1) { 
-  width: 20%; /* Supplier Name */
+  width: 15%; /* Supplier Name */
 }
 
 .table-cell:nth-child(2), .header-cell:nth-child(2) { 
-  width: 30%; /* Items */
+  width: 35%; /* Items */
 }
 
 .table-cell:nth-child(3), .header-cell:nth-child(3) { 
-  width: 15%; /* Total */
+  width: 10%; /* Total */
 }
 
 .table-cell:nth-child(4), .header-cell:nth-child(4) { 
-  width: 15%; /* Date */
+  width: 18%; /* Date */
 }
 
 .table-cell:nth-child(5), .header-cell:nth-child(5) { 
-  width: 20%; /* Actions */
+  width: 28%; /* Actions */
 }
 
 .actions-cell {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   justify-content: flex-end;
   align-items: center;
   padding: 4px;
+  height: 32px;
 }
 
+/* Create a single, consistent style for all buttons */
 .edit-button,
 .delete-button,
-.email-button {
-  padding: 6px 12px;
-  border: none;
+.email-button,
+.pdf-button {
+  padding: 6px 8px;
+  border: 1px solid;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
-  color: white;
   height: 32px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  background-color: transparent;
+  line-height: 1; /* Add this to normalize line height */
+}
+
+/* Individual button styles */
+.edit-button {
+  color: var(--ion-color-primary);
+  border-color: var(--ion-color-primary);
+}
+
+.delete-button {
+  color: var(--ion-color-danger);
+  border-color: var(--ion-color-danger);
+}
+
+.email-button {
+  color: #2dd36f;
+  border-color: #2dd36f;
+}
+
+.pdf-button {
+  color: #000000;
+  border-color: #000000;
 }
 
 .pagination-controls {
