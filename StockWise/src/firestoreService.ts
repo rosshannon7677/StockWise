@@ -248,3 +248,31 @@ export const getSupplierOrders = (callback: (orders: SupplierOrder[]) => void) =
     callback(orders);
   });
 };
+
+export const deleteOrder = async (id: string) => {
+  try {
+    const orderRef = doc(db, "supplierOrders", id);
+    await deleteDoc(orderRef);
+    console.log("Order deleted with ID: ", id);
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    throw error;
+  }
+};
+
+export const updateOrder = async (id: string, orderData: Partial<SupplierOrder>) => {
+  try {
+    const orderRef = doc(db, "supplierOrders", id);
+    await updateDoc(orderRef, {
+      ...orderData,
+      metadata: {
+        ...orderData.metadata,
+        lastUpdated: new Date().toISOString()
+      }
+    });
+    console.log("Order updated with ID: ", id);
+  } catch (error) {
+    console.error("Error updating order:", error);
+    throw error;
+  }
+};
