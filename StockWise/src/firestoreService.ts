@@ -9,10 +9,16 @@ import {
   updateDoc, 
   doc,
   deleteDoc,
-  increment
+  increment,
+  setDoc,
+  getDoc,
+  query,
+  where,
+  getDocs
 } from "firebase/firestore";
 import { app } from "./../firebaseConfig";
 import { auth } from '../firebaseConfig';
+import type { UserRole, UserRoleData } from './types/roles';
 
 export interface InventoryItem {
   id: string;
@@ -273,6 +279,114 @@ export const updateOrder = async (id: string, orderData: Partial<SupplierOrder>)
     console.log("Order updated with ID: ", id);
   } catch (error) {
     console.error("Error updating order:", error);
+    throw error;
+  }
+};
+
+export const setUserRole = async (userId: string, userData: UserRoleData) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    await setDoc(userRef, userData);
+  } catch (error) {
+    console.error("Error setting user role:", error);
+    throw error;
+  }
+};
+
+export const getUserRole = async (userId: string): Promise<UserRole> => {
+  try {
+    const userRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userRef);
+    if (userDoc.exists()) {
+      return userDoc.data().role;
+    }
+    return 'employee'; // Default role
+  } catch (error) {
+    console.error("Error getting user role:", error);
+    return 'employee'; // Default role on error
+  }
+};
+
+export const setAdminRole = async (email: string) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('No authenticated user');
+    }
+
+    // First, ensure the user document exists
+    const userRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      // Create initial user document
+      await setDoc(userRef, {
+        email: user.email,
+        role: user.email === email ? 'admin' : 'employee',
+        name: user.displayName || '',
+        userId: user.uid
+      });
+    } else if (user.email === email) {
+      // Update existing user to admin if it matches
+      await updateDoc(userRef, {
+        role: 'admin'
+      });
+    }
+    
+    console.log("Admin role set successfully");
+  } catch (error) {
+    console.error("Error setting admin role:", error);
+    throw error;
+  }
+};
+
+export const setDefaultAdmin = async (email: string) => {
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "==", email));
+    const snapshot = await getDocs(q);
+    
+    if (!snapshot.empty) {
+      const userDoc = snapshot.docs[0];
+      await updateDoc(doc(db, "users", userDoc.id), {
+        role: 'admin',
+        isDefaultAdmin: true
+      });
+    }
+  } catch (error) {
+    console.error("Error setting default admin:", error);
+    throw error;
+  }
+};
+
+export const getUsers = async (): Promise<UserRoleData[]> => {
+  try {
+    const usersRef = collection(db, "users");
+    const snapshot = await getDocs(usersRef);
+    return snapshot.docs.map(doc => ({
+      userId: doc.id,
+      ...doc.data()
+    } as UserRoleData));
+  } catch (error) {
+    console.error("Error getting users:", error);
+    throw error;
+  }
+};
+
+export const updateUserRole = async (userId: string, newRole: UserRole) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.data();
+
+    // Prevent changing role if user is default admin
+    if (userData?.isDefaultAdmin) {
+      throw new Error("Cannot change role of default admin");
+    }
+
+    await updateDoc(userRef, { role: newRole });
+  } catch (error) {
+    console.error("Error updating user role:", error);
     throw error;
   }
 };

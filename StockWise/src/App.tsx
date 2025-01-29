@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import './i18n/config';  // Add this line at the top
+import './i18n/config';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebaseConfig'; // Fix the import path
+import { auth } from '../firebaseConfig';
 import Layout from './components/Layout';
 
 // Import pages
@@ -11,16 +11,15 @@ import Home from './pages/Home';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import InventoryManagement from './components/InventoryManagement';
-import Restock from './pages/Restock'; // Add this import
-import Suppliers from './pages/Suppliers'; // Add this import
-
+import Restock from './pages/Restock';
+import Suppliers from './pages/Suppliers';
+import UserManagement from './components/UserManagement';
 
 // Import components
 import Login from './components/Login';
 import Orders from './pages/Orders';
 import Signup from './components/Signup';
 import ProtectedRoute from './ProtectedRoute';
-  // Move ProtectedRoute to components folder
 
 setupIonicReact();
 
@@ -29,16 +28,15 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Listen for auth state changes and set isAuthenticated accordingly
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user); // Set to true if there's a user, false otherwise
-      setLoading(false); // Loading is done once we know the auth state
+      setIsAuthenticated(!!user);
+      setLoading(false);
     });
 
-    return () => unsubscribe(); // Clean up the listener on component unmount
+    return () => unsubscribe();
   }, []);
 
-  if (loading) return <div>Loading...</div>; // Show loading state while checking auth
+  if (loading) return <div>Loading...</div>;
 
   return (
     <IonApp>
@@ -112,6 +110,16 @@ const App: React.FC = () => {
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
                   <Layout>
                     <Orders />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <Layout>
+                    <UserManagement />
                   </Layout>
                 </ProtectedRoute>
               }
