@@ -11,6 +11,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../../firebaseConfig'; // Adjust the path as needed
+import { setUserRole } from '../firestoreService';
 import './Auth.css';
 
 const Signup: React.FC = () => {
@@ -27,6 +28,15 @@ const Signup: React.FC = () => {
       await updateProfile(userCredential.user, {
         displayName: name
       });
+      
+      // Set default role
+      await setUserRole(userCredential.user.uid, {
+        userId: userCredential.user.uid,
+        email: email,
+        role: 'employee', // Default role
+        name: name
+      });
+
       setError(null);
       navigate('/home');
     } catch (err: any) {

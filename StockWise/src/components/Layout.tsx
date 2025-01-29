@@ -22,11 +22,12 @@ import {
   settingsOutline,
   logOutOutline,
   reloadOutline,
-  peopleOutline, // Add this import
-  cartOutline // Add this import
+  peopleOutline, 
+  cartOutline 
 } from 'ionicons/icons';
 import { useLocation } from 'react-router';
 import { auth } from '../../firebaseConfig';
+import { useRole } from '../hooks/useRole';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -35,11 +36,10 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const ionRouter = useIonRouter();
-
+  const { role } = useRole();
   const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get current user's display name
     const user = auth.currentUser;
     if (user) {
       setUserName(user.displayName);
@@ -47,13 +47,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   const menuItems = [
-    { title: 'Home', path: '/home', icon: homeOutline },
-    { title: 'Inventory', path: '/inventory', icon: listOutline },
-    { title: 'Orders', path: '/orders', icon: cartOutline }, // Add this line
-    { title: 'Suppliers', path: '/suppliers', icon: peopleOutline },
-    { title: 'Restock', path: '/restock', icon: reloadOutline },
-    { title: 'Reports', path: '/reports', icon: statsChartOutline },
-    { title: 'Settings', path: '/settings', icon: settingsOutline },
+    { title: 'Home', path: '/home', icon: homeOutline, roles: ['admin', 'manager', 'employee'] },
+    { title: 'Inventory', path: '/inventory', icon: listOutline, roles: ['admin', 'manager', 'employee'] },
+    { title: 'Orders', path: '/orders', icon: cartOutline, roles: ['admin', 'manager'] },
+    { title: 'Suppliers', path: '/suppliers', icon: peopleOutline, roles: ['admin', 'manager', 'employee'] },
+    { title: 'Restock', path: '/restock', icon: reloadOutline, roles: ['admin', 'manager'] },
+    { title: 'Reports', path: '/reports', icon: statsChartOutline, roles: ['admin', 'manager'] },
+    { title: 'User Management', path: '/users', icon: peopleOutline, roles: ['admin'] },
+    { title: 'Settings', path: '/settings', icon: settingsOutline, roles: ['admin', 'manager', 'employee'] },
   ];
 
   const handleSignOut = async () => {
@@ -72,18 +73,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <IonSplitPane contentId="main" when="md" style={{ '--side-width': '180px' }}>
         <IonMenu contentId="main" style={{ 
           '--background': '#f0f8ff',
-          '--padding-top': '20px', // Reduced padding
+          '--padding-top': '20px', 
         }}>
           <IonContent style={{ 
             '--background': '#f0f8ff',
-            '--padding-top': '20px', // Reduced padding
+            '--padding-top': '20px', 
             borderRight: '1px solid var(--ion-color-light-shade)'
           }}>
             <IonList style={{ 
-              marginTop: '5px', // Reduced margin
-              background: 'transparent'  // Make list background transparent
+              marginTop: '5px', 
+              background: 'transparent'  
             }}>
-              {menuItems.map((item) => (
+              {menuItems
+                .filter(item => item.roles.includes(role))
+                .map((item) => (
                 <IonMenuToggle key={item.path} autoHide={false}>
                   <IonItem 
                     className={location.pathname === item.path ? 'selected' : ''} 
@@ -92,13 +95,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     lines="none"
                     button
                     style={{ 
-                      minHeight: '36px', // Reduced from 44px
+                      minHeight: '36px', 
                       '--padding-start': '16px',
                       '--background': 'transparent',
                       '--background-hover': 'rgba(var(--ion-color-primary-rgb), 0.1)',
                       '--color': 'var(--ion-color-dark)',
                       borderRadius: '8px',
-                      margin: '2px 8px' // Reduced from 4px to 2px
+                      margin: '2px 8px' 
                     }}
                   >
                     <IonIcon 
@@ -125,14 +128,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 lines="none"
                 className="sign-out-button"
                 style={{ 
-                  minHeight: '36px', // Reduced from 44px
+                  minHeight: '36px', 
                   '--padding-start': '16px',
                   '--background': 'transparent',
                   '--background-hover': 'rgba(var(--ion-color-danger-rgb), 0.1)',
                   '--color': 'var(--ion-color-danger)',
                   borderRadius: '8px',
-                  margin: '2px 8px', // Reduced from 4px to 2px
-                  marginBottom: '10px' // Add some space above footer
+                  margin: '2px 8px', 
+                  marginBottom: '10px' 
                 }}
               >
                 <IonIcon 
