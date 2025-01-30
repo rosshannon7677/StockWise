@@ -49,6 +49,7 @@ export interface Supplier {
   email: string;
   phone: string;
   address: string;
+  category: string; // Add supplier category
   notes?: string;
   metadata: {
     addedBy: string;
@@ -89,9 +90,10 @@ export interface SupplierOrder {
     name: string;
     email: string;
     phone: string;
+    category: string; // Required field
   };
   items: {
-    itemId: string;
+    itemId: string; // Required field
     name: string;
     quantity: number;
     price: number;
@@ -208,14 +210,8 @@ export const deleteSupplier = async (id: string) => {
 
 export const addOrder = async (order: Omit<SupplierOrder, 'id'>) => {
   try {
+    // Remove inventory update since supplier orders are independent
     const orderRef = await addDoc(collection(db, "supplierOrders"), order);
-    // Update inventory quantities
-    for (const item of order.items) {
-      const itemRef = doc(db, "inventoryItems", item.itemId);
-      await updateDoc(itemRef, {
-        quantity: increment(-item.quantity)
-      });
-    }
     return orderRef.id;
   } catch (error) {
     console.error("Error adding order:", error);
