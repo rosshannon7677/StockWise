@@ -8,27 +8,30 @@ import OrderList from '../components/OrderList';
 import { getOrders, addOrder, getInventoryItems, getSuppliers } from '../firestoreService';
 import type { SupplierOrder, InventoryItem, Supplier } from '../firestoreService';
 import './Orders.css';
+import { auth } from '../../firebaseConfig';
 
 const Orders: React.FC = () => {
   const [orders, setOrders] = useState<SupplierOrder[]>([]);
-  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>(''); // Add this
+  const [selectedSupplier, setSelectedSupplier] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<{
     itemId: string;
     name: string;
     quantity: number;
     price: number;
   }[]>([]);
-  const [selectedSupplier, setSelectedSupplier] = useState<string>('');
+
+  // Get unique supplier categories
+  const supplierCategories = Array.from(new Set(suppliers.map(s => s.category)));
+
+  // Filter suppliers based on selected category
+  const filteredSuppliers = suppliers.filter(s => s.category === selectedCategory);
   
   useEffect(() => {
     const unsubscribeOrders = getOrders((fetchedOrders) => {
       setOrders(fetchedOrders);
-    });
-
-    const unsubscribeInventory = getInventoryItems((items) => {
-      setInventoryItems(items);
     });
 
     const unsubscribeSuppliers = getSuppliers((fetchedSuppliers) => {
@@ -37,13 +40,17 @@ const Orders: React.FC = () => {
 
     return () => {
       unsubscribeOrders();
-      unsubscribeInventory();
       unsubscribeSuppliers();
     };
   }, []);
 
   const handleAddItem = () => {
-    setSelectedItems([...selectedItems, { itemId: '', name: '', quantity: 1, price: 0 }]);
+    setSelectedItems([...selectedItems, { 
+      itemId: `temp-${Date.now()}`,  // Generate a temporary unique ID
+      name: '', 
+      quantity: 1, 
+      price: 0 
+    }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -52,20 +59,7 @@ const Orders: React.FC = () => {
 
   const handleItemChange = (index: number, field: string, value: any) => {
     const newItems = [...selectedItems];
-    if (field === 'itemId') {
-      const selectedItem = inventoryItems.find(item => item.id === value);
-      if (selectedItem) {
-        newItems[index] = {
-          ...newItems[index],
-          itemId: selectedItem.id,
-          name: selectedItem.name,
-          price: selectedItem.price,
-          quantity: 1
-        };
-      }
-    } else {
-      newItems[index] = { ...newItems[index], [field]: value };
-    }
+    newItems[index] = { ...newItems[index], [field]: value };
     setSelectedItems(newItems);
   };
 
@@ -83,14 +77,15 @@ const Orders: React.FC = () => {
           id: supplier.id,
           name: supplier.name,
           email: supplier.email,
-          phone: supplier.phone
+          phone: supplier.phone,
+          category: supplier.category // Add supplier category
         },
         items: selectedItems,
         status: 'pending',
         totalAmount: calculateTotal(),
         orderDate: new Date().toISOString(),
         metadata: {
-          addedBy: '',
+          addedBy: auth.currentUser?.email || '',
           addedDate: new Date().toISOString(),
           lastUpdated: new Date().toISOString()
         }
@@ -107,6 +102,7 @@ const Orders: React.FC = () => {
   const resetForm = () => {
     setSelectedItems([]);
     setSelectedSupplier('');
+    setSelectedCategory(''); // Add this
   };
 
   return (
@@ -126,61 +122,86 @@ const Orders: React.FC = () => {
             <h2>Create Supply Order</h2>
             
             <div className="form-section">
-              <h3>Select Supplier</h3>
+              <h3>Select Category</h3>
               <IonItem>
-                <IonLabel position="floating">Supplier</IonLabel>
-                <IonSelect value={selectedSupplier} onIonChange={e => setSelectedSupplier(e.detail.value)}>
-                  {suppliers.map(supplier => (
-                    <IonSelectOption key={supplier.id} value={supplier.id}>
-                      {supplier.name}
+                <IonLabel position="floating">Category</IonLabel>
+                <IonSelect 
+                  value={selectedCategory} 
+                  onIonChange={e => {
+                    setSelectedCategory(e.detail.value);
+                    setSelectedSupplier(''); // Reset supplier when category changes
+                  }}
+                >
+                  {supplierCategories.map(category => (
+                    <IonSelectOption key={category} value={category}>
+                      {category}
                     </IonSelectOption>
                   ))}
                 </IonSelect>
               </IonItem>
             </div>
 
-            <div className="form-section">
-              <h3>Order Items</h3>
-              <IonButton onClick={handleAddItem} size="small">
-                <IonIcon slot="start" icon={addCircleOutline} />
-                Add Item
-              </IonButton>
-              
-              {selectedItems.map((item, index) => (
-                <div key={index} className="order-item-row">
-                  <IonSelect
-                    value={item.itemId}
-                    placeholder="Select Item"
-                    onIonChange={e => handleItemChange(index, 'itemId', e.detail.value)}
+            {selectedCategory && (
+              <div className="form-section">
+                <h3>Select Supplier</h3>
+                <IonItem>
+                  <IonLabel position="floating">Supplier</IonLabel>
+                  <IonSelect 
+                    value={selectedSupplier} 
+                    onIonChange={e => setSelectedSupplier(e.detail.value)}
                   >
-                    {inventoryItems.map(invItem => (
-                      <IonSelectOption key={invItem.id} value={invItem.id}>
-                        {invItem.name} (€{invItem.price})
+                    {filteredSuppliers.map(supplier => (
+                      <IonSelectOption key={supplier.id} value={supplier.id}>
+                        {supplier.name}
                       </IonSelectOption>
                     ))}
                   </IonSelect>
-                  <IonInput
-                    type="number"
-                    value={item.quantity}
-                    placeholder="Qty"
-                    min="1"
-                    onIonChange={e => handleItemChange(index, 'quantity', parseInt(e.detail.value!))}
-                  />
-                  <div className="item-total">€{(item.price * item.quantity).toFixed(2)}</div>
-                  <IonButton 
-                    fill="clear" 
-                    color="danger" 
-                    onClick={() => handleRemoveItem(index)}
-                  >
-                    <IonIcon icon={removeCircleOutline} />
-                  </IonButton>
-                </div>
-              ))}
-              
-              <div className="order-total">
-                Total: €{calculateTotal().toFixed(2)}
+                </IonItem>
               </div>
-            </div>
+            )}
+
+            {selectedSupplier && (
+              <div className="form-section">
+                <h3>Order Items</h3>
+                <IonButton onClick={handleAddItem} size="small">
+                  <IonIcon slot="start" icon={addCircleOutline} />
+                  Add Item
+                </IonButton>
+                
+                {selectedItems.map((item, index) => (
+                  <div key={index} className="order-item-row">
+                    <IonInput
+                      placeholder="Item Name"
+                      value={item.name}
+                      onIonChange={e => handleItemChange(index, 'name', e.detail.value)}
+                    />
+                    <IonInput
+                      type="number"
+                      placeholder="Quantity"
+                      value={item.quantity}
+                      onIonChange={e => handleItemChange(index, 'quantity', parseInt(e.detail.value!))}
+                    />
+                    <IonInput
+                      type="number"
+                      placeholder="Price"
+                      value={item.price}
+                      onIonChange={e => handleItemChange(index, 'price', parseFloat(e.detail.value!))}
+                    />
+                    <IonButton 
+                      fill="clear" 
+                      color="danger" 
+                      onClick={() => handleRemoveItem(index)}
+                    >
+                      <IonIcon icon={removeCircleOutline} />
+                    </IonButton>
+                  </div>
+                ))}
+                
+                <div className="order-total">
+                  Total: €{calculateTotal().toFixed(2)}
+                </div>
+              </div>
+            )}
 
             <div className="modal-actions">
               <IonButton 

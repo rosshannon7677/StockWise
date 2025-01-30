@@ -12,6 +12,7 @@ export interface Supplier {
   email: string;
   phone: string;
   address: string;
+  category: string; // Add this field
   notes?: string;
   metadata: {
     addedBy: string;
@@ -30,6 +31,7 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
+  const [category, setCategory] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -37,12 +39,15 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [selectedDistance, setSelectedDistance] = useState<string>('');
 
+  const supplierCategories = ["Category1", "Category2", "Category3"]; // Example categories
+
   const columns = [
-    { field: 'name', headerName: 'Name', width: '15%' },
+    { field: 'name', headerName: 'Name', width: '20%' },
     { field: 'email', headerName: 'Email', width: '20%' },
     { field: 'phone', headerName: 'Phone', width: '15%' },
-    { field: 'address', headerName: 'Address', width: '25%' }, // Reduced from 30%
-    { field: 'actions', headerName: 'Actions', width: '15%' }  // Increased from 10%
+    { field: 'category', headerName: 'Category', width: '15%' },
+    { field: 'address', headerName: 'Address', width: '20%' },
+    { field: 'actions', headerName: 'Actions', width: '10%' }
   ];
 
   const handleDelete = async (id: string) => {
@@ -59,6 +64,7 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
     setPhone(supplier.phone);
     setAddress(supplier.address);
     setNotes(supplier.notes || "");
+    setCategory(supplier.category || "");
   };
 
   const handleUpdate = async (id: string) => {
@@ -68,7 +74,8 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
         email,
         phone,
         address,
-        notes
+        notes,
+        category
       });
       setEditSupplierId(null);
       resetForm();
@@ -96,6 +103,7 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
     setPhone("");
     setAddress("");
     setNotes("");
+    setCategory("");
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -141,6 +149,17 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
                     className="edit-input"
                   />
                 </div>
+                <div className="table-cell" style={{ width: '15%' }}>
+                  <select 
+                    value={category} 
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="edit-input"
+                  >
+                    {supplierCategories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="table-cell" style={{ width: '25%' }}> {/* Reduced from 40% */}
                   <input 
                     type="text" 
@@ -159,6 +178,7 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
                 <div className="table-cell">{supplier.name}</div>
                 <div className="table-cell">{supplier.email}</div>
                 <div className="table-cell">{supplier.phone}</div>
+                <div className="table-cell">{supplier.category}</div>
                 <div 
                   className="table-cell address-cell" 
                   onClick={() => handleAddressClick(supplier.address)}
