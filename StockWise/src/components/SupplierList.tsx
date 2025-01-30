@@ -39,7 +39,14 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [selectedDistance, setSelectedDistance] = useState<string>('');
 
-  const supplierCategories = ["Category1", "Category2", "Category3"]; // Example categories
+  const supplierCategories = [
+    'Timber',
+    'Countertops',
+    'Tools',
+    'Paint',
+    'Edge/Trim',
+    'Screws/Nails'
+  ];
 
   const columns = [
     { field: 'name', headerName: 'Name', width: '20%' },
@@ -247,7 +254,7 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
                 allowFullScreen
                 src={`https://www.google.com/maps/embed/v1/directions?key=${GOOGLE_MAPS_API_KEY}
                   &origin=${WORKSHOP_LOCATION.lat},${WORKSHOP_LOCATION.lng}
-                  &destination=${selectedLocation.lat},${selectedLocation.lng}
+                  &destination={selectedLocation.lat},${selectedLocation.lng}
                   &mode=driving`}
               />
             </>

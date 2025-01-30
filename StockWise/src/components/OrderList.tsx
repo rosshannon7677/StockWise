@@ -4,6 +4,8 @@ import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 import './OrderList.css';
 import { SupplierOrder, deleteOrder, updateOrder } from '../firestoreService';
 import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import type { UserOptions } from 'jspdf-autotable';
 
 // Add type declaration for jsPDF with autoTable
@@ -62,7 +64,18 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
 
   const handleItemChange = (index: number, field: string, value: any) => {
     const newItems = [...editedItems];
-    newItems[index] = { ...newItems[index], [field]: value };
+    if (field.includes('dimensions')) {
+      const [_, dimensionField] = field.split('.'); // Split 'dimensions.length' into ['dimensions', 'length']
+      newItems[index] = {
+        ...newItems[index],
+        dimensions: {
+          ...newItems[index].dimensions,
+          [dimensionField]: value
+        }
+      };
+    } else {
+      newItems[index] = { ...newItems[index], [field]: value };
+    }
     setEditedItems(newItems);
   };
 
@@ -99,25 +112,26 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
     doc.text(`Email: ${order.supplier.email}`, 14, 56);
     doc.text(`Phone: ${order.supplier.phone}`, 14, 63);
     
-    // Add items table
+    // Add items table with dimensions
     doc.autoTable({
       startY: 75,
-      head: [['Item', 'Quantity', 'Price', 'Total']],
+      head: [['Item', 'Quantity', 'Price', 'Dimensions', 'Total']],
       body: order.items.map(item => [
         item.name,
         item.quantity,
         `€${item.price.toFixed(2)}`,
+        `${item.dimensions.length}x${item.dimensions.width}x${item.dimensions.height}cm`,
         `€${(item.quantity * item.price).toFixed(2)}`
       ]),
       foot: [[
         'Total',
         '',
         '',
+        '',
         `€${order.totalAmount.toFixed(2)}`
-      ]],
+      ]]
     });
     
-    // Save the PDF
     doc.save(`order-${order.id}.pdf`);
   };
 
@@ -215,26 +229,77 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
           <h2>Edit Order</h2>
           {editingOrder && (
             <div className="form-section">
+              <h3>Supplier Information</h3>
+              <div className="supplier-info">
+                <p><strong>Supplier:</strong> {editingOrder.supplier.name}</p>
+                <p><strong>Category:</strong> {editingOrder.supplier.category}</p>
+                <p><strong>Email:</strong> {editingOrder.supplier.email}</p>
+              </div>
+              
               <h3>Order Items</h3>
               {editedItems.map((item, index) => (
                 <div key={index} className="order-item-row">
-                  <IonInput
-                    value={item.name}
-                    onIonChange={e => handleItemChange(index, 'name', e.detail.value)}
-                    placeholder="Item Name"
-                  />
-                  <IonInput
-                    type="number"
-                    value={item.quantity}
-                    onIonChange={e => handleItemChange(index, 'quantity', parseInt(e.detail.value!))}
-                    placeholder="Quantity"
-                  />
-                  <IonInput
-                    type="number"
-                    value={item.price}
-                    onIonChange={e => handleItemChange(index, 'price', parseFloat(e.detail.value!))}
-                    placeholder="Price"
-                  />
+                  <div className="item-basic-info">
+                    <div className="input-group">
+                      <label>Item Name</label>
+                      <IonInput
+                        value={item.name}
+                        onIonChange={e => handleItemChange(index, 'name', e.detail.value)}
+                        placeholder="Item Name"
+                      />
+                    </div>
+                    
+                    <div className="quantity-price-group">
+                      <div className="input-group">
+                        <label>Quantity</label>
+                        <IonInput
+                          type="number"
+                          value={item.quantity}
+                          onIonChange={e => handleItemChange(index, 'quantity', parseInt(e.detail.value!))}
+                          placeholder="Quantity"
+                        />
+                      </div>
+                      <div className="input-group">
+                        <label>Price (€)</label>
+                        <IonInput
+                          type="number"
+                          value={item.price}
+                          onIonChange={e => handleItemChange(index, 'price', parseFloat(e.detail.value!))}
+                          placeholder="Price"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="dimensions-group">
+                      <h4>Dimensions (cm)</h4>
+                      <div className="dimensions-inputs">
+                        <div className="dimension-input">
+                          <label>Length</label>
+                          <IonInput
+                            type="number"
+                            value={item.dimensions.length}
+                            onIonChange={e => handleItemChange(index, 'dimensions.length', parseFloat(e.detail.value || '0'))}
+                          />
+                        </div>
+                        <div className="dimension-input">
+                          <label>Width</label>
+                          <IonInput
+                            type="number"
+                            value={item.dimensions.width}
+                            onIonChange={e => handleItemChange(index, 'dimensions.width', parseFloat(e.detail.value || '0'))}
+                          />
+                        </div>
+                        <div className="dimension-input">
+                          <label>Height</label>
+                          <IonInput
+                            type="number"
+                            value={item.dimensions.height}
+                            onIonChange={e => handleItemChange(index, 'dimensions.height', parseFloat(e.detail.value || '0'))}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
               <div className="order-total">
