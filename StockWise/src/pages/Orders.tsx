@@ -21,6 +21,11 @@ const Orders: React.FC = () => {
     name: string;
     quantity: number;
     price: number;
+    dimensions: {
+      length: number;
+      width: number;
+      height: number;
+    };
   }[]>([]);
 
   // Get unique supplier categories
@@ -49,7 +54,12 @@ const Orders: React.FC = () => {
       itemId: `temp-${Date.now()}`,  // Generate a temporary unique ID
       name: '', 
       quantity: 1, 
-      price: 0 
+      price: 0,
+      dimensions: {
+        length: 0,
+        width: 0,
+        height: 0
+      }
     }]);
   };
 
@@ -59,7 +69,11 @@ const Orders: React.FC = () => {
 
   const handleItemChange = (index: number, field: string, value: any) => {
     const newItems = [...selectedItems];
-    newItems[index] = { ...newItems[index], [field]: value };
+    if (field === 'dimensions') {
+      newItems[index] = { ...newItems[index], dimensions: value };
+    } else {
+      newItems[index] = { ...newItems[index], [field]: value };
+    }
     setSelectedItems(newItems);
   };
 
@@ -170,26 +184,82 @@ const Orders: React.FC = () => {
                 
                 {selectedItems.map((item, index) => (
                   <div key={index} className="order-item-row">
-                    <IonInput
-                      placeholder="Item Name"
-                      value={item.name}
-                      onIonChange={e => handleItemChange(index, 'name', e.detail.value)}
-                    />
-                    <IonInput
-                      type="number"
-                      placeholder="Quantity"
-                      value={item.quantity}
-                      onIonChange={e => handleItemChange(index, 'quantity', parseInt(e.detail.value!))}
-                    />
-                    <IonInput
-                      type="number"
-                      placeholder="Price"
-                      value={item.price}
-                      onIonChange={e => handleItemChange(index, 'price', parseFloat(e.detail.value!))}
-                    />
+                    <div className="item-basic-info">
+                      <IonInput
+                        placeholder="Item Name"
+                        value={item.name}
+                        onIonChange={e => handleItemChange(index, 'name', e.detail.value)}
+                      />
+                      <div className="quantity-price-group">
+                        <IonInput
+                          type="number"
+                          placeholder="Quantity"
+                          value={item.quantity}
+                          onIonChange={e => handleItemChange(index, 'quantity', parseInt(e.detail.value!))}
+                        />
+                        <IonInput
+                          type="number"
+                          placeholder="Price"
+                          value={item.price}
+                          onIonChange={e => handleItemChange(index, 'price', parseFloat(e.detail.value!))}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="dimensions-group">
+                      <h4>Dimensions (cm)</h4>
+                      <div className="dimensions-inputs">
+                        <div className="dimension-input">
+                          <label>Length</label>
+                          <IonInput
+                            type="number"
+                            placeholder="Length"
+                            value={item.dimensions.length}
+                            onIonChange={e => {
+                              const value = parseFloat(e.detail.value || '0');
+                              handleItemChange(index, 'dimensions', {
+                                ...item.dimensions,
+                                length: value
+                              });
+                            }}
+                          />
+                        </div>
+                        <div className="dimension-input">
+                          <label>Width</label>
+                          <IonInput
+                            type="number"
+                            placeholder="Width"
+                            value={item.dimensions.width}
+                            onIonChange={e => {
+                              const value = parseFloat(e.detail.value || '0');
+                              handleItemChange(index, 'dimensions', {
+                                ...item.dimensions,
+                                width: value
+                              });
+                            }}
+                          />
+                        </div>
+                        <div className="dimension-input">
+                          <label>Height</label>
+                          <IonInput
+                            type="number"
+                            placeholder="Height"
+                            value={item.dimensions.height}
+                            onIonChange={e => {
+                              const value = parseFloat(e.detail.value || '0');
+                              handleItemChange(index, 'dimensions', {
+                                ...item.dimensions,
+                                height: value
+                              });
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
                     <IonButton 
                       fill="clear" 
-                      color="danger" 
+                      color="danger"
                       onClick={() => handleRemoveItem(index)}
                     >
                       <IonIcon icon={removeCircleOutline} />
@@ -211,7 +281,7 @@ const Orders: React.FC = () => {
                 Cancel
               </IonButton>
               <IonButton 
-                color="primary"
+              
                 onClick={handleCreateOrder}
                 disabled={!selectedSupplier || selectedItems.length === 0}
               >

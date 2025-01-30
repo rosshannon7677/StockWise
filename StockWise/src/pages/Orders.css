@@ -23,12 +23,15 @@
 }
 
 .actions-bar ion-button {
-  --padding-start: 1rem;
-  --padding-end: 1rem;
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
   width: auto;
   min-width: 120px;
   height: 36px;
   font-size: 0.9rem;
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-light);
+  font-weight: 600;
 }
 
 .order-grid {
@@ -127,6 +130,7 @@
   overflow-y: auto;
   padding-bottom: 120px; /* Add more space for the buttons */
   position: relative;
+  background: var(--ion-color-light-tint);
 }
 
 .modal-actions {
@@ -149,6 +153,10 @@
   color: var(--ion-color-primary);
   margin-bottom: 2rem;
   text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-bottom: 2px solid var(--ion-color-primary);
+  padding-bottom: 0.5rem;
 }
 
 ion-modal {
@@ -158,9 +166,10 @@ ion-modal {
 
 .form-section {
   margin-bottom: 2rem;
-  background: var(--ion-color-light);
-  padding: 1rem;
+  background: var(--ion-color-light-shade);
+  padding: 1.5rem;
   border-radius: 8px;
+  border-left: 4px solid var(--ion-color-primary);
 }
 
 ion-item {
@@ -170,12 +179,85 @@ ion-item {
 /* Add styles for the order items section */
 .order-item-row {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 1rem;
   margin: 0.5rem 0;
-  padding: 0.5rem;
+  padding: 1rem;
   background: var(--ion-color-light);
   border-radius: 8px;
+}
+
+.item-basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--ion-background-color);
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.quantity-price-group {
+  display: flex;
+  gap: 2rem;
+}
+
+.quantity-input-group,
+.price-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quantity-input-group label,
+.price-input-group label {
+  font-size: 0.9rem;
+  color: var(--ion-color-dark);
+  font-weight: 500;
+}
+
+.quantity-price-group ion-input {
+  width: 120px;
+  --background: var(--ion-color-light);
+  --padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--ion-color-medium-tint);
+}
+
+.dimensions-group {
+  margin-top: 0.5rem;
+  background: var(--ion-background-color);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.dimensions-group h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--ion-color-dark);
+  font-size: 0.9rem;
+}
+
+.dimensions-inputs {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.dimension-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dimension-input label {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.dimension-input ion-input {
+  width: 80px;
+  --background: var(--ion-color-light-tint);
+  --padding: 8px;
+  border-radius: 4px;
 }
 
 .order-total {
@@ -183,4 +265,44 @@ ion-item {
   font-weight: bold;
   margin-top: 1rem;
   padding: 0.5rem;
+}
+
+.dimensions-group {
+  margin-top: 1rem;
+  background: var(--ion-color-light);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.dimensions-group h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--ion-color-dark);
+  font-size: 0.9rem;
+}
+
+.dimensions-inputs {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.dimension-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dimension-input label {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.dimension-input ion-input {
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+  --padding-top: 0.5rem;
+  --padding-bottom: 0.5rem;
+  --background: var(--ion-color-light-tint);
+  border-radius: 4px;
+  width: 80px;
 }

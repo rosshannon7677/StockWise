@@ -3,8 +3,15 @@ import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption } fr
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 import './OrderList.css';
 import { SupplierOrder, deleteOrder, updateOrder } from '../firestoreService';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import type { UserOptions } from 'jspdf-autotable';
+
+// Add type declaration for jsPDF with autoTable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: UserOptions) => jsPDF;
+  }
+}
 
 interface OrderListProps {
   orders: SupplierOrder[];
@@ -19,6 +26,11 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
     name: string;
     quantity: number;
     price: number;
+    dimensions: {
+      length: number;
+      width: number;
+      height: number;
+    };
   }[]>([]);
   const itemsPerPage = 10;
 
@@ -128,7 +140,20 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
           <div key={order.id} className="table-row">
             <div className="table-cell">{order.supplier.name}</div>
             <div className="table-cell">
-              {order.items.map(item => `${item.name} (x${item.quantity})`).join(', ')}
+              {order.items.map(item => (
+                <div key={item.itemId} className="order-item-info">
+                  <span className="item-name">{item.name}</span>
+                  <span className="item-quantity">x{item.quantity}</span>
+                  {item.dimensions && (
+                    <div className="item-dimensions">
+                      <span>L: {item.dimensions.length}</span>
+                      <span>W: {item.dimensions.width}</span>
+                      <span>H: {item.dimensions.height}</span>
+                      <span className="unit">cm</span>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
             <div className="table-cell">€{order.totalAmount.toFixed(2)}</div>
             <div className="table-cell">
@@ -221,7 +246,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
             <IonButton fill="outline" onClick={() => setShowEditModal(false)}>
               Cancel
             </IonButton>
-            <IonButton color="primary" onClick={handleUpdateOrder}>
+            <IonButton onClick={handleUpdateOrder}>
               Save Changes
             </IonButton>
           </div>

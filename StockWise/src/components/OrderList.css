@@ -145,3 +145,43 @@
   font-size: 0.9rem;
   color: var(--ion-color-medium);
 }
+
+.order-item-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+.order-item-info:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  font-weight: 500;
+}
+
+.item-quantity {
+  color: var(--ion-color-medium);
+}
+
+.item-dimensions {
+  display: flex;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--ion-color-dark);
+  background: var(--ion-color-light);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.item-dimensions span {
+  font-weight: 500;
+}
+
+.item-dimensions .unit {
+  color: var(--ion-color-medium);
+  font-size: 0.8rem;
+}
