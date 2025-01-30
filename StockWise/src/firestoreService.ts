@@ -97,6 +97,11 @@ export interface SupplierOrder {
     name: string;
     quantity: number;
     price: number;
+    dimensions: {  // Add dimensions field
+      length: number;
+      width: number;
+      height: number;
+    };
   }[];
   status: 'pending' | 'sent' | 'received';
   totalAmount: number;
