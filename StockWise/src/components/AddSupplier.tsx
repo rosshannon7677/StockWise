@@ -16,10 +16,20 @@ const AddSupplier: React.FC<AddSupplierProps> = ({ onClose }) => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [category, setCategory] = useState("");
   const [notes, setNotes] = useState("");
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [searchAddress, setSearchAddress] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
+
+  const supplierCategories = [
+    'Timber',
+    'Countertops',
+    'Tools',
+    'Paint',
+    'Edge/Trim',
+    'Screws/Nails'
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +39,7 @@ const AddSupplier: React.FC<AddSupplierProps> = ({ onClose }) => {
       email,
       phone,
       address,
+      category,
       notes,
       metadata: {
         addedBy: currentUser?.email || 'unknown',
@@ -41,6 +52,7 @@ const AddSupplier: React.FC<AddSupplierProps> = ({ onClose }) => {
     setEmail("");
     setPhone("");
     setAddress("");
+    setCategory("");
     setNotes("");
     
     onClose();
@@ -104,6 +116,23 @@ const AddSupplier: React.FC<AddSupplierProps> = ({ onClose }) => {
               onChange={(e) => setPhone(e.target.value)} 
               required 
             />
+          </div>
+        </div>
+
+        <div className="form-section">
+          <h4>Category</h4>
+          <div className="form-group">
+            <label>Supplier Category:</label>
+            <select 
+              value={category} 
+              onChange={(e) => setCategory(e.target.value)}
+              required
+            >
+              <option value="">Select a category</option>
+              {supplierCategories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
         </div>
 
