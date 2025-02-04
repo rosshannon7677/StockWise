@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 import './OrderList.css';
-import { SupplierOrder, deleteOrder, updateOrder } from '../firestoreService';
+import { SupplierOrder, deleteOrder, updateOrder } from '../../firestoreService';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import autoTable from 'jspdf-autotable';

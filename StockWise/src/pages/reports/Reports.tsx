@@ -21,7 +21,7 @@ import {
   checkmarkCircleOutline
 } from 'ionicons/icons';
 import './Reports.css';
-import { getInventoryItems } from '../firestoreService';
+import { getInventoryItems } from '../../firestoreService';
 import {
   Chart as ChartJS,
   CategoryScale,

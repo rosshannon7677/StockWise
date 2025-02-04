@@ -22,9 +22,9 @@ import {
   settingsOutline 
 } from 'ionicons/icons';
 import './Home.css';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../../firebaseConfig';
 import { useIonRouter } from '@ionic/react';
-import { getInventoryItems } from '../firestoreService';
+import { getInventoryItems } from '../../firestoreService';
 
 interface InventoryItem {
   id: string;

@@ -1,7 +1,7 @@
 // src/components/AddItem.tsx
 import React, { useState } from "react";
-import { addInventoryItem } from "../firestoreService";
-import { auth } from '../../firebaseConfig';
+import { addInventoryItem } from "../../firestoreService";
+import { auth } from '../../../firebaseConfig';
 import './AddItem.css';
 import { IonButton } from '@ionic/react';
 

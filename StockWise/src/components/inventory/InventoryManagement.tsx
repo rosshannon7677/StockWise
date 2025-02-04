@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { IonContent, IonSearchbar, IonSelect, IonSelectOption, IonButton, IonModal, IonIcon } from '@ionic/react';
 import { SearchbarInputEventDetail } from '@ionic/core';
 import InventoryList from './InventoryList';
-import { getInventoryItems, addInventoryItem } from '../firestoreService';
+import { getInventoryItems, addInventoryItem } from '../../firestoreService';
 import './AddItem.css';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../../firebaseConfig';
 import { addOutline } from 'ionicons/icons';
 import AddItem from './AddItem';
 

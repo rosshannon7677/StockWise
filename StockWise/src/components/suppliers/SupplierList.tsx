@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import "./SupplierList.css";
-import { addSupplier, updateSupplier, deleteSupplier } from '../firestoreService';
+import { addSupplier, updateSupplier, deleteSupplier } from '../../firestoreService';
 import { IonIcon, IonModal } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
-import { getSupplierLocation, GOOGLE_MAPS_API_KEY, WORKSHOP_LOCATION } from '../services/mapsService';
+import { getSupplierLocation, GOOGLE_MAPS_API_KEY, WORKSHOP_LOCATION } from '../../services/mapsService';
 
 // Change from 'interface Supplier' to 'export interface Supplier'
 export interface Supplier {

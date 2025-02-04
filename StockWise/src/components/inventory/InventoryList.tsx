@@ -1,8 +1,8 @@
 // src/components/InventoryList.tsx
 import React, { useState } from "react";
 import "./InventoryList.css";
-import { addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../firestoreService';
-import { auth } from '../../firebaseConfig';
+import { addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../../firestoreService';
+import { auth } from '../../../firebaseConfig';
 import { IonIcon } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 

@@ -22,7 +22,7 @@ import {
   setPersistence,
   browserLocalPersistence
 } from 'firebase/auth';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../../firebaseConfig';
 import { logoGoogle, logoApple } from 'ionicons/icons';
 import './Auth.css';
 

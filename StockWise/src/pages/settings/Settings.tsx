@@ -10,7 +10,7 @@ import {
   IonSelectOption
 } from '@ionic/react';
 import { useTranslation } from 'react-i18next';
-import '../i18n/config';  // Add this import
+import '../../i18n/config';  // Add this import
 import './Settings.css';
 
 const Settings: React.FC = () => {

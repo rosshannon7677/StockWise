@@ -4,21 +4,21 @@ import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
-import Layout from './components/Layout';
+import Layout from './components/layout/Layout';
 
 // Import pages
-import Home from './pages/Home';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
-import InventoryManagement from './components/InventoryManagement';
-import Restock from './pages/Restock';
-import Suppliers from './pages/Suppliers';
-import UserManagement from './components/UserManagement';
+import Home from './pages/home/Home';
+import Reports from './pages/reports/Reports';
+import Settings from './pages/settings/Settings';
+import InventoryManagement from './components/inventory/InventoryManagement';
+import Restock from './pages/restock/Restock';
+import Suppliers from './pages/suppliers/Suppliers';
+import UserManagement from './users/UserManagement';
 
 // Import components
-import Login from './components/Login';
-import Orders from './pages/Orders';
-import Signup from './components/Signup';
+import Login from './components/auth/Login';
+import Orders from './pages/orders/Orders';
+import Signup from './components/auth/Signup';
 import ProtectedRoute from './ProtectedRoute';
 
 setupIonicReact();

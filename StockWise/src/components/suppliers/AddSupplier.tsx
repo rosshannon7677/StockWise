@@ -1,10 +1,10 @@
 // src/components/AddSupplier.tsx
 import React, { useState } from "react";
-import { addSupplier } from "../firestoreService";
-import { auth } from '../../firebaseConfig';
+import { addSupplier } from "../../firestoreService";
+import { auth } from "../../../firebaseConfig"; 
 import { IonButton, IonModal } from '@ionic/react';
-import { getSupplierLocation, GOOGLE_MAPS_API_KEY } from '../services/mapsService';
-import './AddItem.css'; // We can reuse the AddItem styles
+import { getSupplierLocation, GOOGLE_MAPS_API_KEY } from '../../services/mapsService';
+import './AddSupplier.css';
 
 interface AddSupplierProps {
   onClose: () => void;

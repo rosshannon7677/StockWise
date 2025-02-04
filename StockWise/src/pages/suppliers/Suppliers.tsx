@@ -6,9 +6,9 @@ import {
   IonModal
 } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
-import SupplierList from '../components/SupplierList';
-import { getSuppliers } from '../firestoreService';
-import AddSupplier from '../components/AddSupplier';
+import SupplierList from '../../components/suppliers/SupplierList';
+import { getSuppliers } from '../../firestoreService';
+import AddSupplier from '../../components/suppliers/AddSupplier';
 
 // Add interface for Supplier
 interface Supplier {

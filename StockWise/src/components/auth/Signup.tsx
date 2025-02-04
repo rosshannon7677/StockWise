@@ -10,8 +10,8 @@ import {
 } from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '../../firebaseConfig'; // Adjust the path as needed
-import { setUserRole } from '../firestoreService';
+import { auth } from '../../../firebaseConfig'; // Adjust the path as needed
+import { setUserRole } from '../../firestoreService';
 import './Auth.css';
 
 const Signup: React.FC = () => {

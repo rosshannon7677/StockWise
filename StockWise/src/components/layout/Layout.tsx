@@ -27,8 +27,8 @@ import {
   cartOutline 
 } from 'ionicons/icons';
 import { useLocation } from 'react-router';
-import { auth } from '../../firebaseConfig';
-import { useRole } from '../hooks/useRole';
+import { auth } from '../../../firebaseConfig';
+import { useRole } from '../../hooks/useRole';
 
 interface LayoutProps {
   children: React.ReactNode;

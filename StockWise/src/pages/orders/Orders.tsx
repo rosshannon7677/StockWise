@@ -4,11 +4,11 @@ import {
   IonLabel, IonInput, IonSelect, IonSelectOption, IonList
 } from '@ionic/react';
 import { addOutline, addCircleOutline, removeCircleOutline } from 'ionicons/icons';
-import OrderList from '../components/OrderList';
-import { getOrders, addOrder, getInventoryItems, getSuppliers } from '../firestoreService';
-import type { SupplierOrder, InventoryItem, Supplier } from '../firestoreService';
+import OrderList from '../../components/orders/OrderList';
+import { getOrders, addOrder, getInventoryItems, getSuppliers } from '../../firestoreService';
+import type { SupplierOrder, InventoryItem, Supplier } from '../../firestoreService';
 import './Orders.css';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../../firebaseConfig';
 
 const Orders: React.FC = () => {
   const [orders, setOrders] = useState<SupplierOrder[]>([]);

@@ -18,7 +18,7 @@ import {
   reloadOutline,
   cartOutline
 } from 'ionicons/icons';
-import { getInventoryItems } from '../firestoreService';
+import { getInventoryItems } from '../../firestoreService';
 import './Restock.css';
 
 interface RestockSuggestion {
