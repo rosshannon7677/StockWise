@@ -185,24 +185,34 @@ const Orders: React.FC = () => {
                 {selectedItems.map((item, index) => (
                   <div key={index} className="order-item-row">
                     <div className="item-basic-info">
-                      <IonInput
-                        placeholder="Item Name"
-                        value={item.name}
-                        onIonChange={e => handleItemChange(index, 'name', e.detail.value)}
-                      />
+                      <div className="input-group">
+                        <label>Item Name</label>
+                        <IonInput
+                          placeholder="Enter item name"
+                          value={item.name}
+                          onIonChange={e => handleItemChange(index, 'name', e.detail.value)}
+                        />
+                      </div>
+                      
                       <div className="quantity-price-group">
-                        <IonInput
-                          type="number"
-                          placeholder="Quantity"
-                          value={item.quantity}
-                          onIonChange={e => handleItemChange(index, 'quantity', parseInt(e.detail.value!))}
-                        />
-                        <IonInput
-                          type="number"
-                          placeholder="Price"
-                          value={item.price}
-                          onIonChange={e => handleItemChange(index, 'price', parseFloat(e.detail.value!))}
-                        />
+                        <div className="input-group">
+                          <label>Quantity</label>
+                          <IonInput
+                            type="number"
+                            placeholder="Enter quantity"
+                            value={item.quantity}
+                            onIonChange={e => handleItemChange(index, 'quantity', parseInt(e.detail.value!))}
+                          />
+                        </div>
+                        <div className="input-group">
+                          <label>Price (€)</label>
+                          <IonInput
+                            type="number"
+                            placeholder="Enter price"
+                            value={item.price}
+                            onIonChange={e => handleItemChange(index, 'price', parseFloat(e.detail.value!))}
+                          />
+                        </div>
                       </div>
                     </div>
                     

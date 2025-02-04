@@ -196,6 +196,29 @@ ion-item {
   border-radius: 6px;
 }
 
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  color: var(--ion-color-dark);
+  font-weight: 500;
+}
+
+.input-group ion-input {
+  --padding-start: 0.75rem;
+  --padding-end: 0.75rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+  --background: var(--ion-color-light);
+  border: 1px solid var(--ion-color-medium-tint);
+  border-radius: 4px;
+  margin-top: 0.25rem;
+}
+
 .quantity-price-group {
   display: flex;
   gap: 2rem;
@@ -206,13 +229,6 @@ ion-item {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.quantity-input-group label,
-.price-input-group label {
-  font-size: 0.9rem;
-  color: var(--ion-color-dark);
-  font-weight: 500;
 }
 
 .quantity-price-group ion-input {
