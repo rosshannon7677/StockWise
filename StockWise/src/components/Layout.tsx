@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './Layout.css';
 import {
   IonPage,
   IonSplitPane,
@@ -70,52 +71,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <IonPage>
-      <IonSplitPane contentId="main" when="md" style={{ '--side-width': '180px' }}>
-        <IonMenu contentId="main" style={{ 
-          '--background': '#f0f8ff',
-          '--padding-top': '20px', 
-        }}>
-          <IonContent style={{ 
-            '--background': '#f0f8ff',
-            '--padding-top': '20px', 
-            borderRight: '1px solid var(--ion-color-light-shade)'
-          }}>
-            <IonList style={{ 
-              marginTop: '5px', 
-              background: 'transparent'  
-            }}>
+      <IonSplitPane contentId="main" when="md">
+        <IonMenu contentId="main" className="menu-container">
+          <IonContent className="menu-container">
+            <IonList className="menu-list">
               {menuItems
                 .filter(item => item.roles.includes(role))
                 .map((item) => (
                 <IonMenuToggle key={item.path} autoHide={false}>
                   <IonItem 
-                    className={location.pathname === item.path ? 'selected' : ''} 
+                    className={`menu-item ${location.pathname === item.path ? 'selected' : ''}`}
                     routerLink={item.path} 
                     routerDirection="none"
                     lines="none"
                     button
-                    style={{ 
-                      minHeight: '36px', 
-                      '--padding-start': '16px',
-                      '--background': 'transparent',
-                      '--background-hover': 'rgba(var(--ion-color-primary-rgb), 0.1)',
-                      '--color': 'var(--ion-color-dark)',
-                      borderRadius: '8px',
-                      margin: '2px 8px' 
-                    }}
                   >
                     <IonIcon 
                       slot="start" 
                       icon={item.icon}
-                      style={{ 
-                        fontSize: '1.2rem',
-                        color: 'var(--ion-color-primary)'
-                      }} 
+                      className="menu-icon"
                     />
-                    <IonLabel style={{ 
-                      fontSize: '0.9rem',
-                      fontWeight: 500
-                    }}>
+                    <IonLabel className="menu-label">
                       {item.title}
                     </IonLabel>
                   </IonItem>
@@ -127,62 +103,40 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 button
                 lines="none"
                 className="sign-out-button"
-                style={{ 
-                  minHeight: '36px', 
-                  '--padding-start': '16px',
-                  '--background': 'transparent',
-                  '--background-hover': 'rgba(var(--ion-color-danger-rgb), 0.1)',
-                  '--color': 'var(--ion-color-danger)',
-                  borderRadius: '8px',
-                  margin: '2px 8px', 
-                  marginBottom: '10px' 
-                }}
               >
                 <IonIcon 
                   slot="start" 
                   icon={logOutOutline}
-                  style={{ 
-                    fontSize: '1.2rem',
-                    color: 'var(--ion-color-danger)'
-                  }}
+                  className="sign-out-icon"
                 />
-                <IonLabel style={{ 
-                  fontSize: '0.9rem',
-                  fontWeight: 500
-                }}>
+                <IonLabel className="menu-label">
                   Sign Out
                 </IonLabel>
               </IonItem>
             </IonList>
           </IonContent>
         </IonMenu>
+
         <IonPage id="main">
           <IonHeader>
-            <IonToolbar style={{ minHeight: '46px' }}>
-              <IonTitle style={{ textAlign: 'center', fontSize: '1.1rem' }}>
+            <IonToolbar className="header-toolbar">
+              <IonTitle className="header-title">
                 StockWise Inventory Management
               </IonTitle>
               {userName && (
-                <div style={{ 
-                  position: 'absolute',
-                  right: '1rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  fontSize: '0.9rem',
-                  color: 'var(--ion-color-medium)'
-                }}>
+                <div className="user-welcome">
                   Welcome, {userName}
                 </div>
               )}
             </IonToolbar>
           </IonHeader>
 
-          <IonContent className="main-content" style={{ '--padding-top': '46px' }}>
+          <IonContent className="main-content">
             {children}
           </IonContent>
 
           <IonFooter>
-            <IonToolbar>
+            <IonToolbar className="footer-toolbar">
               <div className="footer-content">
                 <p>© 2024 StockWise. All rights reserved.</p>
               </div>

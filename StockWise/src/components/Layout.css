@@ -1,0 +1,102 @@
+.main-content {
+    --padding-top: 46px;
+    --padding-bottom: 80px; /* Increase bottom padding */
+  }
+  
+  ion-split-pane {
+    --side-width: 150px; /* Reduce from default ~300px to 150px */
+  }
+  
+  .menu-container {
+    --background: #f0f8ff;
+    --padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 250px; /* Add max-width to enforce smaller size */
+  }
+  
+  .menu-list {
+    background: transparent;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-bottom: 60px; /* Add margin for sign-out button */
+  }
+  
+  .menu-item {
+    min-height: 36px;
+    --padding-start: 8px; /* Reduce padding */
+    --background: transparent;
+    --background-hover: rgba(var(--ion-color-primary-rgb), 0.1);
+    --color: var(--ion-color-dark);
+    border-radius: 8px;
+    margin: 2px 4px; /* Reduce margins */
+  }
+  
+  .menu-icon {
+    font-size: 1.2rem;
+    color: var(--ion-color-primary);
+  }
+  
+  .menu-label {
+    font-size: 0.9rem; /* Slightly reduce font size */
+    font-weight: 500;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .sign-out-button {
+    position: sticky;
+    bottom: 0;
+    min-height: 36px;
+    --padding-start: 16px;
+    --background: transparent;
+    --background-hover: rgba(var(--ion-color-danger-rgb), 0.1);
+    --color: var(--ion-color-danger);
+    border-radius: 8px;
+    margin: 8px;
+    margin-top: auto; /* Push to bottom */
+    z-index: 1000;
+  }
+  
+  .sign-out-icon {
+    font-size: 1.2rem;
+    color: var(--ion-color-danger);
+  }
+  
+  .header-toolbar {
+    min-height: 46px;
+  }
+  
+  .header-title {
+    text-align: center;
+    font-size: 1.1rem;
+  }
+  
+  .user-welcome {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+  }
+  
+  .footer-toolbar {
+    min-height: 50px;
+    border-top: 1px solid var(--ion-color-light-shade);
+    background: var(--ion-background-color);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
+  
+  .footer-content {
+    text-align: center;
+    padding: 1rem;
+  }
