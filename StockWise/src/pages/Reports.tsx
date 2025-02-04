@@ -8,7 +8,8 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonIcon
+  IonIcon,
+  IonButton
 } from '@ionic/react';
 import { 
   cubeOutline,
@@ -34,6 +35,16 @@ import {
   Legend
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import type { UserOptions } from 'jspdf-autotable';
+
+// Add type declaration for jsPDF
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: UserOptions) => jsPDF;
+  }
+}
 
 // Register ChartJS components
 ChartJS.register(
@@ -48,6 +59,28 @@ ChartJS.register(
   Legend
 );
 
+interface InventoryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  category: string;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  location: {
+    aisle: string;
+    shelf: string;
+    section: string;
+  };
+  metadata: {
+    addedBy: string;
+    addedDate: string;
+  };
+}
+
 const Reports: React.FC = () => {
   const [inventoryData, setInventoryData] = useState<any>([]);
 
@@ -59,10 +92,11 @@ const Reports: React.FC = () => {
 
   // Calculate metrics
   const totalItems = inventoryData.length;
-  const lowStockItems = inventoryData.filter(item => item.quantity < 10).length;
-  const totalValue = inventoryData.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const activeItems = inventoryData.filter(item => item.quantity > 0).length;
-  const categories = new Set(inventoryData.map(item => item.category)).size;
+  const lowStockItems = inventoryData.filter((item: InventoryItem) => item.quantity < 10).length;
+  const totalValue = inventoryData.reduce((sum: number, item: InventoryItem) => 
+    sum + (item.price * item.quantity), 0);
+  const activeItems = inventoryData.filter((item: InventoryItem) => item.quantity > 0).length;
+  const categories = new Set(inventoryData.map((item: InventoryItem) => item.category)).size;
   
   // Get top items by quantity
   const topItems = [...inventoryData]
@@ -71,12 +105,13 @@ const Reports: React.FC = () => {
 
   // Prepare chart data
   const categoryChartData = {
-    labels: Array.from(new Set(inventoryData.map(item => item.category))),
+    labels: Array.from(new Set(inventoryData.map((item: InventoryItem) => item.category))),
     datasets: [{
       label: 'Items by Category',
-      data: Array.from(new Set(inventoryData.map(item => item.category))).map(cat => 
-        inventoryData.filter(item => item.category === cat).length
-      ),
+      data: Array.from(new Set(inventoryData.map((item: InventoryItem) => item.category)))
+        .map(cat => 
+          inventoryData.filter((item: InventoryItem) => item.category === cat).length
+        ),
       backgroundColor: [
         'rgba(255, 99, 132, 0.5)',
         'rgba(54, 162, 235, 0.5)',
@@ -87,25 +122,143 @@ const Reports: React.FC = () => {
     }]
   };
 
+  // Get data by category
+  const categoryData = Array.from(new Set(inventoryData.map((item: InventoryItem) => item.category))).map(cat => {
+    const items = inventoryData.filter((item: InventoryItem) => item.category === cat);
+    const totalItems = items.length;
+    const totalValue = items.reduce((sum: number, item: InventoryItem) => 
+      sum + (item.price * item.quantity), 0);
+    const averageValue = totalValue / totalItems;
+  
+    return {
+      category: cat,
+      itemCount: totalItems,
+      totalValue,
+      averageValue
+    };
+  });
+  
+  // Fix valueChartData with proper types
   const valueChartData = {
-    labels: Array.from(new Set(inventoryData.map(item => item.category))),
+    labels: Array.from(new Set(inventoryData.map((item: InventoryItem) => item.category))),
     datasets: [{
       label: 'Value by Category',
-      data: Array.from(new Set(inventoryData.map(item => item.category))).map(cat =>
-        inventoryData
-          .filter(item => item.category === cat)
-          .reduce((sum, item) => sum + (item.price * item.quantity), 0)
-      ),
+      data: Array.from(new Set(inventoryData.map((item: InventoryItem) => item.category)))
+        .map(cat => 
+          inventoryData
+            .filter((item: InventoryItem) => item.category === cat)
+            .reduce((sum: number, item: InventoryItem) => 
+              sum + (item.price * item.quantity), 0)
+        ),
       backgroundColor: 'rgba(54, 162, 235, 0.5)'
     }]
+  };
+
+  const generateInventoryPDF = () => {
+    const doc = new jsPDF();
+      
+    // Add header
+    doc.setFontSize(20);
+    doc.text('Inventory Overview Report', 14, 15);
+      
+    // Add report info
+    doc.setFontSize(12);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 25);
+    
+    // Add summary metrics
+    doc.text('Summary:', 14, 35);
+    doc.setFontSize(11);
+    doc.text(`Total Items: ${totalItems}`, 14, 45);
+    doc.text(`Active Items: ${activeItems}`, 14, 52);
+    doc.text(`Low Stock Items: ${lowStockItems}`, 14, 59);
+    doc.text(`Total Value: €${totalValue.toFixed(2)}`, 14, 66);
+    
+    // Add items table with proper typing
+    doc.autoTable({
+      startY: 80,
+      head: [['Item Name', 'Category', 'Quantity', 'Price', 'Total Value', 'Location']],
+      body: inventoryData.map((item: InventoryItem) => [
+        item.name,
+        item.category,
+        item.quantity,
+        `€${item.price.toFixed(2)}`,
+        `€${(item.quantity * item.price).toFixed(2)}`,
+        `${item.location.aisle}-${item.location.shelf}-${item.location.section}`
+      ]),
+    });
+      
+    doc.save('inventory-report.pdf');
+  };
+  
+  const generateCategoryPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add header
+    doc.setFontSize(20);
+    doc.text('Category Analysis Report', 14, 15);
+    
+    // Add report info
+    doc.setFontSize(12);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 25);
+    doc.text(`Total Categories: ${categories}`, 14, 32);
+    
+    // Get data by category
+    const categoryData = Array.from(new Set(inventoryData.map((item: InventoryItem) => item.category))).map(cat => {
+      const items = inventoryData.filter((item: InventoryItem) => item.category === cat);
+      const totalItems = items.length;
+      const totalValue = items.reduce((sum: number, item: InventoryItem) => sum + (item.price * item.quantity), 0);
+      const averageValue = totalValue / totalItems;
+      
+      return {
+        category: cat,
+        itemCount: totalItems,
+        totalValue,
+        averageValue
+      };
+    });
+    
+    // Add category summary table
+    doc.autoTable({
+      startY: 45,
+      head: [['Category', 'Items', 'Total Value', 'Avg Value/Item']],
+      body: categoryData.map(cat => [
+        cat.category,
+        cat.itemCount,
+        `€${cat.totalValue.toFixed(2)}`,
+        `€${cat.averageValue.toFixed(2)}`
+      ]),
+    });
+      
+    doc.save('category-report.pdf');
   };
 
   return (
     <IonContent>
       <div className="dashboard-container">
-        <h1 className="dashboard-title">Inventory Analytics</h1>
         
-        {/* Inventory Status Overview */}
+        {/* Report Buttons */}
+        <IonRow className="report-buttons">
+          <IonCol>
+            <IonButton 
+              expand="block"
+              onClick={generateInventoryPDF}
+              className="report-button"
+            >
+              Generate Inventory Report
+            </IonButton>
+          </IonCol>
+          <IonCol>
+            <IonButton 
+              expand="block"
+              onClick={generateCategoryPDF}
+              className="report-button"
+            >
+              Generate Category Report
+            </IonButton>
+          </IonCol>
+        </IonRow>
+
+        {/* Metric Cards */}
         <IonGrid>
           <IonRow>
             <IonCol sizeMd="3" sizeSm="6">
@@ -115,9 +268,7 @@ const Reports: React.FC = () => {
                   <IonCardTitle>Total Stock</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <div className="metric-value">
-                    {inventoryData.reduce((sum, item) => sum + item.quantity, 0)}
-                  </div>
+                  <div className="metric-value">{totalItems}</div>
                   <div className="metric-label">Items in Stock</div>
                 </IonCardContent>
               </IonCard>
@@ -163,52 +314,7 @@ const Reports: React.FC = () => {
             </IonCol>
           </IonRow>
 
-          {/* Detailed Analysis */}
-          <IonRow>
-            <IonCol sizeMd="8">
-              <IonCard className="dashboard-card">
-                <IonCardHeader>
-                  <IonCardTitle>Top Items by Quantity</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <div className="top-items-list">
-                    {topItems.map((item, index) => (
-                      <div key={index} className="top-item">
-                        <span className="item-name">{item.name}</span>
-                        <span className="item-quantity">{item.quantity} units</span>
-                        <span className="item-value">€{(item.quantity * item.price).toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-
-            <IonCol sizeMd="4">
-              <IonCard className="dashboard-card">
-                <IonCardHeader>
-                  <IonCardTitle>Stock Health</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <div className="stock-stats">
-                    <div className="stat-item">
-                      <label>Active Items:</label>
-                      <span>{activeItems} ({((activeItems/totalItems) * 100).toFixed(1)}%)</span>
-                    </div>
-                    <div className="stat-item">
-                      <label>Average Item Value:</label>
-                      <span>€{(totalValue / totalItems).toFixed(2)}</span>
-                    </div>
-                    <div className="stat-item">
-                      <label>Low Stock Alert:</label>
-                      <span className="warning">{lowStockItems} items</span>
-                    </div>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-          </IonRow>
-
+          {/* Charts Row */}
           <IonRow>
             <IonCol sizeMd="6">
               <IonCard className="dashboard-card">
@@ -216,14 +322,8 @@ const Reports: React.FC = () => {
                   <IonCardTitle>Category Distribution</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <div style={{ height: '300px' }}>
-                    <Doughnut 
-                      data={categoryChartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false
-                      }}
-                    />
+                  <div className="chart-container">
+                    <Doughnut data={categoryChartData} options={{ responsive: true, maintainAspectRatio: false }} />
                   </div>
                 </IonCardContent>
               </IonCard>
@@ -235,14 +335,8 @@ const Reports: React.FC = () => {
                   <IonCardTitle>Value by Category</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <div style={{ height: '300px' }}>
-                    <Bar 
-                      data={valueChartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false
-                      }}
-                    />
+                  <div className="chart-container">
+                    <Bar data={valueChartData} options={{ responsive: true, maintainAspectRatio: false }} />
                   </div>
                 </IonCardContent>
               </IonCard>
