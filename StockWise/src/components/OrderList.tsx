@@ -90,37 +90,51 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   };
 
   const generateEmailBody = (order: SupplierOrder): string => {
-    return `Dear ${order.supplier.name},\n\nWe would like to request the following items:\n\n${order.items.map(item => `${item.name} x${item.quantity}`).join('\n')}\n\nThank you,\nYour Company`;
+    return `Dear ${order.supplier.name},
+
+We would like to request the following items:
+
+${order.items.map(item => 
+  `${item.name}
+   Quantity: ${item.quantity}
+   Dimensions: ${item.dimensions.length}x${item.dimensions.width}x${item.dimensions.height}cm
+   Price: €${item.price.toFixed(2)}`
+).join('\n\n')}
+
+Total: €${order.totalAmount.toFixed(2)}
+
+Thank you,
+Hannons Kitchens`;
   };
 
   const generatePDF = (order: SupplierOrder) => {
     const doc = new jsPDF();
-    
+      
     // Add header
     doc.setFontSize(20);
     doc.text('Supply Order', 14, 15);
-    
+      
     // Add order info
     doc.setFontSize(12);
     doc.text(`Order Date: ${new Date(order.orderDate).toLocaleDateString()}`, 14, 25);
     doc.text(`Order ID: ${order.id}`, 14, 32);
-    
+      
     // Add supplier info
     doc.text('Supplier Details:', 14, 42);
     doc.setFontSize(11);
     doc.text(`Name: ${order.supplier.name}`, 14, 49);
     doc.text(`Email: ${order.supplier.email}`, 14, 56);
     doc.text(`Phone: ${order.supplier.phone}`, 14, 63);
-    
+      
     // Add items table with dimensions
     doc.autoTable({
       startY: 75,
-      head: [['Item', 'Quantity', 'Price', 'Dimensions', 'Total']],
+      head: [['Item', 'Quantity', 'Dimensions', 'Price', 'Total']],
       body: order.items.map(item => [
         item.name,
         item.quantity,
-        `€${item.price.toFixed(2)}`,
         `${item.dimensions.length}x${item.dimensions.width}x${item.dimensions.height}cm`,
+        `€${item.price.toFixed(2)}`,
         `€${(item.quantity * item.price).toFixed(2)}`
       ]),
       foot: [[
@@ -131,7 +145,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
         `€${order.totalAmount.toFixed(2)}`
       ]]
     });
-    
+      
     doc.save(`order-${order.id}.pdf`);
   };
 
@@ -158,14 +172,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
                 <div key={item.itemId} className="order-item-info">
                   <span className="item-name">{item.name}</span>
                   <span className="item-quantity">x{item.quantity}</span>
-                  {item.dimensions && (
-                    <div className="item-dimensions">
-                      <span>L: {item.dimensions.length}</span>
-                      <span>W: {item.dimensions.width}</span>
-                      <span>H: {item.dimensions.height}</span>
-                      <span className="unit">cm</span>
-                    </div>
-                  )}
+                  <span className="item-price">€{item.price.toFixed(2)}</span>
                 </div>
               ))}
             </div>
