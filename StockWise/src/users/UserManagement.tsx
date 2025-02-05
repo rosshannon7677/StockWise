@@ -70,7 +70,6 @@ const UserManagement: React.FC = () => {
                     interface="popover"
                     disabled={user.email === 'rosshannonty@gmail.com'}
                   >
-                    <IonSelectOption value="admin">Admin</IonSelectOption>
                     <IonSelectOption value="manager">Manager</IonSelectOption>
                     <IonSelectOption value="employee">Employee</IonSelectOption>
                   </IonSelect>

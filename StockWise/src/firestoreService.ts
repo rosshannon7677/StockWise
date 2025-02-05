@@ -385,6 +385,11 @@ export const updateUserRole = async (userId: string, newRole: UserRole) => {
       throw new Error("Cannot change role of default admin");
     }
 
+    // Prevent setting admin role
+    if (newRole === 'admin') {
+      throw new Error("Cannot set admin role");
+    }
+
     await updateDoc(userRef, { role: newRole });
   } catch (error) {
     console.error("Error updating user role:", error);

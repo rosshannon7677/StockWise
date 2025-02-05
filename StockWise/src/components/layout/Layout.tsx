@@ -125,7 +125,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </IonTitle>
               {userName && (
                 <div className="user-welcome">
-                  Welcome, {userName}
+                  {userName}
                 </div>
               )}
             </IonToolbar>
