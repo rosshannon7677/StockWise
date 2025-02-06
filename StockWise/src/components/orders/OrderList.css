@@ -149,9 +149,10 @@
 .order-item-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--ion-color-light-shade);
+  gap: 0.5rem; /* Small gap between name and quantity */
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--ion-color-light-tint);
+  width: 100%; /* Force full width */
 }
 
 .order-item-info:last-child {
@@ -160,10 +161,18 @@
 
 .item-name {
   font-weight: 500;
+  margin-right: 0; /* Remove margin */
 }
 
 .item-quantity {
   color: var(--ion-color-medium);
+  font-size: 0.9rem;
+  background: var(--ion-color-light-tint);
+  padding: 0.25rem 0.5rem; /* Fix excessive padding */
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0; /* Remove auto margin */
 }
 
 .item-dimensions {
@@ -225,4 +234,82 @@
   font-size: 1.2rem;
   margin: 1rem 0;
   font-weight: 600;
+}
+
+.order-items-dropdown {
+  display: flex;
+  flex-direction: column; /* Force items to stack vertically */
+  background: var(--ion-color-light);
+  padding: 1rem;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+.modal-content {
+  padding: 2rem;
+}
+
+.form-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border: 2px solid #000;
+  border-radius: 8px;
+}
+
+.form-section h3 {
+  color: var(--ion-color-dark);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #000;
+}
+
+.item-basic-info {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #000;
+  border-radius: 4px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.input-group label {
+  font-weight: 500;
+  color: var(--ion-color-dark);
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.25rem;
+}
+
+.input-group ion-input {
+  border: 2px solid #000;
+  border-radius: 4px;
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+  --padding-top: 0.5rem;
+  --padding-bottom: 0.5rem;
+}
+
+.order-items-dropdown {
+  display: flex;
+  flex-direction: column; /* Force items to stack vertically */
+  background: var(--ion-color-light);
+  padding: 1rem;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+.item-name {
+  font-weight: 500;
+}
+
+.item-quantity {
+  justify-self: end;
+  padding: 0.25rem 0.5rem;
+  background: var(--ion-color-light);
+  border: 1px solid #000;
+  border-radius: 4px;
 }

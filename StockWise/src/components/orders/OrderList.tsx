@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
-import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
+import { chevronForwardOutline, chevronBackOutline, chevronDownOutline } from 'ionicons/icons';
 import './OrderList.css';
 import { SupplierOrder, deleteOrder, updateOrder } from '../../firestoreService';
 import { jsPDF } from 'jspdf';
@@ -34,6 +34,15 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
       height: number;
     };
   }[]>([]);
+  const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
+
+  const toggleOrderExpansion = (orderId: string) => {
+    setExpandedOrders(prev => 
+      prev.includes(orderId) 
+        ? prev.filter(id => id !== orderId)
+        : [...prev, orderId]
+    );
+  };
   const itemsPerPage = 10;
 
   const handleEdit = async (order: SupplierOrder) => {
@@ -165,50 +174,63 @@ Hannons Kitchens`;
       </div>
       <div className="table-body">
         {currentOrders.map((order) => (
-          <div key={order.id} className="table-row">
-            <div className="table-cell">{order.supplier.name}</div>
-            <div className="table-cell">
-              {order.items.map(item => (
-                <div key={item.itemId} className="order-item-info">
-                  <span className="item-name">{item.name}</span>
-                  <span className="item-quantity">x{item.quantity}</span>
-                  <span className="item-price">€{item.price.toFixed(2)}</span>
-                </div>
-              ))}
+          <div key={order.id}>
+            <div 
+              className="table-row"
+              onClick={() => toggleOrderExpansion(order.id)}
+            >
+              <div className="table-cell">{order.supplier.name}</div>
+              <div className="table-cell">
+                {order.items.length} items
+                <IonIcon 
+                  icon={expandedOrders.includes(order.id) ? chevronDownOutline : chevronForwardOutline}
+                  style={{ marginLeft: '8px' }}
+                />
+              </div>
+              <div className="table-cell">€{order.totalAmount.toFixed(2)}</div>
+              <div className="table-cell">
+                {new Date(order.orderDate).toLocaleDateString()}
+              </div>
+              <div className="actions-cell">
+                <button 
+                  className="edit-button"
+                  onClick={() => handleEdit(order)}
+                >
+                  Edit
+                </button>
+                <button 
+                  className="delete-button"
+                  onClick={() => handleDelete(order.id)}
+                >
+                  Delete
+                </button>
+                <button 
+                  className="pdf-button"
+                  onClick={() => generatePDF(order)}
+                >
+                  PDF
+                </button>
+                <button 
+                  className="email-button"
+                  onClick={() => {
+                    const mailtoLink = `mailto:${order.supplier.email}?subject=Stock Order Request&body=${encodeURIComponent(generateEmailBody(order))}`;
+                    window.location.href = mailtoLink;
+                  }}
+                >
+                  Email
+                </button>
+              </div>
             </div>
-            <div className="table-cell">€{order.totalAmount.toFixed(2)}</div>
-            <div className="table-cell">
-              {new Date(order.orderDate).toLocaleDateString()}
-            </div>
-            <div className="actions-cell">
-              <button 
-                className="edit-button"
-                onClick={() => handleEdit(order)}
-              >
-                Edit
-              </button>
-              <button 
-                className="delete-button"
-                onClick={() => handleDelete(order.id)}
-              >
-                Delete
-              </button>
-              <button 
-                className="pdf-button"
-                onClick={() => generatePDF(order)}
-              >
-                PDF
-              </button>
-              <button 
-                className="email-button"
-                onClick={() => {
-                  const mailtoLink = `mailto:${order.supplier.email}?subject=Stock Order Request&body=${encodeURIComponent(generateEmailBody(order))}`;
-                  window.location.href = mailtoLink;
-                }}
-              >
-                Email
-              </button>
-            </div>
+            {expandedOrders.includes(order.id) && (
+              <div className="order-items-dropdown">
+                {order.items.map(item => (
+                  <div key={item.itemId} className="order-item-info">
+                    <span className="item-name">{item.name}</span>
+                    <span className="item-quantity">Quantity: {item.quantity}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
