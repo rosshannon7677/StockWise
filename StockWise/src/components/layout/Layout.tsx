@@ -123,11 +123,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <IonTitle className="header-title">
                 StockWise Inventory Management
               </IonTitle>
-              {userName && (
-                <div className="user-welcome">
-                  {userName}
-                </div>
-              )}
+              <div className="header-actions">
+                {userName && (
+                  <>
+                    <span className="user-welcome">{userName}</span>
+                    <IonIcon 
+                      icon={logOutOutline}
+                      className="sign-out-icon"
+                      onClick={handleSignOut}
+                    />
+                  </>
+                )}
+              </div>
             </IonToolbar>
           </IonHeader>
 
