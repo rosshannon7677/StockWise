@@ -29,6 +29,7 @@ import {
 import { useLocation } from 'react-router';
 import { auth } from '../../../firebaseConfig';
 import { useRole } from '../../hooks/useRole';
+import { useNavigate } from 'react-router-dom';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -36,7 +37,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const ionRouter = useIonRouter();
+  const navigate = useNavigate();
   const { role } = useRole();
   const [userName, setUserName] = useState<string | null>(null);
 
@@ -54,8 +55,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { title: 'Suppliers', path: '/suppliers', icon: peopleOutline, roles: ['admin', 'manager', 'employee'] },
     { title: 'Restock', path: '/restock', icon: reloadOutline, roles: ['admin', 'manager'] },
     { title: 'Reports', path: '/reports', icon: statsChartOutline, roles: ['admin', 'manager'] },
-    { title: 'User Management', path: '/users', icon: peopleOutline, roles: ['admin'] },
-    { title: 'Settings', path: '/settings', icon: settingsOutline, roles: ['admin', 'manager', 'employee'] },
+    { title: 'User Management', path: '/users', icon: peopleOutline, roles: ['admin'] }
   ];
 
   const handleSignOut = async () => {
@@ -97,24 +97,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </IonItem>
                 </IonMenuToggle>
               ))}
-              
-              <IonItem 
-                onClick={handleSignOut}
-                button
-                lines="none"
-                className="sign-out-button"
-              >
-                <IonIcon 
-                  slot="start" 
-                  icon={logOutOutline}
-                  className="sign-out-icon"
-                />
-                <IonLabel className="menu-label">
-                  Sign Out
-                </IonLabel>
-              </IonItem>
             </IonList>
           </IonContent>
+          <IonItem 
+            onClick={handleSignOut}
+            button
+            lines="none"
+            className="sign-out-button"
+          >
+            <IonIcon 
+              slot="start" 
+              icon={logOutOutline}
+              className="sign-out-icon"
+            />
+            <IonLabel className="menu-label">
+              Sign Out
+            </IonLabel>
+          </IonItem>
         </IonMenu>
 
         <IonPage id="main">
@@ -127,6 +126,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {userName && (
                   <>
                     <span className="user-welcome">{userName}</span>
+                    <IonIcon 
+                      icon={settingsOutline}
+                      className="settings-icon"
+                      onClick={() => navigate('/settings')}
+                    />
                     <IonIcon 
                       icon={logOutOutline}
                       className="sign-out-icon"
