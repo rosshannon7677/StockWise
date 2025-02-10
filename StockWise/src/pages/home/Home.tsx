@@ -52,11 +52,20 @@ interface InventoryItem {
 const Home: React.FC = () => {
   const navigation = useIonRouter();
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [predictions, setPredictions] = useState<any[]>([]);
 
   useEffect(() => {
     getInventoryItems((items) => {
       setInventoryItems(items);
     });
+  }, []);
+
+  useEffect(() => {
+    const fetchPredictions = async () => {
+      const stockPredictions = await getStockPredictions();
+      setPredictions(stockPredictions);
+    };
+    fetchPredictions();
   }, []);
 
   const handleSignOut = async () => {

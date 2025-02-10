@@ -18,7 +18,7 @@ import {
   reloadOutline,
   cartOutline
 } from 'ionicons/icons';
-import { getInventoryItems } from '../../firestoreService';
+import { getInventoryItems, getStockPredictions } from '../../firestoreService';
 import './Restock.css';
 
 interface RestockSuggestion {
@@ -35,8 +35,17 @@ interface RestockSuggestion {
 const Restock: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
   const [restockSuggestions, setRestockSuggestions] = useState<RestockSuggestion[]>([]);
+  const [mlPredictions, setMlPredictions] = useState<any[]>([]);
 
   useEffect(() => {
+    // Fetch ML predictions
+    const fetchPredictions = async () => {
+      const predictions = await getStockPredictions();
+      setMlPredictions(predictions);
+    };
+
+    fetchPredictions();
+    
     getInventoryItems((fetchedItems) => {
       setItems(fetchedItems);
       
@@ -175,6 +184,42 @@ const Restock: React.FC = () => {
                       <span>€{urgentItems.reduce((total, item) => 
                         total + (item.recommendedQuantity * item.price), 0).toFixed(2)}</span>
                     </div>
+                  </div>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
+
+          <IonRow>
+            <IonCol sizeMd="12">
+              <IonCard className="dashboard-card">
+                <IonCardHeader>
+                  <IonIcon icon={trendingUpOutline} className="card-icon" />
+                  <IonCardTitle>ML Stock Predictions</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  <div className="predictions-list">
+                    {mlPredictions.map((prediction) => (
+                      <div key={prediction.product_id} className={`prediction-item ${
+                        prediction.predicted_days_until_low < 7 ? 'urgent' : 
+                        prediction.predicted_days_until_low < 14 ? 'warning' : 'normal'
+                      }`}>
+                        <div className="prediction-info">
+                          <h3>{prediction.name}</h3>
+                          <p>Current Stock: {prediction.current_quantity}</p>
+                          <p>Days until low: {prediction.predicted_days_until_low}</p>
+                        </div>
+                        <div className="prediction-metrics">
+                          <div className={`confidence-score ${
+                            prediction.confidence_score > 0.7 ? 'high' :
+                            prediction.confidence_score > 0.5 ? 'medium' : 'low'
+                          }`}>
+                            {(prediction.confidence_score * 100).toFixed(0)}% confidence
+                          </div>
+                          <p>Restock by: {new Date(prediction.recommended_restock_date).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </IonCardContent>
               </IonCard>

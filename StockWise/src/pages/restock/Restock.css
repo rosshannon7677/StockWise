@@ -151,3 +151,70 @@ ion-content {
   position: relative;
   z-index: 1;
 }
+
+.predictions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.prediction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-medium);
+}
+
+.prediction-item.urgent {
+  border-left-color: var(--ion-color-danger);
+}
+
+.prediction-item.warning {
+  border-left-color: var(--ion-color-warning);
+}
+
+.prediction-item.normal {
+  border-left-color: var(--ion-color-success);
+}
+
+.prediction-info h3 {
+  margin: 0;
+  color: var(--ion-color-dark);
+  font-size: 1.1rem;
+}
+
+.prediction-info p {
+  margin: 0.25rem 0;
+  color: var(--ion-color-medium);
+}
+
+.prediction-metrics {
+  text-align: right;
+}
+
+.confidence-score {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.confidence-score.high {
+  background: var(--ion-color-success-tint);
+  color: var(--ion-color-success);
+}
+
+.confidence-score.medium {
+  background: var(--ion-color-warning-tint);
+  color: var(--ion-color-warning);
+}
+
+.confidence-score.low {
+  background: var(--ion-color-danger-tint);
+  color: var(--ion-color-danger);
+}
