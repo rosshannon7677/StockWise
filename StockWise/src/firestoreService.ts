@@ -396,3 +396,14 @@ export const updateUserRole = async (userId: string, newRole: UserRole) => {
     throw error;
   }
 };
+
+export const getStockPredictions = async (): Promise<any[]> => {
+  try {
+    const response = await fetch('http://localhost:8000/predictions');
+    const predictions = await response.json();
+    return predictions;
+  } catch (error) {
+    console.error('Error fetching predictions:', error);
+    return [];
+  }
+};
