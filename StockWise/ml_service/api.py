@@ -24,10 +24,14 @@ class PredictionResponse(BaseModel):
     predicted_days_until_low: int
     confidence_score: float
     recommended_restock_date: str
+    usage_history: list[dict] = []  # Add this
+    daily_consumption: float        # Add this
 
 @app.get("/predictions", response_model=List[PredictionResponse])
 async def get_predictions():
+    print("Received prediction request")  # Add debug log
     predictions = predictor.predict_stock_levels()
+    print(f"Returning {len(predictions)} predictions")  # Add debug log
     return predictions
 
 @app.post("/train")
