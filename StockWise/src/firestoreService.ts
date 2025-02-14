@@ -41,6 +41,10 @@ export interface InventoryItem {
     addedBy: string;
     addedDate: string;
   };
+  used_stock?: {
+    date: string;
+    quantity: number;
+  }[];
 }
 
 export interface Supplier {
@@ -112,6 +116,15 @@ export interface SupplierOrder {
     addedDate: string;
     lastUpdated: string;
   };
+}
+
+export interface StockPrediction {
+  product_id: string;
+  name: string;
+  current_quantity: number;
+  predicted_days_until_low: number;
+  confidence_score: number;
+  recommended_restock_date: string;
 }
 
 // Initialize Firestore
@@ -397,9 +410,12 @@ export const updateUserRole = async (userId: string, newRole: UserRole) => {
   }
 };
 
-export const getStockPredictions = async (): Promise<any[]> => {
+export const getStockPredictions = async (): Promise<StockPrediction[]> => {
   try {
     const response = await fetch('http://localhost:8000/predictions');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const predictions = await response.json();
     return predictions;
   } catch (error) {

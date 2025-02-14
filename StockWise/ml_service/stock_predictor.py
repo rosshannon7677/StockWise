@@ -27,27 +27,44 @@ class StockPredictor:
         stock_data = []
         for doc in docs:
             data = doc.to_dict()
-            # Calculate daily consumption rate
+            usage_history = data.get('used_stock', [])
+            
+            # Calculate average daily consumption from history
+            if usage_history:
+                total_used = sum(usage['quantity'] for usage in usage_history)
+                try:
+                    # Clean the date string before parsing
+                    latest_date = usage_history[-1]['date'].replace('"', '').strip()
+                    earliest_date = usage_history[0]['date'].replace('"', '').strip()
+                    
+                    date_range = (datetime.fromisoformat(latest_date.replace('Z', '+00:00')) - 
+                                 datetime.fromisoformat(earliest_date.replace('Z', '+00:00'))).days + 1
+                    daily_consumption = total_used / date_range if date_range > 0 else 0
+                except (ValueError, KeyError):
+                    daily_consumption = 0
+            else:
+                daily_consumption = 0
+                
             stock_data.append({
                 'product_id': doc.id,
                 'name': data['name'],
                 'current_quantity': data['quantity'],
                 'price': data['price'],
                 'category': data['category'],
-                'days_until_low': self._calculate_days_until_low(data)
+                'daily_consumption': daily_consumption,
+                'days_until_low': self._calculate_days_until_low(data, daily_consumption)
             })
         
         return pd.DataFrame(stock_data)
     
-    def _calculate_days_until_low(self, item_data):
-        # Simple calculation - can be enhanced with actual historical data
+    def _calculate_days_until_low(self, item_data, daily_consumption):
         current_quantity = item_data['quantity']
         if current_quantity <= 10:
             return 0
         
-        # Estimate consumption rate (can be improved with real data)
-        daily_consumption = 0.5 if current_quantity > 20 else 1
-        return int((current_quantity - 10) / daily_consumption)
+        # Use actual consumption rate if available, otherwise estimate
+        consumption_rate = daily_consumption if daily_consumption > 0 else (0.5 if current_quantity > 20 else 1)
+        return int((current_quantity - 10) / consumption_rate)
     
     def train_model(self):
         data = self.fetch_inventory_data()
