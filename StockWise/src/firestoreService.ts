@@ -118,6 +118,11 @@ export interface SupplierOrder {
   };
 }
 
+interface StockUsageHistory {
+  date: string;
+  quantity: number;
+}
+
 export interface StockPrediction {
   product_id: string;
   name: string;
@@ -125,6 +130,11 @@ export interface StockPrediction {
   predicted_days_until_low: number;
   confidence_score: number;
   recommended_restock_date: string;
+  usage_history?: Array<{
+    date: string;
+    quantity: number;
+  }>;
+  daily_consumption: number;  // Remove optional flag if it should always be present
 }
 
 // Initialize Firestore
@@ -412,12 +422,23 @@ export const updateUserRole = async (userId: string, newRole: UserRole) => {
 
 export const getStockPredictions = async (): Promise<StockPrediction[]> => {
   try {
+    console.log('Fetching predictions...');
     const response = await fetch('http://localhost:8000/predictions');
+    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+    
     const predictions = await response.json();
-    return predictions;
+    console.log('Raw predictions response:', predictions);
+    
+    // Add type to the parameter
+    const validatedPredictions = predictions.map((p: Partial<StockPrediction>) => ({
+      ...p,
+      daily_consumption: Number(p.daily_consumption) || 0
+    }));
+    
+    return validatedPredictions as StockPrediction[];
   } catch (error) {
     console.error('Error fetching predictions:', error);
     return [];
