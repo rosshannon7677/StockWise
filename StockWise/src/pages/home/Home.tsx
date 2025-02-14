@@ -24,7 +24,7 @@ import {
 import './Home.css';
 import { auth } from '../../../firebaseConfig';
 import { useIonRouter } from '@ionic/react';
-import { getInventoryItems } from '../../firestoreService';
+import { getInventoryItems, getStockPredictions, StockPrediction } from '../../firestoreService';
 
 interface InventoryItem {
   id: string;
@@ -52,7 +52,7 @@ interface InventoryItem {
 const Home: React.FC = () => {
   const navigation = useIonRouter();
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
-  const [predictions, setPredictions] = useState<any[]>([]);
+  const [predictions, setPredictions] = useState<StockPrediction[]>([]);
 
   useEffect(() => {
     getInventoryItems((items) => {

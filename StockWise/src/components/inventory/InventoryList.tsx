@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "./InventoryList.css";
 import { addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../../firestoreService';
 import { auth } from '../../../firebaseConfig';
-import { IonIcon } from '@ionic/react';
+import { IonIcon, IonModal } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 
 interface InventoryItem {
@@ -27,6 +27,10 @@ interface InventoryItem {
     addedBy: string;
     addedDate: string;
   };
+  used_stock?: {  // Add this field
+    date: string;
+    quantity: number;
+  }[];
 }
 
 interface InventoryListProps {
@@ -54,6 +58,10 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
   });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const [showUseStockModal, setShowUseStockModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [unitsUsed, setUnitsUsed] = useState(1);
 
   if (!items || items.length === 0) {
     return <div className="no-items">No inventory items found</div>;
@@ -165,6 +173,28 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     alert("Item added successfully!");
   };
 
+  const handleUseStock = async () => {
+    if (selectedItem && unitsUsed > 0) {
+      const newQuantity = selectedItem.quantity - unitsUsed;
+      
+      // Format date properly for ISO string
+      const usageRecord = {
+        date: new Date().toISOString().replace(/\.[0-9]{3}Z$/, 'Z'),
+        quantity: unitsUsed
+      };
+
+      await updateInventoryItem(selectedItem.id, {
+        ...selectedItem,
+        quantity: Math.max(0, newQuantity),
+        used_stock: [...(selectedItem.used_stock || []), usageRecord]
+      });
+      
+      setShowUseStockModal(false);
+      setSelectedItem(null);
+      setUnitsUsed(1);
+    }
+  };
+
   const columns = [
     {
       field: 'name',
@@ -213,6 +243,17 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
       width: 150,
       renderCell: (item: InventoryItem) => (
         <div className="actions-cell" style={{ width: columns[7].width }}>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedItem(item);
+              setUnitsUsed(1);
+              setShowUseStockModal(true);
+            }} 
+            className="use-button"
+          >
+            Use Stock
+          </button>
           <button 
             onClick={(e) => {
               e.stopPropagation();
@@ -351,6 +392,17 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
+                      setSelectedItem(item);
+                      setUnitsUsed(1);
+                      setShowUseStockModal(true);
+                    }} 
+                    className="use-button"
+                  >
+                    Use Stock
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleEdit(item);
                     }} 
                     className="edit-button"
@@ -391,6 +443,37 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
           <IonIcon icon={chevronForwardOutline} />
         </button>
       </div>
+      <IonModal isOpen={showUseStockModal} onDidDismiss={() => setShowUseStockModal(false)}>
+        <div className="modal-content">
+          <h2>Use Stock</h2>
+          <div className="form-section">
+            <h3>{selectedItem?.name}</h3>
+            <p>Current Stock: {selectedItem?.quantity}</p>
+            <div className="form-group">
+              <label>Units Used:</label>
+              <input
+                type="number"
+                value={unitsUsed}
+                onChange={(e) => setUnitsUsed(Math.min(Number(e.target.value), selectedItem?.quantity || 0))}
+                min={1}
+                max={selectedItem?.quantity}
+              />
+            </div>
+          </div>
+          <div className="modal-actions">
+            <button className="cancel-button" onClick={() => setShowUseStockModal(false)}>
+              Cancel
+            </button>
+            <button 
+              className="save-button"
+              onClick={handleUseStock}
+              disabled={!selectedItem || unitsUsed <= 0 || unitsUsed > selectedItem.quantity}
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </IonModal>
     </div>
   );
 };

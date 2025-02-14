@@ -271,10 +271,11 @@ input {
 .actions-cell {
   display: flex;
   gap: 8px;
-  justify-content: center;
+  justify-content: flex-start; /* Change to flex-start */
   align-items: center;
-  min-width: 140px;
+  width: 240px; /* Fixed width instead of min-width */
   padding: 4px;
+  margin-left: auto; /* Add this to push buttons to the right */
 }
 
 
@@ -317,11 +318,6 @@ input {
   color: white;
 }
 
-
-
-.edit-button {
-  background-color: var(--ion-color-primary);
-}
 
 .add-item-button {
   color: black;
@@ -422,4 +418,16 @@ ion-content {
 .page-info {
   font-size: 0.9rem;
   color: var(--ion-color-medium);
+}
+
+
+
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ion-color-light-shade);
 }
