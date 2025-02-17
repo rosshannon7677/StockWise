@@ -5,6 +5,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from datetime import datetime, timedelta
 import os
+import matplotlib.pyplot as plt
+import io
+import base64
+import numpy as np
+from fastapi import HTTPException
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Get the directory containing the current file
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +29,7 @@ class StockPredictor:
     def __init__(self):
         self.model = LinearRegression()
         self.is_trained = False
+        self.logger = logging.getLogger(__name__)  # Add logger to the class
         
     def fetch_inventory_data(self):
         inventory_ref = db.collection('inventoryItems')
@@ -160,3 +171,79 @@ class StockPredictor:
         elif item['current_quantity'] < 10:
             return 0.5
         return 0.4
+
+    def generate_consumption_plot(self, item_name):
+        try:
+            data = self.fetch_inventory_data()
+            print(f"Looking for item: {item_name} in {len(data)} items")  # Debug log
+            
+            # Filter for specific item
+            item_data = data[data['name'] == item_name]
+            if item_data.empty:
+                raise HTTPException(status_code=404, detail=f"Item {item_name} not found")
+            
+            item_data = item_data.iloc[0]
+            usage_history = item_data['used_stock']
+            
+            if not usage_history:
+                raise HTTPException(status_code=400, detail="No usage history available")
+            
+            self.logger.debug(f"Fetched data for plotting: {len(data)} items")
+            
+            # Filter for specific item
+            item_data = data[data['name'] == item_name]
+            if item_data.empty:
+                self.logger.error(f"Item not found: {item_name}")
+                raise HTTPException(status_code=404, detail=f"Item {item_name} not found")
+            
+            item_data = item_data.iloc[0]
+            usage_history = sorted(
+                item_data['used_stock'],
+                key=lambda x: datetime.fromisoformat(x['date'].replace('Z', ''))
+            )
+            
+            if not usage_history:
+                self.logger.error(f"No usage history for item: {item_name}")
+                raise HTTPException(status_code=400, detail="No usage history available")
+            
+            # Debug log the usage history
+            self.logger.debug(f"Usage history for {item_name}: {len(usage_history)} records")
+            
+            # Create plot
+            dates = [datetime.fromisoformat(u['date'].replace('Z', '')) for u in usage_history]
+            quantities = [u['quantity'] for u in usage_history]
+            
+            plt.figure(figsize=(10, 6))
+            plt.plot(dates, quantities, 'b-o', label='Units Used')
+            
+            if len(dates) > 1:
+                try:
+                    days_since_start = [(d - dates[0]).days for d in dates]
+                    days_since_start = np.array(days_since_start) + np.random.normal(0, 0.01, len(days_since_start))
+                    z = np.polyfit(days_since_start, quantities, 1)
+                    p = np.poly1d(z)
+                    x_trend = np.linspace(min(days_since_start), max(days_since_start), 100)
+                    y_trend = p(x_trend)
+                    trend_dates = [dates[0] + timedelta(days=x) for x in x_trend]
+                    plt.plot(trend_dates, y_trend, "r--", label=f'Trend (avg: {z[0]:.2f} units/day)')
+                except np.linalg.LinAlgError as e:
+                    self.logger.warning(f"Could not calculate trend line: {e}")
+            
+            plt.title(f'Usage History for {item_name}')
+            plt.xlabel('Date')
+            plt.ylabel('Units Used')
+            plt.xticks(rotation=45)
+            plt.grid(True)
+            plt.legend()
+            plt.tight_layout()
+            
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png')
+            plt.close()
+            buf.seek(0)
+            plot_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+            return plot_base64
+            
+        except Exception as e:
+            self.logger.error(f"Error generating plot for {item_name}: {e}", exc_info=True)
+            raise HTTPException(status_code=400, detail=str(e))
