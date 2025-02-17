@@ -1,18 +1,25 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from stock_predictor import StockPredictor
 from typing import List
 from pydantic import BaseModel
+from fastapi.responses import JSONResponse
+import logging
 
-app = FastAPI()
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
-# Add CORS middleware
+app = FastAPI(title="StockWise ML API", debug=True)
+
+# Update CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8100"],  # Your frontend URL
+    allow_origins=["http://localhost:8100", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 predictor = StockPredictor()
@@ -38,3 +45,21 @@ async def get_predictions():
 async def train_model():
     accuracy = predictor.train_model()
     return {"accuracy": accuracy}
+
+@app.get("/consumption-plot/{item_name}", tags=["plots"])
+async def get_consumption_plot(item_name: str):
+    print(f"Received request for item: {item_name}")  # Debug log
+    try:
+        plot_data = predictor.generate_consumption_plot(item_name)
+        return JSONResponse({
+            "plot": plot_data,
+            "item_name": item_name
+        })
+    except Exception as e:
+        print(f"Error generating plot: {e}")  # Debug log
+        raise HTTPException(status_code=400, detail=str(e))
+
+# Make sure this appears at the end of the file
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
