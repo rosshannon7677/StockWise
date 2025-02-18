@@ -39,6 +39,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { role } = useRole();
+  const ionRouter = useIonRouter();
   const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {

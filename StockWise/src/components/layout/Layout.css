@@ -64,7 +64,7 @@
   
   .sign-out-icon {
     font-size: 1.4rem;
-    color: var(--ion-color-danger);
+    color: white;
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 50%;
@@ -72,21 +72,28 @@
   }
   
   .sign-out-icon:hover {
-    background-color: var(--ion-color-light);
+    background-color: rgba(255, 255, 255, 0.1);
   }
   
   .header-toolbar {
     min-height: 46px;
+    --background: var(--ion-color-primary);
+    --color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
   .header-title {
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
   
   .user-welcome {
     font-size: 0.9rem;
-    color: var(--ion-color-medium);
+    color: white;
   }
   
   .header-actions {
@@ -101,7 +108,7 @@
   
   .settings-icon {
     font-size: 1.4rem;
-    color: var(--ion-color-medium);
+    color: white;
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 50%;
@@ -109,21 +116,24 @@
   }
   
   .settings-icon:hover {
-    background-color: var(--ion-color-light);
+    background-color: rgba(255, 255, 255, 0.1);
   }
   
   .footer-toolbar {
     min-height: 50px;
     border-top: 1px solid var(--ion-color-light-shade);
-    background: var(--ion-background-color);
+    --background: var(--ion-color-primary);
+    --color: white;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 1000;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
   }
   
   .footer-content {
     text-align: center;
     padding: 1rem;
+    color: white;
   }
