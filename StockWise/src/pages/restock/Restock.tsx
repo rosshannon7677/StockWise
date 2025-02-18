@@ -250,38 +250,67 @@ const Restock: React.FC = () => {
                           onClick={() => handleItemClick(prediction.name)}
                         >
                           <div className="prediction-info">
-                            <h3>{prediction.name}</h3>
-                            <div className="prediction-details">
-                              <p>Current Stock: {prediction.current_quantity}</p>
-                              <p>Daily Usage: {prediction.daily_consumption?.toFixed(2)} units</p>
-                              <p>Days until Low: {prediction.predicted_days_until_low}</p>
-                            </div>
-                            <div className="prediction-meta">
-                              <span className={`confidence-badge ${
-                                prediction.confidence_score > 0.7 ? 'high' :
-                                prediction.confidence_score > 0.5 ? 'medium' : 'low'
-                              }`}>
-                                {(prediction.confidence_score * 100).toFixed(0)}% confidence
-                              </span>
-                              <span className="restock-date">
-                                Restock by: {new Date(prediction.recommended_restock_date).toLocaleDateString()}
-                              </span>
-                            </div>
-                            {prediction.usage_history && prediction.usage_history.length > 0 && (
-                              <div className="usage-timeline">
-                                <h4>Recent Usage History</h4>
-                                {prediction.usage_history.slice(-5).map((usage: UsageRecord, index: number) => (
-                                  <div key={index} className="usage-event">
-                                    <span className="usage-date">
-                                      {new Date(usage.date).toLocaleDateString()}
-                                    </span>
-                                    <span className="usage-quantity">
-                                      -{usage.quantity} units
-                                    </span>
-                                  </div>
-                                ))}
+                            <h1>{prediction.name}</h1>
+                            
+                            <div className="tables-container">
+                              {/* Stock Information Table */}
+                              <div className="table-section">
+                              <h4>Stock Information</h4>
+                                <table className="info-table">
+                                  <thead>
+                                    <tr>
+                                      <th>Metric</th>
+                                      <th>Value</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr>
+                                      <td>Current Stock:</td>
+                                      <td>{prediction.current_quantity}</td>
+                                    </tr>
+                                    <tr>
+                                      <td>Daily Usage:</td>
+                                      <td>{prediction.daily_consumption?.toFixed(2)} units</td>
+                                    </tr>
+                                    <tr>
+                                      <td>Days until Low:</td>
+                                      <td>{prediction.predicted_days_until_low}</td>
+                                    </tr>
+                                    <tr>
+                                      <td>Confidence:</td>
+                                      <td>{(prediction.confidence_score * 100).toFixed(0)}%</td>
+                                    </tr>
+                                    <tr>
+                                      <td>Restock by:</td>
+                                      <td>{new Date(prediction.recommended_restock_date).toLocaleDateString()}</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
                               </div>
-                            )}
+
+                              {/* Usage History Table */}
+                              {prediction.usage_history && prediction.usage_history.length > 0 && (
+                                <div className="table-section">
+                                  <h4>Recent Usage History</h4>
+                                  <table className="usage-table">
+                                    <thead>
+                                      <tr>
+                                        <th>Date</th>
+                                        <th>Units Used</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {prediction.usage_history.slice(-5).map((usage: UsageRecord, index: number) => (
+                                        <tr key={index}>
+                                          <td>{new Date(usage.date).toLocaleDateString()}</td>
+                                          <td>-{usage.quantity}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
                           </div>
                           {selectedItem === prediction.name && plotData && (
                             <div className="usage-plot">

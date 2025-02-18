@@ -240,7 +240,7 @@ ion-content {
 }
 
 .prediction-card.urgent {
-  border-left-color: var(--ion-color-danger);
+  border-left-color: var (--ion-color-danger);
 }
 
 .prediction-card.warning {
@@ -294,9 +294,14 @@ ion-content {
 }
 
 .usage-timeline {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--ion-color-light-shade);
+}
+
+.usage-timeline h4 {
+  margin-bottom: 1rem;
+  color: var(--ion-color-dark);
 }
 
 .usage-event {
@@ -317,4 +322,65 @@ ion-content {
   text-align: center;
   padding: 2rem;
   color: var(--ion-color-medium);
+}
+
+.info-table, .usage-table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  border: 1px solid var(--ion-color-dark);
+}
+
+.info-table th,
+.info-table td,
+.usage-table th,
+.usage-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid var(--ion-color-dark);
+}
+
+.info-table th,
+.usage-table th {
+  background-color: var(--ion-color-light);
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.info-table tr:nth-child(even) {
+  background-color: var(--ion-color-light-tint);
+}
+
+.usage-table td:last-child {
+  color: var(--ion-color-danger);
+  text-align: right;
+}
+
+.prediction-info {
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tables-container {
+  display: flex;
+  gap: 2rem;
+  margin: 1rem 0;
+}
+
+.table-section {
+  flex: 1;
+}
+
+.table-section h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--ion-color-dark);
+}
+
+@media (max-width: 768px) {
+  .tables-container {
+    flex-direction: column;
+  }
 }
