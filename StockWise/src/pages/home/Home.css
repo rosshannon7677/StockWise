@@ -238,6 +238,14 @@ ion-card-content {
   font-weight: 500;
 }
 
+.usage-plot {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 .predictions-list {
   display: flex;
   flex-direction: column;
@@ -249,6 +257,12 @@ ion-card-content {
   border-radius: 8px;
   padding: 1rem;
   border-left: 4px solid var(--ion-color-medium);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.prediction-item:hover {
+  transform: translateY(-2px);
 }
 
 .prediction-item.urgent {

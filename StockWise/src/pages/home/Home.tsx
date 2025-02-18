@@ -54,6 +54,8 @@ const Home: React.FC = () => {
   const navigation = useIonRouter();
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [predictions, setPredictions] = useState<StockPrediction[]>([]);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [plotData, setPlotData] = useState<string | null>(null);
 
   useEffect(() => {
     getInventoryItems((items) => {
@@ -68,6 +70,43 @@ const Home: React.FC = () => {
     };
     fetchPredictions();
   }, []);
+
+  const fetchPlot = async (itemName: string) => {
+    console.log(`Fetching plot for: ${itemName}`);  // Debug log
+    try {
+      // Make sure to encode the item name properly
+      const encodedName = encodeURIComponent(itemName);
+      const url = `http://localhost:8000/consumption-plot/${encodedName}`;
+      console.log(`Requesting URL: ${url}`);  // Debug log
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data.plot) {
+        setPlotData(data.plot);
+      } else {
+        throw new Error('No plot data received');
+      }
+    } catch (error) {
+      console.error('Error fetching plot:', error);
+      setPlotData(null);
+    }
+  };
+
+  const handleItemClick = (itemName: string) => {
+    if (selectedItem === itemName) {
+      setSelectedItem(null);
+      setPlotData(null);
+    } else {
+      setSelectedItem(itemName);
+      fetchPlot(itemName);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -184,10 +223,14 @@ const Home: React.FC = () => {
                   {predictions.length > 0 ? (
                     <div className="predictions-list">
                       {predictions.map((prediction) => (
-                        <div key={prediction.product_id} className={`prediction-item ${
-                          prediction.predicted_days_until_low < 7 ? 'urgent' : 
-                          prediction.predicted_days_until_low < 14 ? 'warning' : 'normal'
-                        }`}>
+                        <div 
+                          key={prediction.product_id} 
+                          className={`prediction-item ${
+                            prediction.predicted_days_until_low < 7 ? 'urgent' : 
+                            prediction.predicted_days_until_low < 14 ? 'warning' : 'normal'
+                          }`}
+                          onClick={() => handleItemClick(prediction.name)}
+                        >
                           <div className="prediction-info">
                             <h3>{prediction.name}</h3>
                             <div className="prediction-details">
@@ -222,6 +265,16 @@ const Home: React.FC = () => {
                               </div>
                             )}
                           </div>
+                          {selectedItem === prediction.name && plotData && (
+                            <div className="usage-plot">
+                              <h4>Usage Trends</h4>
+                              <img 
+                                src={`data:image/png;base64,${plotData}`} 
+                                alt={`Usage trend for ${prediction.name}`}
+                                style={{ width: '100%', marginTop: '1rem' }}
+                              />
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
