@@ -271,7 +271,13 @@ const Home: React.FC = () => {
                               <img 
                                 src={`data:image/png;base64,${plotData}`} 
                                 alt={`Usage trend for ${prediction.name}`}
-                                style={{ width: '100%', marginTop: '1rem' }}
+                                style={{ 
+                                  width: '80%',  // Reduced from 100%
+                                  marginTop: '1rem',
+                                  marginLeft: 'auto',
+                                  marginRight: 'auto',
+                                  display: 'block'
+                                }}
                               />
                             </div>
                           )}
