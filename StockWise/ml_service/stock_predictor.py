@@ -44,21 +44,28 @@ class StockPredictor:
                 try:
                     # Sort usage history by date
                     sorted_history = sorted(usage_history, 
-                        key=lambda x: datetime.fromisoformat(x['date'].replace('Z', '+00:00').replace('+00:00', ''))
+                        key=lambda x: datetime.fromisoformat(x['date'].replace('Z', ''))
                     )
                     
                     # Calculate total units used
                     total_used = sum(usage['quantity'] for usage in sorted_history)
                     
-                    # Get first date and current date (both timezone naive)
-                    first_date = datetime.fromisoformat(sorted_history[0]['date'].replace('Z', ''))
-                    current_date = datetime.now()
+                    # Get unique days where stock was actually used
+                    usage_dates = {
+                        datetime.fromisoformat(usage['date'].replace('Z', '')).date() 
+                        for usage in sorted_history
+                    }
+                    active_days = len(usage_dates)
                     
-                    # Calculate date range
-                    date_range = (current_date - first_date).days + 1
+                    # Calculate consumption rate based only on active usage days
+                    daily_consumption = total_used / active_days if active_days > 0 else 0
                     
-                    daily_consumption = total_used / date_range if date_range > 0 else total_used
-                    print(f"Debug - {data['name']}: Total used: {total_used}, Days: {date_range}, Rate: {daily_consumption}")
+                    self.logger.debug(f"""
+                        Item: {data['name']}
+                        Total used: {total_used} units
+                        Active usage days: {active_days}
+                        Daily consumption rate: {daily_consumption:.2f}
+                    """)
                     
                 except (ValueError, KeyError, IndexError) as e:
                     print(f"Error calculating consumption for {data['name']}: {e}")
@@ -125,29 +132,38 @@ class StockPredictor:
         predictions = []
         
         for _, item in data.iterrows():
-            X_pred = pd.DataFrame([[item['current_quantity'], item['price']]], 
-                                columns=['current_quantity', 'price'])
+            current_quantity = item['current_quantity']
+            daily_consumption = item['daily_consumption']
             
-            days_until_low = int(max(0, self.model.predict(X_pred)[0]))
+            # Calculate days until low using actual consumption data
+            if daily_consumption > 0:
+                days_until_low = int((current_quantity - 10) / daily_consumption)
+                days_until_low = max(0, days_until_low)  # Ensure non-negative
+            else:
+                # Fall back to ML prediction only if no usage data
+                X_pred = pd.DataFrame([[current_quantity, item['price']]], 
+                                    columns=['current_quantity', 'price'])
+                days_until_low = int(max(0, self.model.predict(X_pred)[0]))
             
-            # Add debug logging
-            print(f"Prediction for {item['name']}:")
-            print(f"- Current quantity: {item['current_quantity']}")
-            print(f"- Daily consumption: {item['daily_consumption']}")
-            print(f"- Days until low: {days_until_low}")
-            print(f"- Usage history: {len(item['used_stock'])} records")
-            
+            self.logger.debug(f"""
+                Prediction calculation for {item['name']}:
+                Current quantity: {current_quantity}
+                Daily consumption: {daily_consumption}
+                Target threshold: 10
+                Days until low: {days_until_low}
+            """)
+
             prediction = {
                 'product_id': item['product_id'],
                 'name': item['name'],
-                'current_quantity': item['current_quantity'],
+                'current_quantity': current_quantity,
                 'predicted_days_until_low': days_until_low,
                 'confidence_score': self._calculate_confidence(item),
                 'recommended_restock_date': (
                     datetime.now() + timedelta(days=days_until_low)
                 ).isoformat(),
                 'usage_history': item['used_stock'],
-                'daily_consumption': float(item['daily_consumption'])  # Make sure this is a float
+                'daily_consumption': float(daily_consumption)
             }
             predictions.append(prediction)
         
