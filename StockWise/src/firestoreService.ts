@@ -40,11 +40,8 @@ export interface InventoryItem {
   metadata: {
     addedBy: string;
     addedDate: string;
+    lastUpdated?: string;
   };
-  used_stock?: {
-    date: string;
-    quantity: number;
-  }[];
 }
 
 export interface Supplier {
@@ -176,10 +173,25 @@ export const getInventoryItems = (callback: (items: InventoryItem[]) => void) =>
 export const updateInventoryItem = async (id: string, updatedItem: Partial<InventoryItem>) => {
   try {
     const itemRef = doc(db, "inventoryItems", id);
-    await updateDoc(itemRef, updatedItem);
+    const itemDoc = await getDoc(itemRef);
+    
+    if (!itemDoc.exists()) {
+      throw new Error('Item not found');
+    }
+
+    const currentData = itemDoc.data();
+    await updateDoc(itemRef, {
+      ...updatedItem,
+      metadata: {
+        ...currentData.metadata,
+        ...updatedItem.metadata
+      }
+    });
+    
     console.log("Document updated with ID: ", id);
   } catch (error) {
     console.error("Error updating document: ", error);
+    throw error;
   }
 };
 

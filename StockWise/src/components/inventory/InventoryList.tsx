@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "./InventoryList.css";
 import { addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../../firestoreService';
 import { auth } from '../../../firebaseConfig';
-import { IonIcon, IonModal } from '@ionic/react';
+import { IonIcon, IonModal, IonInput, IonButton } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 
 interface InventoryItem {
@@ -26,11 +26,12 @@ interface InventoryItem {
   metadata: {
     addedBy: string;
     addedDate: string;
+    lastUpdated?: string;
   };
-  used_stock?: {  // Add this field
+  used_stock?: Array<{
     date: string;
     quantity: number;
-  }[];
+  }>;
 }
 
 interface InventoryListProps {
@@ -63,6 +64,9 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [unitsUsed, setUnitsUsed] = useState(1);
 
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+
   if (!items || items.length === 0) {
     return <div className="no-items">No inventory items found</div>;
   }
@@ -75,9 +79,7 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
   };
 
   const handleEdit = (item: InventoryItem) => {
-    setEditItemId(item.id);
-    // Set all the form values with the item's current values
-    setUpdatedItem(item);
+    setEditingItem(item);
     setName(item.name);
     setQuantity(item.quantity);
     setPrice(item.price);
@@ -85,11 +87,14 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     setCategory(item.category);
     setDimensions(item.dimensions);
     setLocation(item.location);
+    setShowEditModal(true);
   };
 
   const handleUpdate = async (id: string) => {
     try {
-      await updateInventoryItem(id, {
+      if (!editingItem) return;
+
+      const updatedData: Partial<InventoryItem> = {
         name,
         quantity,
         price,
@@ -97,9 +102,17 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
         category,
         dimensions,
         location,
-        metadata: updatedItem.metadata
-      });
-      setEditItemId(null); // Reset edit mode
+        metadata: {
+          addedBy: editingItem.metadata.addedBy, // Ensure required field
+          addedDate: editingItem.metadata.addedDate, // Ensure required field
+          lastUpdated: new Date().toISOString()
+        }
+      };
+
+      await updateInventoryItem(id, updatedData);
+      setShowEditModal(false);
+      setEditingItem(null);
+      
       // Reset form values
       setName("");
       setQuantity(0);
@@ -177,17 +190,23 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     if (selectedItem && unitsUsed > 0) {
       const newQuantity = selectedItem.quantity - unitsUsed;
       
-      // Format date properly for ISO string
-      const usageRecord = {
-        date: new Date().toISOString().replace(/\.[0-9]{3}Z$/, 'Z'),
-        quantity: unitsUsed
+      const updatedItem: Partial<InventoryItem> = {
+        quantity: Math.max(0, newQuantity),
+        metadata: {
+          addedBy: selectedItem.metadata.addedBy,
+          addedDate: selectedItem.metadata.addedDate,
+          lastUpdated: new Date().toISOString()
+        },
+        used_stock: [
+          ...(selectedItem.used_stock || []),
+          {
+            date: new Date().toISOString(),
+            quantity: unitsUsed
+          }
+        ]
       };
 
-      await updateInventoryItem(selectedItem.id, {
-        ...selectedItem,
-        quantity: Math.max(0, newQuantity),
-        used_stock: [...(selectedItem.used_stock || []), usageRecord]
-      });
+      await updateInventoryItem(selectedItem.id, updatedItem);
       
       setShowUseStockModal(false);
       setSelectedItem(null);
@@ -471,6 +490,126 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
             >
               Confirm
             </button>
+          </div>
+        </div>
+      </IonModal>
+      <IonModal isOpen={showEditModal} onDidDismiss={() => setShowEditModal(false)}>
+        <div className="modal-content">
+          <h2>Edit Item</h2>
+          <div className="form-section">
+            <h3>Basic Information</h3>
+            <div className="item-basic-info">
+              <div className="input-group">
+                <label>Name</label>
+                <IonInput
+                  value={name}
+                  onIonChange={e => setName(e.detail.value!)}
+                  placeholder="Item Name"
+                />
+              </div>
+              
+              <div className="input-group">
+                <label>Category</label>
+                <IonInput
+                  value={category}
+                  onIonChange={e => setCategory(e.detail.value!)}
+                  placeholder="Category"
+                />
+              </div>
+              
+              <div className="quantity-price-group">
+                <div className="input-group">
+                  <label>Quantity</label>
+                  <IonInput
+                    type="number"
+                    value={quantity}
+                    onIonChange={e => setQuantity(parseInt(e.detail.value!))}
+                    placeholder="Quantity"
+                  />
+                </div>
+                <div className="input-group">
+                  <label>Price (€)</label>
+                  <IonInput
+                    type="number"
+                    value={price}
+                    onIonChange={e => setPrice(parseFloat(e.detail.value!))}
+                    placeholder="Price"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h3>Location</h3>
+            <div className="location-inputs">
+              <div className="input-group">
+                <label>Aisle</label>
+                <IonInput
+                  value={location.aisle}
+                  onIonChange={e => setLocation({...location, aisle: e.detail.value!})}
+                  placeholder="Aisle"
+                />
+              </div>
+              <div className="input-group">
+                <label>Shelf</label>
+                <IonInput
+                  value={location.shelf}
+                  onIonChange={e => setLocation({...location, shelf: e.detail.value!})}
+                  placeholder="Shelf"
+                />
+              </div>
+              <div className="input-group">
+                <label>Section</label>
+                <IonInput
+                  value={location.section}
+                  onIonChange={e => setLocation({...location, section: e.detail.value!})}
+                  placeholder="Section"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h3>Dimensions</h3>
+            <div className="dimensions-inputs">
+              <div className="input-group">
+                <label>Length</label>
+                <IonInput
+                  type="number"
+                  value={dimensions.length}
+                  onIonChange={e => setDimensions({...dimensions, length: parseFloat(e.detail.value!)})}
+                  placeholder="Length"
+                />
+              </div>
+              <div className="input-group">
+                <label>Width</label>
+                <IonInput
+                  type="number"
+                  value={dimensions.width}
+                  onIonChange={e => setDimensions({...dimensions, width: parseFloat(e.detail.value!)})}
+                  placeholder="Width"
+                />
+              </div>
+              <div className="input-group">
+                <label>Height</label>
+                <IonInput
+                  type="number"
+                  value={dimensions.height}
+                  onIonChange={e => setDimensions({...dimensions, height: parseFloat(e.detail.value!)})}
+                  placeholder="Height"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="modal-actions">
+            <IonButton fill="outline" onClick={() => setShowEditModal(false)}>
+              Cancel
+            </IonButton>
+            <IonButton onClick={() => handleUpdate(editingItem!.id)}>
+              Save Changes
+            </IonButton>
           </div>
         </div>
       </IonModal>

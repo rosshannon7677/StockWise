@@ -343,6 +343,11 @@ input {
   padding: 1rem;
   display: flex;
   flex-direction: column;
+  padding: 2rem;
+  max-height: calc(90vh - 80px);
+  overflow-y: auto;
+  padding-bottom: 120px;
+  position: relative;
 }
 
 .modal-header {
@@ -430,4 +435,37 @@ ion-content {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--ion-color-light-shade);
+  padding: 1rem 2rem;
+  background: var(--ion-background-color);
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--ion-color-light-shade);
+  z-index: 1000;
+}
+
+.quantity-price-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.location-inputs,
+.dimensions-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+  font-weight: 500;
 }
