@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./SupplierList.css";
 import { addSupplier, updateSupplier, deleteSupplier } from '../../firestoreService';
-import { IonIcon, IonModal } from '@ionic/react';
+import { IonIcon, IonModal, IonInput, IonSelect, IonSelectOption, IonButton, IonTextarea } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 import { getSupplierLocation, GOOGLE_MAPS_API_KEY, WORKSHOP_LOCATION } from '../../services/mapsService';
 
@@ -33,11 +33,14 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
   const [notes, setNotes] = useState("");
   const [category, setCategory] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const itemsPerPage = 10;
 
   const [showMap, setShowMap] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [selectedDistance, setSelectedDistance] = useState<string>('');
+  const [searchAddress, setSearchAddress] = useState("");
 
   const supplierCategories = [
     'Timber',
@@ -65,13 +68,14 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
   };
 
   const handleEdit = (supplier: Supplier) => {
-    setEditSupplierId(supplier.id);
+    setEditingSupplier(supplier);
     setName(supplier.name);
     setEmail(supplier.email);
     setPhone(supplier.phone);
     setAddress(supplier.address);
+    setCategory(supplier.category);
     setNotes(supplier.notes || "");
-    setCategory(supplier.category || "");
+    setShowEditModal(true);
   };
 
   const handleUpdate = async (id: string) => {
@@ -84,8 +88,13 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
         notes,
         category
       });
+      
+      // Reset states
       setEditSupplierId(null);
+      setShowEditModal(false); // Close the modal
+      setEditingSupplier(null); // Clear editing supplier
       resetForm();
+      
     } catch (error) {
       console.error('Error updating supplier:', error);
     }
@@ -101,6 +110,26 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
       setShowMap(true);
     } catch (error) {
       console.error('Error:', error);
+    }
+  };
+
+  const handleAddressSearch = async () => {
+    try {
+      if (!searchAddress.trim()) {
+        alert('Please enter an address to search');
+        return;
+      }
+  
+      const { location, formattedAddress } = await getSupplierLocation(searchAddress);
+      setSelectedLocation({
+        ...location,
+        formattedAddress
+      });
+      setAddress(formattedAddress);
+      setSearchAddress(formattedAddress);
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert(error.message || 'Error finding location. Please try again.');
     }
   };
 
@@ -259,6 +288,99 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
               />
             </>
           )}
+        </div>
+      </IonModal>
+      <IonModal isOpen={showEditModal} onDidDismiss={() => setShowEditModal(false)}>
+        <div className="modal-content">
+          <h2>Edit Supplier</h2>
+          {editingSupplier && (
+            <div className="form-section">
+              <h3>Basic Information</h3>
+              <div className="supplier-basic-info">
+                <div className="input-group">
+                  <label>Company Name</label>
+                  <IonInput
+                    value={name}
+                    onIonChange={e => setName(e.detail.value!)}
+                    placeholder="Company Name"
+                  />
+                </div>
+                
+                <div className="input-group">
+                  <label>Category</label>
+                  <IonSelect 
+                    value={category}
+                    onIonChange={e => setCategory(e.detail.value)}
+                  >
+                    {supplierCategories.map(cat => (
+                      <IonSelectOption key={cat} value={cat}>
+                        {cat}
+                      </IonSelectOption>
+                    ))}
+                  </IonSelect>
+                </div>
+              </div>
+
+              <div className="contact-info-group">
+                <div className="input-group">
+                  <label>Email</label>
+                  <IonInput
+                    type="email"
+                    value={email}
+                    onIonChange={e => setEmail(e.detail.value!)}
+                    placeholder="Email"
+                  />
+                </div>
+                <div className="input-group">
+                  <label>Phone</label>
+                  <IonInput
+                    type="tel"
+                    value={phone}
+                    onIonChange={e => setPhone(e.detail.value!)}
+                    placeholder="Phone"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="form-section">
+            <h3>Address & Notes</h3>
+            <div className="address-input-container">
+              <IonInput
+                value={searchAddress}
+                onIonChange={e => setSearchAddress(e.detail.value!)}
+                placeholder="Search for supplier address..."
+              />
+              <IonButton 
+                size="small"
+                onClick={handleAddressSearch}
+              >
+                Search
+              </IonButton>
+            </div>
+            <IonTextarea
+              value={address}
+              onIonChange={e => setAddress(e.detail.value!)}
+              placeholder="Full address"
+              rows={3}
+            />
+            <IonTextarea
+              value={notes}
+              onIonChange={e => setNotes(e.detail.value!)}
+              placeholder="Additional notes..."
+              rows={3}
+            />
+          </div>
+
+          <div className="modal-actions">
+            <IonButton fill="outline" onClick={() => setShowEditModal(false)}>
+              Cancel
+            </IonButton>
+            <IonButton onClick={() => handleUpdate(editingSupplier!.id)}>
+              Save Changes
+            </IonButton>
+          </div>
         </div>
       </IonModal>
     </div>
