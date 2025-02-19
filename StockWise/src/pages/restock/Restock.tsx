@@ -19,25 +19,14 @@ import {
   cartOutline,
   analyticsOutline
 } from 'ionicons/icons';
-import { getInventoryItems, getStockPredictions } from '../../firestoreService';
+import { getInventoryItems, getStockPredictions, StockPrediction } from '../../firestoreService';
 import './Restock.css';
 
-// Add interface for usage history
+// Remove the local StockPrediction interface since we're importing it
+
 interface UsageRecord {
   date: string;
   quantity: number;
-}
-
-// Add interface for prediction
-interface StockPrediction {
-  product_id: string;
-  name: string;
-  current_quantity: number;
-  daily_consumption: number;
-  predicted_days_until_low: number;
-  confidence_score: number;
-  recommended_restock_date: string;
-  usage_history: UsageRecord[];
 }
 
 interface RestockSuggestion {
@@ -49,45 +38,50 @@ interface RestockSuggestion {
   category: string;
   urgency: 'high' | 'medium' | 'low';
   lastRestocked?: string;
+  confidence: number;
+  predicted_days_until_low: number;
 }
 
 const Restock: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
   const [restockSuggestions, setRestockSuggestions] = useState<RestockSuggestion[]>([]);
-  const [mlPredictions, setMlPredictions] = useState<any[]>([]);
-  const [predictions, setPredictions] = useState<any[]>([]);
+  const [mlPredictions, setMlPredictions] = useState<StockPrediction[]>([]);
+  const [predictions, setPredictions] = useState<StockPrediction[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [plotData, setPlotData] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch ML predictions
     const fetchPredictions = async () => {
-      const predictions = await getStockPredictions();
-      setMlPredictions(predictions);
-      setPredictions(predictions);
+      const fetchedPredictions = await getStockPredictions();
+      setMlPredictions(fetchedPredictions);
+      setPredictions(fetchedPredictions);
+      
+      const suggestions = fetchedPredictions.map(pred => ({
+        id: pred.product_id,
+        name: pred.name,
+        currentQuantity: pred.current_quantity,
+        recommendedQuantity: Math.ceil(pred.daily_consumption * 14),
+        price: pred.price,
+        category: pred.category,
+        // Fix: Type assertion for urgency
+        urgency: (pred.predicted_days_until_low < 7 
+          ? 'high' 
+          : pred.predicted_days_until_low < 14 
+            ? 'medium' 
+            : 'low') as 'high' | 'medium' | 'low',
+        lastRestocked: undefined,
+        confidence: pred.confidence_score,
+        predicted_days_until_low: pred.predicted_days_until_low
+      }));
+
+      const needsRestock = suggestions.filter(item => 
+        item.predicted_days_until_low < 14 || item.currentQuantity < 10
+      );
+      
+      setRestockSuggestions(needsRestock);
     };
 
     fetchPredictions();
-    
-    getInventoryItems((fetchedItems) => {
-      setItems(fetchedItems);
-      
-      // Calculate restock suggestions with proper type assertion
-      const suggestions = fetchedItems
-        .filter(item => item.quantity < 10)
-        .map(item => ({
-          id: item.id,
-          name: item.name,
-          currentQuantity: item.quantity,
-          recommendedQuantity: 20 - item.quantity,
-          price: item.price,
-          category: item.category,
-          urgency: item.quantity < 5 ? ('high' as const) : ('medium' as const),
-          lastRestocked: item.metadata?.addedDate
-        }));
-      
-      setRestockSuggestions(suggestions);
-    });
   }, []);
 
   const handleItemClick = async (itemName: string) => {
@@ -116,7 +110,6 @@ const Restock: React.FC = () => {
   return (
     <IonContent>
       <div className="dashboard-container">
-        <h1 className="dashboard-title">Restock Management</h1>
         
         <IonGrid>
           <IonRow>
@@ -171,8 +164,7 @@ const Restock: React.FC = () => {
             </IonCol>
           </IonRow>
 
-          <IonRow>
-            <IonCol sizeMd="8" sizeSm="12">
+            
               <IonCard className="dashboard-card">
                 <IonCardHeader>
                   <IonCardTitle>Restock Suggestions</IonCardTitle>
@@ -184,13 +176,17 @@ const Restock: React.FC = () => {
                         <div className="item-info">
                           <h3>{item.name}</h3>
                           <p>Current Stock: {item.currentQuantity}</p>
+                          <p>Daily Usage: {mlPredictions.find(p => p.product_id === item.id)?.daily_consumption.toFixed(2)} units</p>
                           <p>Recommended Order: {item.recommendedQuantity}</p>
-                          <p>Category: {item.category}</p>
+                          <p>Days until Low: {mlPredictions.find(p => p.product_id === item.id)?.predicted_days_until_low}</p>
                         </div>
                         <div className="item-actions">
                           <IonBadge color={item.urgency === 'high' ? 'danger' : 'warning'}>
                             {item.urgency.toUpperCase()}
                           </IonBadge>
+                          <div className="confidence-score">
+                            {(item.confidence * 100).toFixed(0)}% confidence
+                          </div>
                           <p className="cost">€{(item.recommendedQuantity * item.price).toFixed(2)}</p>
                           <IonButton size="small" fill="solid">
                             Order Now
@@ -201,34 +197,8 @@ const Restock: React.FC = () => {
                   </div>
                 </IonCardContent>
               </IonCard>
-            </IonCol>
-
-            <IonCol sizeMd="4" sizeSm="12">
-              <IonCard className="dashboard-card">
-                <IonCardHeader>
-                  <IonCardTitle>Restock Analysis</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <div className="analysis-stats">
-                    <div className="stat-item">
-                      <label>Average Restock Size:</label>
-                      <span>{(restockSuggestions.reduce((acc, item) => 
-                        acc + item.recommendedQuantity, 0) / restockSuggestions.length || 0).toFixed(0)} units</span>
-                    </div>
-                    <div className="stat-item">
-                      <label>Average Cost per Item:</label>
-                      <span>€{(totalRestockCost / restockSuggestions.length || 0).toFixed(2)}</span>
-                    </div>
-                    <div className="stat-item">
-                      <label>Urgent Items Cost:</label>
-                      <span>€{urgentItems.reduce((total, item) => 
-                        total + (item.recommendedQuantity * item.price), 0).toFixed(2)}</span>
-                    </div>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-          </IonRow>
+            
+          
 
           <IonRow>
             <IonCol sizeMd="12">

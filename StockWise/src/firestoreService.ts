@@ -134,7 +134,9 @@ export interface StockPrediction {
     date: string;
     quantity: number;
   }>;
-  daily_consumption: number;  // Remove optional flag if it should always be present
+  daily_consumption: number;
+  price: number;    // Add this
+  category: string; // Add this
 }
 
 // Initialize Firestore
