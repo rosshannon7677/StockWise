@@ -27,6 +27,19 @@ import { auth } from '../../../firebaseConfig';
 import { useIonRouter } from '@ionic/react';
 import { getInventoryItems, getStockPredictions, StockPrediction } from '../../firestoreService';
 
+// Define valid supplier categories
+const VALID_CATEGORIES = [
+  'Timber',
+  'Countertops',
+  'Tools',
+  'Paint',
+  'Edge/Trim',
+  'Screws/Nails'
+] as const;
+
+// Add type for the categories
+type ValidCategory = typeof VALID_CATEGORIES[number];
+
 interface InventoryItem {
   id: string;
   name: string;
@@ -148,6 +161,49 @@ const Home: React.FC = () => {
   const topProducts = [...inventoryItems]
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 5);
+
+  const suggestions = predictions.map(pred => {
+    // Parse numbers safely and ensure price is properly set
+    const currentQuantity = Number(pred.current_quantity) || 0;
+    const dailyConsumption = Number(pred.daily_consumption) || 0;
+    const price = Number(pred.price) || 0;
+    
+    // Debug price
+    console.log(`Item ${pred.name} price:`, pred.price);
+    
+    // Calculate recommended quantity based on ML predictions:
+    const daysToOrder = Math.max(14, pred.predicted_days_until_low * 2);
+    const safetyBuffer = Math.ceil(dailyConsumption * 7);
+    const recommendedQuantity = Math.max(
+      Math.ceil(dailyConsumption * daysToOrder) + safetyBuffer - currentQuantity,
+      0
+    );
+  
+    // Ensure price is properly passed and calculated
+    return {
+      id: pred.product_id,
+      name: pred.name,
+      currentQuantity: currentQuantity,
+      recommendedQuantity: recommendedQuantity,
+      price: Number(pred.price) || 0, // Ensure price is a number
+      category: VALID_CATEGORIES.find(cat => 
+        pred.category?.toLowerCase() === cat.toLowerCase()
+      ) as ValidCategory || 'Paint',
+      urgency: (pred.predicted_days_until_low < 7 
+        ? 'high' 
+        : pred.predicted_days_until_low < 14 
+          ? 'medium' 
+          : 'low') as 'high' | 'medium' | 'low',
+      lastRestocked: undefined,
+      confidence: pred.confidence_score,
+      predicted_days_until_low: pred.predicted_days_until_low,
+      dimensions: {
+        length: Number(pred.dimensions?.length) || 0,
+        width: Number(pred.dimensions?.width) || 0,
+        height: Number(pred.dimensions?.height) || 0
+      }
+    };
+  });
 
   return (
     <IonContent>

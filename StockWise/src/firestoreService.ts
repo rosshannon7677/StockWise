@@ -139,8 +139,13 @@ export interface StockPrediction {
     quantity: number;
   }>;
   daily_consumption: number;
-  price: number;    // Add this
-  category: string; // Add this
+  price: number;
+  category: string;
+  dimensions?: {  // Add dimensions property
+    length: number;
+    width: number;
+    height: number;
+  };
 }
 
 // Initialize Firestore
