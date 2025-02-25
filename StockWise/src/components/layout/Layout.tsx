@@ -122,7 +122,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <IonHeader>
             <IonToolbar className="header-toolbar">
               <IonTitle className="header-title">
-                StockWise Inventory Management
+                StockWise
               </IonTitle>
               <div className="header-actions">
                 {userName && (
