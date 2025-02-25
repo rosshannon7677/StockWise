@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../../../firebaseConfig';
-import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption, useIonRouter } from '@ionic/react';
+import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption, useIonRouter, IonAlert } from '@ionic/react';
 import { 
     chevronForwardOutline, 
     chevronBackOutline, 
@@ -62,6 +62,12 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   const [statusNotes, setStatusNotes] = useState<string>('');
   const router = useIonRouter();
 
+  // Add state for alerts
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+  const [showStatusAlert, setShowStatusAlert] = useState(false);
+  const [newStatus, setNewStatus] = useState<OrderStatus | null>(null);
+
   const toggleOrderExpansion = (orderId: string) => {
     setExpandedOrders(prev => 
       prev.includes(orderId) 
@@ -114,14 +120,10 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
     setEditedItems(newItems);
   };
 
+  // Modify handleDelete
   const handleDelete = async (orderId: string) => {
-    if (window.confirm('Are you sure you want to delete this order?')) {
-      try {
-        await deleteOrder(orderId);
-      } catch (error) {
-        console.error('Error deleting order:', error);
-      }
-    }
+    setOrderToDelete(orderId);
+    setShowDeleteAlert(true);
   };
 
   const generateEmailBody = (order: SupplierOrder): string => {
@@ -184,59 +186,10 @@ Hannons Kitchens`;
     doc.save(`order-${order.id}.pdf`);
   };
 
-  const handleStatusChange = async (newStatus: OrderStatus) => {
-    if (!editingOrder) return;
-  
-    try {
-      if (!Object.keys(statusConfig).includes(newStatus)) {
-        throw new Error('Invalid status');
-      }
-  
-      await updateOrderStatus(editingOrder.id, newStatus, statusNotes);
-      
-      // If status is received, automatically add items to inventory
-      if (newStatus === 'received') {
-        for (const item of editingOrder.items) {
-          await addInventoryItem({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            category: editingOrder.supplier.category, // Use supplier's category
-            dimensions: item.dimensions,
-            location: {
-              aisle: "",  // These can be updated later
-              shelf: "",
-              section: ""
-            },
-            metadata: {
-              addedBy: auth.currentUser?.email || 'unknown',
-              addedDate: new Date().toISOString()
-            }
-          });
-        }
-        alert('All items have been added to inventory');
-      }
-  
-      setEditingOrder({
-        ...editingOrder,
-        status: newStatus,
-        statusHistory: [
-          ...(editingOrder.statusHistory || []),
-          {
-            status: newStatus,
-            date: new Date().toISOString(),
-            updatedBy: auth.currentUser?.email || 'unknown',
-            notes: statusNotes
-          }
-        ]
-      });
-  
-      setStatusNotes('');
-      setShowEditModal(false);
-  
-    } catch (error) {
-      console.error('Error updating order status:', error);
-    }
+  // Modify handleStatusChange
+  const handleStatusChange = async (status: OrderStatus) => {
+    setNewStatus(status);
+    setShowStatusAlert(true);
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -465,6 +418,84 @@ Hannons Kitchens`;
           </div>
         </div>
       </IonModal>
+
+      {/* Add alerts */}
+      <IonAlert
+        isOpen={showDeleteAlert}
+        onDidDismiss={() => setShowDeleteAlert(false)}
+        header="Confirm Delete"
+        message="Are you sure you want to delete this order?"
+        buttons={[
+          {
+            text: 'Cancel',
+            role: 'cancel'
+          },
+          {
+            text: 'Delete',
+            role: 'confirm',
+            handler: async () => {
+              if (orderToDelete) {
+                try {
+                  await deleteOrder(orderToDelete);
+                } catch (error) {
+                  console.error('Error deleting order:', error);
+                }
+              }
+            }
+          }
+        ]}
+      />
+
+      <IonAlert
+        isOpen={showStatusAlert}
+        onDidDismiss={() => {
+          setShowStatusAlert(false);
+          setNewStatus(null);
+        }}
+        header="Confirm Status Change"
+        message={`Are you sure you want to change the status to ${newStatus?.replace('_', ' ').toUpperCase()}?`}
+        buttons={[
+          {
+            text: 'Cancel',
+            role: 'cancel'
+          },
+          {
+            text: 'Confirm',
+            role: 'confirm',
+            handler: async () => {
+              if (newStatus && editingOrder) {
+                try {
+                  await updateOrderStatus(editingOrder.id, newStatus, statusNotes);
+                  // Rest of your status update logic
+                  if (newStatus === 'received') {
+                    for (const item of editingOrder.items) {
+                      await addInventoryItem({
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: item.price,
+                        category: editingOrder.supplier.category,
+                        dimensions: item.dimensions,
+                        location: {
+                          aisle: "",
+                          shelf: "",
+                          section: ""
+                        },
+                        metadata: {
+                          addedBy: auth.currentUser?.email || 'unknown',
+                          addedDate: new Date().toISOString()
+                        }
+                      });
+                    }
+                    alert('All items have been added to inventory');
+                  }
+                } catch (error) {
+                  console.error('Error updating status:', error);
+                }
+              }
+            }
+          }
+        ]}
+      />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./SupplierList.css";
 import { addSupplier, updateSupplier, deleteSupplier } from '../../firestoreService';
-import { IonIcon, IonModal, IonInput, IonSelect, IonSelectOption, IonButton, IonTextarea } from '@ionic/react';
+import { IonIcon, IonModal, IonInput, IonSelect, IonSelectOption, IonButton, IonTextarea, IonAlert } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 import { getSupplierLocation, GOOGLE_MAPS_API_KEY, WORKSHOP_LOCATION } from '../../services/mapsService';
 
@@ -42,6 +42,10 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
   const [selectedDistance, setSelectedDistance] = useState<string>('');
   const [searchAddress, setSearchAddress] = useState("");
 
+  // Add state for delete alert
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [supplierToDelete, setSupplierToDelete] = useState<string | null>(null);
+
   const supplierCategories = [
     'Timber',
     'Countertops',
@@ -60,11 +64,10 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
     { field: 'actions', headerName: 'Actions', width: '10%' }
   ];
 
+  // Update handleDelete
   const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this supplier?");
-    if (confirmDelete) {
-      await deleteSupplier(id);
-    }
+    setSupplierToDelete(id);
+    setShowDeleteAlert(true);
   };
 
   const handleEdit = (supplier: Supplier) => {
@@ -383,6 +386,27 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
           </div>
         </div>
       </IonModal>
+      <IonAlert
+        isOpen={showDeleteAlert}
+        onDidDismiss={() => setShowDeleteAlert(false)}
+        header="Confirm Delete"
+        message="Are you sure you want to delete this supplier?"
+        buttons={[
+          {
+            text: 'Cancel',
+            role: 'cancel'
+          },
+          {
+            text: 'Delete',
+            role: 'confirm',
+            handler: async () => {
+              if (supplierToDelete) {
+                await deleteSupplier(supplierToDelete);
+              }
+            }
+          }
+        ]}
+      />
     </div>
   );
 };

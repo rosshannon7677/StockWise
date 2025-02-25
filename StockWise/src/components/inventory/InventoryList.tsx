@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "./InventoryList.css";
 import { addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../../firestoreService';
 import { auth } from '../../../firebaseConfig';
-import { IonIcon, IonModal, IonInput, IonButton } from '@ionic/react';
+import { IonIcon, IonModal, IonInput, IonButton, IonAlert } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 
 interface InventoryItem {
@@ -67,15 +67,18 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
+  // Add state for delete alert
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+
   if (!items || items.length === 0) {
     return <div className="no-items">No inventory items found</div>;
   }
 
+  // Update handleDelete
   const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
-    if (confirmDelete) {
-      await deleteInventoryItem(id);
-    }
+    setItemToDelete(id);
+    setShowDeleteAlert(true);
   };
 
   const handleEdit = (item: InventoryItem) => {
@@ -613,6 +616,27 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
           </div>
         </div>
       </IonModal>
+      <IonAlert
+        isOpen={showDeleteAlert}
+        onDidDismiss={() => setShowDeleteAlert(false)}
+        header="Confirm Delete"
+        message="Are you sure you want to delete this item?"
+        buttons={[
+          {
+            text: 'Cancel',
+            role: 'cancel'
+          },
+          {
+            text: 'Delete',
+            role: 'confirm',
+            handler: async () => {
+              if (itemToDelete) {
+                await deleteInventoryItem(itemToDelete);
+              }
+            }
+          }
+        ]}
+      />
     </div>
   );
 };
