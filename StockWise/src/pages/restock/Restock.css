@@ -60,6 +60,12 @@
   margin: 0;
 }
 
+.unit-price {
+  font-size: 0.8em;
+  color: var(--ion-color-medium);
+  margin-left: 0.5rem;
+}
+
 .analysis-stats {
   display: flex;
   flex-direction: column;

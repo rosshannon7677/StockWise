@@ -19,7 +19,9 @@ import {
   cartOutline,
   analyticsOutline
 } from 'ionicons/icons';
-import { getInventoryItems, getStockPredictions, StockPrediction } from '../../firestoreService';
+import { getInventoryItems, getStockPredictions, StockPrediction, addOrder, getSuppliers, SupplierOrder} from '../../firestoreService';
+import { auth } from '../../../firebaseConfig';
+import { useIonRouter } from '@ionic/react';
 import './Restock.css';
 
 // Remove the local StockPrediction interface since we're importing it
@@ -40,7 +42,30 @@ interface RestockSuggestion {
   lastRestocked?: string;
   confidence: number;
   predicted_days_until_low: number;
+  dimensions?: {  // Add dimensions property
+    length: number;
+    width: number;
+    height: number;
+  };
 }
+
+interface Supplier {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  category: string;
+}
+
+// First, ensure VALID_CATEGORIES matches exactly with supplier categories
+const VALID_CATEGORIES = [
+  'Timber',
+  'Paint',
+  'Edge/Trim',
+  'Countertops',
+  'Tools',
+  'Screws/Nails'
+];
 
 const Restock: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -49,39 +74,79 @@ const Restock: React.FC = () => {
   const [predictions, setPredictions] = useState<StockPrediction[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [plotData, setPlotData] = useState<string | null>(null);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const router = useIonRouter();
 
   useEffect(() => {
     const fetchPredictions = async () => {
       const fetchedPredictions = await getStockPredictions();
+      console.log('Fetched predictions:', fetchedPredictions); // Debug log
+      
       setMlPredictions(fetchedPredictions);
       setPredictions(fetchedPredictions);
       
-      const suggestions = fetchedPredictions.map(pred => ({
-        id: pred.product_id,
-        name: pred.name,
-        currentQuantity: pred.current_quantity,
-        recommendedQuantity: Math.ceil(pred.daily_consumption * 14),
-        price: pred.price,
-        category: pred.category,
-        // Fix: Type assertion for urgency
-        urgency: (pred.predicted_days_until_low < 7 
-          ? 'high' 
-          : pred.predicted_days_until_low < 14 
-            ? 'medium' 
-            : 'low') as 'high' | 'medium' | 'low',
-        lastRestocked: undefined,
-        confidence: pred.confidence_score,
-        predicted_days_until_low: pred.predicted_days_until_low
-      }));
+      const suggestions = fetchedPredictions.map(pred => {
+        // Parse numbers safely
+        const currentQuantity = Number(pred.current_quantity) || 0;
+        const dailyConsumption = Number(pred.daily_consumption) || 0;
+        const price = Number(pred.price) || 0;
 
-      const needsRestock = suggestions.filter(item => 
-        item.predicted_days_until_low < 14 || item.currentQuantity < 10
-      );
-      
-      setRestockSuggestions(needsRestock);
+        // New recommended quantity calculation:
+        // 1. Calculate base need (7 days instead of 14)
+        // 2. Add smaller safety buffer (3 days)
+        // 3. Subtract current quantity
+        // 4. Ensure minimum order size
+        const daysToStock = 7; // Reduced from 14 to 7 days
+        const safetyBuffer = Math.ceil(dailyConsumption * 3); // 3 days safety stock
+        const recommendedQuantity = Math.max(
+          Math.ceil((dailyConsumption * daysToStock) + safetyBuffer - currentQuantity),
+          5 // Minimum order size
+        );
+
+        console.log(`Processing ${pred.name}:`, {
+          currentQuantity,
+          dailyConsumption,
+          recommendedQuantity,
+          price
+        });
+
+        return {
+          id: pred.product_id,
+          name: pred.name,
+          currentQuantity,
+          recommendedQuantity,
+          price, // Set the item price
+          category: VALID_CATEGORIES.find(cat => 
+            pred.category?.toLowerCase() === cat.toLowerCase()
+          ) || 'Paint',
+          urgency: pred.predicted_days_until_low < 7 
+            ? 'high' 
+            : pred.predicted_days_until_low < 14 
+              ? 'medium' 
+              : 'low',
+          confidence: pred.confidence_score,
+          predicted_days_until_low: pred.predicted_days_until_low,
+          dimensions: pred.dimensions || {
+            length: 0,
+            width: 0,
+            height: 0
+          }
+        } as RestockSuggestion;
+      });
+
+      // Log suggestions for debugging
+      console.log('Generated suggestions:', suggestions);
+
+      setRestockSuggestions(suggestions);
     };
 
     fetchPredictions();
+  }, []);
+
+  useEffect(() => {
+    getSuppliers((fetchedSuppliers) => {
+      setSuppliers(fetchedSuppliers);
+    });
   }, []);
 
   const handleItemClick = async (itemName: string) => {
@@ -98,6 +163,81 @@ const Restock: React.FC = () => {
     } catch (error) {
       console.error('Error fetching plot:', error);
       setPlotData(null);
+    }
+  };
+
+  const handleOrderNow = async (item: RestockSuggestion) => {
+    try {
+      // Debug logs
+      console.log('Item category:', item.category);
+      console.log('Available suppliers:', suppliers);
+      console.log('Item details:', item); // Add this to debug
+
+      const supplier = suppliers.find(s => 
+        s.category.toLowerCase() === item.category.toLowerCase()
+      );
+      
+      if (!supplier) {
+        const availableCategories = Array.from(new Set(suppliers.map(s => s.category)));
+        alert(
+          `Please select a supplier category for ${item.name}:\n` +
+          `Available categories: ${availableCategories.join(', ')}`
+        );
+        return;
+      }
+
+      // Calculate total with proper type checking
+      const quantity = Number(item.recommendedQuantity) || 0;
+      const price = Number(item.price) || 0;
+      const totalAmount = quantity * price;
+
+      // Ensure all required fields are defined with proper number conversion
+      const orderData: Omit<SupplierOrder, 'id'> = {
+        supplier: {
+          id: supplier.id || '',
+          name: supplier.name || '',
+          email: supplier.email || '',
+          phone: supplier.phone || '',
+          category: supplier.category || ''
+        },
+        items: [{
+          itemId: item.id || '',
+          name: item.name || '',
+          quantity: quantity,
+          price: price,
+          dimensions: {
+            length: Number(item.dimensions?.length) || 0,
+            width: Number(item.dimensions?.width) || 0,
+            height: Number(item.dimensions?.height) || 0
+          }
+        }],
+        status: 'pending',
+        totalAmount: totalAmount,
+        orderDate: new Date().toISOString(),
+        statusHistory: [{
+          status: 'pending',
+          date: new Date().toISOString(),
+          updatedBy: auth.currentUser?.email || 'unknown',
+          notes: `Auto-generated from ML restock suggestion. Confidence: ${((item.confidence || 0) * 100).toFixed(0)}%`
+        }],
+        metadata: {
+          addedBy: auth.currentUser?.email || 'unknown',
+          addedDate: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        }
+      };
+
+      // Debug log
+      console.log('Creating order with data:', orderData);
+
+      await addOrder(orderData);
+      alert('Order created successfully!');
+      
+      // Fix router navigation
+      router.push('/orders', 'root', 'replace');
+    } catch (error) {
+      console.error('Error creating order:', error);
+      alert('Failed to create order. Please try again.');
     }
   };
 
@@ -187,8 +327,16 @@ const Restock: React.FC = () => {
                           <div className="confidence-score">
                             {(item.confidence * 100).toFixed(0)}% confidence
                           </div>
-                          <p className="cost">€{(item.recommendedQuantity * item.price).toFixed(2)}</p>
-                          <IonButton size="small" fill="solid">
+                          <p className="cost">
+                            €{(item.price * item.recommendedQuantity).toFixed(2)}
+                            {/* Add unit price */}
+                            <span className="unit-price">(€{item.price.toFixed(2)} each)</span>
+                          </p>
+                          <IonButton 
+                            size="small" 
+                            onClick={() => handleOrderNow(item)}
+                            disabled={!suppliers.length}
+                          >
                             Order Now
                           </IonButton>
                         </div>
