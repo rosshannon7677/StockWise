@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
+import { auth } from '../../../firebaseConfig';
 import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
-import { chevronForwardOutline, chevronBackOutline, chevronDownOutline } from 'ionicons/icons';
+import { 
+    chevronForwardOutline, 
+    chevronBackOutline, 
+    chevronDownOutline,
+    timeOutline,
+    paperPlaneOutline,
+    checkmarkCircleOutline,
+    carOutline,
+    archiveOutline,
+    checkmarkDoneCircleOutline,
+    closeCircleOutline
+} from 'ionicons/icons';
 import './OrderList.css';
-import { SupplierOrder, deleteOrder, updateOrder } from '../../firestoreService';
+import { SupplierOrder, deleteOrder, updateOrder, updateOrderStatus } from '../../firestoreService';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import autoTable from 'jspdf-autotable';
@@ -14,6 +26,18 @@ declare module 'jspdf' {
     autoTable: (options: UserOptions) => jsPDF;
   }
 }
+
+type OrderStatus = 'pending' | 'sent' | 'confirmed' | 'shipped' | 'partially_received' | 'received' | 'canceled';
+
+const statusConfig: Record<OrderStatus, { color: string; icon: string }> = {
+    pending: { color: 'warning', icon: timeOutline },
+    sent: { color: 'primary', icon: paperPlaneOutline },
+    confirmed: { color: 'secondary', icon: checkmarkCircleOutline },
+    shipped: { color: 'tertiary', icon: carOutline },
+    partially_received: { color: 'warning', icon: archiveOutline },
+    received: { color: 'success', icon: checkmarkDoneCircleOutline },
+    canceled: { color: 'danger', icon: closeCircleOutline }
+};
 
 interface OrderListProps {
   orders: SupplierOrder[];
@@ -35,6 +59,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
     };
   }[]>([]);
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
+  const [statusNotes, setStatusNotes] = useState<string>('');
 
   const toggleOrderExpansion = (orderId: string) => {
     setExpandedOrders(prev => 
@@ -158,6 +183,38 @@ Hannons Kitchens`;
     doc.save(`order-${order.id}.pdf`);
   };
 
+  const handleStatusChange = async (newStatus: OrderStatus) => {
+    if (!editingOrder) return;
+  
+    try {
+      // Create type guard for status
+      if (!Object.keys(statusConfig).includes(newStatus)) {
+        throw new Error('Invalid status');
+      }
+  
+      await updateOrderStatus(editingOrder.id, newStatus, statusNotes);
+      
+      // Update local state
+      setEditingOrder({
+        ...editingOrder,
+        status: newStatus,
+        statusHistory: [
+          ...(editingOrder.statusHistory || []),
+          {
+            status: newStatus,
+            date: new Date().toISOString(),
+            updatedBy: auth.currentUser?.email || 'unknown',
+            notes: statusNotes
+          }
+        ]
+      });
+  
+      setStatusNotes(''); // Reset notes after update
+    } catch (error) {
+      console.error('Error updating order status:', error);
+    }
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
@@ -175,10 +232,7 @@ Hannons Kitchens`;
       <div className="table-body">
         {currentOrders.map((order) => (
           <div key={order.id}>
-            <div 
-              className="table-row"
-              onClick={() => toggleOrderExpansion(order.id)}
-            >
+            <div className="table-row" onClick={() => toggleOrderExpansion(order.id)}>
               <div className="table-cell">{order.supplier.name}</div>
               <div className="table-cell">
                 {order.items.length} items
@@ -190,6 +244,12 @@ Hannons Kitchens`;
               <div className="table-cell">€{order.totalAmount.toFixed(2)}</div>
               <div className="table-cell">
                 {new Date(order.orderDate).toLocaleDateString()}
+              </div>
+              <div className="table-cell">
+                <span className={`status-badge ${order.status}`}>
+                  <IonIcon icon={statusConfig[order.status as OrderStatus].icon} />
+                  {order.status.replace('_', ' ').toUpperCase()}
+                </span>
               </div>
               <div className="actions-cell">
                 <button 
@@ -334,6 +394,41 @@ Hannons Kitchens`;
               <div className="order-total">
                 Total: €{editedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
               </div>
+              <div className="status-section">
+                <h3>Order Status</h3>
+                <IonSelect
+                  value={editingOrder.status}
+                  onIonChange={e => handleStatusChange(e.detail.value)}
+                >
+                  {Object.keys(statusConfig).map(status => (
+                    <IonSelectOption key={status} value={status}>
+                      <IonIcon icon={statusConfig[status as OrderStatus].icon} />
+                      {status.replace('_', ' ').toUpperCase()}
+                    </IonSelectOption>
+                  ))}
+                </IonSelect>
+                <IonInput
+                  placeholder="Add status notes (optional)"
+                  value={statusNotes}
+                  onIonChange={e => setStatusNotes(e.detail.value!)}
+                />
+              </div>
+
+              {editingOrder.statusHistory && (
+                <div className="status-history">
+                  <h4>Status History</h4>
+                  {editingOrder.statusHistory.map((history, index) => (
+                    <div key={index} className="status-update">
+                      <span className="status">{history.status}</span>
+                      <span className="date">
+                        {new Date(history.date).toLocaleDateString()}
+                      </span>
+                      <span className="updater">{history.updatedBy}</span>
+                      {history.notes && <p className="notes">{history.notes}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           <div className="modal-actions">

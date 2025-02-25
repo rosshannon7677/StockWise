@@ -313,3 +313,42 @@
   border: 1px solid #000;
   border-radius: 4px;
 }
+
+.status-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+}
+
+.status-history {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+}
+
+.status-update {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--ion-color-medium-tint);
+}
+
+.status-update .status {
+  font-weight: 600;
+  color: var(--ion-color-primary);
+}
+
+.status-update .date,
+.status-update .updater {
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}
+
+.status-update .notes {
+  margin: 0.5rem 0;
+  font-style: italic;
+  color: var(--ion-color-dark);
+}
