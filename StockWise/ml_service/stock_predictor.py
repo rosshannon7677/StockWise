@@ -38,7 +38,22 @@ class StockPredictor:
         stock_data = []
         for doc in docs:
             data = doc.to_dict()
+            # Debug log for price
+            self.logger.debug(f"Raw price for {data['name']}: {data.get('price')}")
+            
+            # Ensure price is properly converted to float
+            try:
+                price = float(data.get('price', 0))
+            except (TypeError, ValueError):
+                price = 0.0
+                self.logger.warning(f"Invalid price for {data['name']}, defaulting to 0")
+            
+            self.logger.debug(f"Processed price for {data['name']}: €{price}")
+            
             usage_history = data.get('used_stock', [])
+            
+            # Debug price info
+            self.logger.debug(f"Fetched price for {data['name']}: {data.get('price', 0)}")
             
             if usage_history:
                 try:
@@ -62,6 +77,7 @@ class StockPredictor:
                     
                     self.logger.debug(f"""
                         Item: {data['name']}
+                        Price: €{data.get('price', 0)}
                         Total used: {total_used} units
                         Active usage days: {active_days}
                         Daily consumption rate: {daily_consumption:.2f}
@@ -80,8 +96,8 @@ class StockPredictor:
                 'product_id': doc.id,
                 'name': data['name'],
                 'current_quantity': data['quantity'],
-                'price': data['price'],
-                'category': data['category'],
+                'price': price,  # Add processed price
+                'category': data.get('category', ''),
                 'daily_consumption': round(daily_consumption, 2),
                 'days_until_low': days_until_low,
                 'used_stock': usage_history,
@@ -124,50 +140,53 @@ class StockPredictor:
         return self.model.score(X_test, y_test)
     
     def predict_stock_levels(self):
-        if not self.is_trained:
-            self.train_model()
-            self.is_trained = True
+        try:
+            if not self.is_trained:
+                self.train_model()
+                self.is_trained = True
+                
+            data = self.fetch_inventory_data()
+            predictions = []
             
-        data = self.fetch_inventory_data()
-        predictions = []
-        
-        for _, item in data.iterrows():
-            current_quantity = item['current_quantity']
-            daily_consumption = item['daily_consumption']
-            
-            # Calculate days until low using actual consumption data
-            if daily_consumption > 0:
-                days_until_low = int((current_quantity - 10) / daily_consumption)
-                days_until_low = max(0, days_until_low)  # Ensure non-negative
-            else:
-                # Fall back to ML prediction only if no usage data
-                X_pred = pd.DataFrame([[current_quantity, item['price']]], 
-                                    columns=['current_quantity', 'price'])
-                days_until_low = int(max(0, self.model.predict(X_pred)[0]))
-            
-            self.logger.debug(f"""
-                Prediction calculation for {item['name']}:
-                Current quantity: {current_quantity}
-                Daily consumption: {daily_consumption}
-                Target threshold: 10
-                Days until low: {days_until_low}
-            """)
+            for _, item in data.iterrows():
+                current_quantity = item['current_quantity']
+                daily_consumption = item['daily_consumption']
+                price = float(item['price'])
+                
+                # Calculate days_until_low before using it
+                days_until_low = self._calculate_days_until_low(
+                    {'quantity': current_quantity}, 
+                    daily_consumption
+                )
+                
+                self.logger.debug(f"""
+                    Prediction calculation for {item['name']}:
+                    Current quantity: {current_quantity}
+                    Daily consumption: {daily_consumption}
+                    Price: €{price}
+                    Days until low: {days_until_low}
+                """)
 
-            prediction = {
-                'product_id': item['product_id'],
-                'name': item['name'],
-                'current_quantity': current_quantity,
-                'predicted_days_until_low': days_until_low,
-                'confidence_score': self._calculate_confidence(item),
-                'recommended_restock_date': (
-                    datetime.now() + timedelta(days=days_until_low)
-                ).isoformat(),
-                'usage_history': item['used_stock'],
-                'daily_consumption': float(daily_consumption)
-            }
-            predictions.append(prediction)
-        
-        return predictions
+                prediction = {
+                    'product_id': item['product_id'],
+                    'name': item['name'],
+                    'current_quantity': current_quantity,
+                    'predicted_days_until_low': days_until_low,
+                    'confidence_score': self._calculate_confidence(item),
+                    'recommended_restock_date': (
+                        datetime.now() + timedelta(days=days_until_low)
+                    ).isoformat(),
+                    'usage_history': item['used_stock'],
+                    'daily_consumption': float(daily_consumption),
+                    'price': price,
+                    'category': item['category']
+                }
+                predictions.append(prediction)
+            
+            return predictions
+        except Exception as e:
+            self.logger.error(f"Error in predict_stock_levels: {e}", exc_info=True)
+            raise
     
     def _calculate_confidence(self, item):
         # Base confidence on usage history and current quantity
