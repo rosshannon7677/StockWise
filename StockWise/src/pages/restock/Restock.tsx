@@ -62,10 +62,10 @@ const VALID_CATEGORIES = [
   'Timber',
   'Paint',
   'Edge/Trim',
-  'Countertops',
+  'Countertops',  // Make sure this matches exactly
   'Tools',
   'Screws/Nails'
-];
+] as const;
 
 const Restock: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -171,17 +171,21 @@ const Restock: React.FC = () => {
       // Debug logs
       console.log('Item category:', item.category);
       console.log('Available suppliers:', suppliers);
-      console.log('Item details:', item); // Add this to debug
+      console.log('Item details:', item);
 
+      // Case-insensitive category matching
       const supplier = suppliers.find(s => 
-        s.category.toLowerCase() === item.category.toLowerCase()
+        s.category.toLowerCase() === item.category.toLowerCase() ||
+        s.category.replace(/[^a-zA-Z]/g, '').toLowerCase() === 
+        item.category.replace(/[^a-zA-Z]/g, '').toLowerCase()
       );
       
       if (!supplier) {
         const availableCategories = Array.from(new Set(suppliers.map(s => s.category)));
         alert(
           `Please select a supplier category for ${item.name}:\n` +
-          `Available categories: ${availableCategories.join(', ')}`
+          `Available categories: ${availableCategories.join(', ')}\n` +
+          `Current category: ${item.category}`
         );
         return;
       }
