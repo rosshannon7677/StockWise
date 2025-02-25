@@ -40,6 +40,9 @@ const InventoryManagement: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [pendingItemData, setPendingItemData] = useState<any>(null);
+  const [pendingItems, setPendingItems] = useState<any[]>([]);
+  const [currentPendingIndex, setCurrentPendingIndex] = useState(0);
   const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized')));
 
   useEffect(() => {
@@ -73,6 +76,27 @@ const InventoryManagement: React.FC = () => {
     setFilteredItems(sorted);
   }, [searchText, sortBy, items, selectedCategory]);
 
+  useEffect(() => {
+    const storedItems = localStorage.getItem('pendingInventoryItems');
+    if (storedItems) {
+      try {
+        const items = JSON.parse(storedItems);
+        setPendingItems(items);
+        setShowAddModal(true);
+        // Set the first item as initial data
+        setPendingItemData({
+          name: items[0].name,
+          quantity: items[0].quantity,
+          price: items[0].price,
+          category: items[0].category,
+          dimensions: items[0].dimensions
+        });
+      } catch (error) {
+        console.error('Error parsing pending items:', error);
+      }
+    }
+  }, []);
+
   const handleSearchChange = (event: CustomEvent<SearchbarInputEventDetail>) => {
     const value = event.detail.value || '';
     setSearchText(value);
@@ -95,6 +119,42 @@ const InventoryManagement: React.FC = () => {
   const selectSuggestion = (value: string) => {
     setSearchText(value);
     setShowSuggestions(false);
+  };
+
+  const handleAddItemClose = () => {
+    // First, check if there are more items to add
+    if (currentPendingIndex < pendingItems.length - 1) {
+      // Increment index for next item
+      const nextIndex = currentPendingIndex + 1;
+      setCurrentPendingIndex(nextIndex);
+
+
+      // Update modal with next item's data
+      setPendingItemData({
+        name: pendingItems[nextIndex].name,
+        quantity: pendingItems[nextIndex].quantity,
+        price: pendingItems[nextIndex].price,
+        category: pendingItems[nextIndex].category || '',
+        dimensions: pendingItems[nextIndex].dimensions || {
+          length: 0,
+          width: 0,
+          height: 0
+        }
+      });
+
+      // Reset form fields in AddItem component by forcing a re-render
+      setShowAddModal(false);
+      setTimeout(() => {
+        setShowAddModal(true);
+      }, 100);
+    } else {
+      // Clean up after all items are added
+      setShowAddModal(false);
+      setPendingItemData(null);
+      setPendingItems([]);
+      setCurrentPendingIndex(0);
+      localStorage.removeItem('pendingInventoryItems');
+    }
   };
 
   return (
@@ -163,12 +223,20 @@ const InventoryManagement: React.FC = () => {
       </div>
       <IonModal 
         isOpen={showAddModal} 
-        onDidDismiss={() => setShowAddModal(false)}
+        onDidDismiss={() => {
+          setShowAddModal(false);
+          setPendingItemData(null);
+          setPendingItems([]);
+          setCurrentPendingIndex(0);
+          localStorage.removeItem('pendingInventoryItems');
+        }}
         className="add-item-modal"
       >
         <AddItem 
-          onClose={() => setShowAddModal(false)} 
+          onClose={handleAddItemClose}
           categories={categories}
+          initialData={pendingItemData}
+          itemNumber={`${currentPendingIndex + 1}/${pendingItems.length}`}
         />
       </IonModal>
     </IonContent>

@@ -7,16 +7,28 @@ import { IonButton } from '@ionic/react';
 
 interface AddItemProps {
   onClose: () => void;
-  categories?: string[]; // Add this line
+  categories?: string[];
+  initialData?: {
+    name: string;
+    quantity: number;
+    price: number;
+    category: string;
+    dimensions: {
+      length: number;
+      width: number;
+      height: number;
+    };
+  };
+  itemNumber?: string;
 }
 
-const AddItem: React.FC<AddItemProps> = ({ onClose, categories = [] }) => {
-  const currentUser = auth.currentUser; // Add this line
-  const [name, setName] = useState("");
-  const [quantity, setQuantity] = useState(0);
-  const [price, setPrice] = useState(0);
-  const [category, setCategory] = useState("");
-  const [dimensions, setDimensions] = useState({
+const AddItem: React.FC<AddItemProps> = ({ onClose, categories = [], initialData, itemNumber }) => {
+  const currentUser = auth.currentUser;
+  const [name, setName] = useState(initialData?.name || "");
+  const [quantity, setQuantity] = useState(initialData?.quantity || 0);
+  const [price, setPrice] = useState(initialData?.price || 0);
+  const [category, setCategory] = useState(initialData?.category || "");
+  const [dimensions, setDimensions] = useState(initialData?.dimensions || {
     length: 0,
     width: 0,
     height: 0
@@ -55,44 +67,51 @@ const AddItem: React.FC<AddItemProps> = ({ onClose, categories = [] }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    await addInventoryItem({
-      name,
-      quantity,
-      price,
-      category,
-      dimensions: {
-        length: dimensions.length,
-        width: dimensions.width,
-        height: dimensions.height
-      },
-      location: {
-        aisle: location.aisle,
-        shelf: location.shelf,
-        section: location.section
-      },
-      metadata: {
-        addedBy: currentUser?.email || 'unknown',
-        addedDate: new Date().toISOString()
-      }
-    });
+    try {
+      await addInventoryItem({
+        name,
+        quantity,
+        price,
+        category,
+        dimensions: {
+          length: dimensions.length,
+          width: dimensions.width,
+          height: dimensions.height
+        },
+        location: {
+          aisle: location.aisle,
+          shelf: location.shelf,
+          section: location.section
+        },
+        metadata: {
+          addedBy: currentUser?.email || 'unknown',
+          addedDate: new Date().toISOString()
+        }
+      });
 
-    // Reset form
-    setName("");
-    setQuantity(0);
-    setPrice(0);
-    setCategory("");
-    setDimensions({ length: 0, width: 0, height: 0 });
-    setLocation({ aisle: "", shelf: "", section: "" });
-    
-    onClose(); // Close the modal after successful submission
-    alert("Item added successfully!");
+      // Reset form fields
+      setName("");
+      setQuantity(0);
+      setPrice(0);
+      setCategory("");
+      setDimensions({ length: 0, width: 0, height: 0 });
+      setLocation({ aisle: "", shelf: "", section: "" });
+
+      // Call onClose to trigger next item instead of closing modal
+      onClose();
+
+    } catch (error) {
+      console.error('Error adding item:', error);
+    }
   };
 
   return (
     <div className="modal-content">
       <div className="modal-header">
-        <h3>Add New Inventory Item</h3>
-        <IonButton fill="clear" onClick={onClose}>Close</IonButton>
+        <h3>Add New Inventory Item {itemNumber && `(${itemNumber})`}</h3>
+        <IonButton fill="clear" onClick={onClose}>
+          {itemNumber ? 'Skip' : 'Close'}
+        </IonButton>
       </div>
       <form onSubmit={handleSubmit} className="add-item-form">
         {/* Basic Information */}
