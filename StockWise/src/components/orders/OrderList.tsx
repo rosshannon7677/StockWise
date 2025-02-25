@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../../../firebaseConfig';
-import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
+import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption, useIonRouter } from '@ionic/react';
 import { 
     chevronForwardOutline, 
     chevronBackOutline, 
@@ -14,7 +14,7 @@ import {
     closeCircleOutline
 } from 'ionicons/icons';
 import './OrderList.css';
-import { SupplierOrder, deleteOrder, updateOrder, updateOrderStatus } from '../../firestoreService';
+import { SupplierOrder, deleteOrder, updateOrder, updateOrderStatus, addInventoryItem } from '../../firestoreService';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import autoTable from 'jspdf-autotable';
@@ -60,6 +60,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   }[]>([]);
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
   const [statusNotes, setStatusNotes] = useState<string>('');
+  const router = useIonRouter();
 
   const toggleOrderExpansion = (orderId: string) => {
     setExpandedOrders(prev => 
@@ -187,14 +188,35 @@ Hannons Kitchens`;
     if (!editingOrder) return;
   
     try {
-      // Create type guard for status
       if (!Object.keys(statusConfig).includes(newStatus)) {
         throw new Error('Invalid status');
       }
   
       await updateOrderStatus(editingOrder.id, newStatus, statusNotes);
       
-      // Update local state
+      // If status is received, automatically add items to inventory
+      if (newStatus === 'received') {
+        for (const item of editingOrder.items) {
+          await addInventoryItem({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            category: editingOrder.supplier.category, // Use supplier's category
+            dimensions: item.dimensions,
+            location: {
+              aisle: "",  // These can be updated later
+              shelf: "",
+              section: ""
+            },
+            metadata: {
+              addedBy: auth.currentUser?.email || 'unknown',
+              addedDate: new Date().toISOString()
+            }
+          });
+        }
+        alert('All items have been added to inventory');
+      }
+  
       setEditingOrder({
         ...editingOrder,
         status: newStatus,
@@ -209,7 +231,9 @@ Hannons Kitchens`;
         ]
       });
   
-      setStatusNotes(''); // Reset notes after update
+      setStatusNotes('');
+      setShowEditModal(false);
+  
     } catch (error) {
       console.error('Error updating order status:', error);
     }

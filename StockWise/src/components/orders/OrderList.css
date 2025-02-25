@@ -352,3 +352,48 @@
   font-style: italic;
   color: var(--ion-color-dark);
 }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background: var(--ion-color-warning-tint);
+  color: var(--ion-color-warning-shade);
+}
+
+.status-badge.sent {
+  background: var(--ion-color-primary-tint);
+  color: var(--ion-color-primary-shade);
+}
+
+.status-badge.confirmed {
+  background: var(--ion-color-secondary-tint);
+  color: var(--ion-color-secondary-shade);
+}
+
+.status-badge.shipped {
+  background: var(--ion-color-tertiary-tint);
+  color: var(--ion-color-tertiary-shade);
+}
+
+.status-badge.partially_received {
+  background: var(--ion-color-warning-tint);
+  color: var(--ion-color-warning-shade);
+}
+
+.status-badge.received {
+  background: var(--ion-color-success-tint);
+  color: var(--ion-color-success-shade);
+}
+
+.status-badge.canceled {
+  background: var(--ion-color-danger-tint);
+  color: var(--ion-color-danger-shade);
+}
