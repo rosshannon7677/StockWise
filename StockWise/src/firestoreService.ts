@@ -103,11 +103,18 @@ export interface SupplierOrder {
       width: number;
       height: number;
     };
+    receivedQuantity?: number; // Add this for partial receipts
   }[];
-  status: 'pending' | 'sent' | 'received';
+  status: 'pending' | 'sent' | 'confirmed' | 'shipped' | 'partially_received' | 'received' | 'canceled';
   totalAmount: number;
   orderDate: string;
   notes?: string;
+  statusHistory: {
+    status: string;
+    date: string;
+    updatedBy: string;
+    notes?: string;
+  }[];
   metadata: {
     addedBy: string;
     addedDate: string;
@@ -317,6 +324,72 @@ export const updateOrder = async (id: string, orderData: Partial<SupplierOrder>)
     console.log("Order updated with ID: ", id);
   } catch (error) {
     console.error("Error updating order:", error);
+    throw error;
+  }
+};
+
+export const updateOrderStatus = async (
+  orderId: string, 
+  newStatus: SupplierOrder['status'],
+  notes?: string
+) => {
+  try {
+    const orderRef = doc(db, "supplierOrders", orderId);
+    const orderDoc = await getDoc(orderRef);
+    
+    if (!orderDoc.exists()) {
+      throw new Error('Order not found');
+    }
+
+    const currentOrder = orderDoc.data() as SupplierOrder;
+    const statusUpdate = {
+      status: newStatus,
+      date: new Date().toISOString(),
+      updatedBy: auth.currentUser?.email || 'unknown',
+      notes: notes
+    };
+
+    await updateDoc(orderRef, {
+      status: newStatus,
+      statusHistory: [...(currentOrder.statusHistory || []), statusUpdate],
+      'metadata.lastUpdated': new Date().toISOString()
+    });
+
+    // If status is 'received' or 'partially_received', update inventory
+    if (newStatus === 'received' || newStatus === 'partially_received') {
+      await updateInventoryOnReceival(currentOrder);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    throw error;
+  }
+};
+
+const updateInventoryOnReceival = async (order: SupplierOrder) => {
+  try {
+    // Process each item in the order
+    for (const item of order.items) {
+      const itemRef = doc(db, "inventoryItems", item.itemId);
+      const itemDoc = await getDoc(itemRef);
+      
+      if (!itemDoc.exists()) {
+        console.warn(`Item ${item.itemId} not found in inventory`);
+        continue;
+      }
+
+      // Update the inventory quantity
+      const currentQuantity = itemDoc.data().quantity || 0;
+      const receivedQuantity = item.receivedQuantity || item.quantity; // Use receivedQuantity if available
+
+      await updateDoc(itemRef, {
+        quantity: currentQuantity + receivedQuantity,
+        'metadata.lastUpdated': new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    console.error('Error updating inventory on receival:', error);
     throw error;
   }
 };
