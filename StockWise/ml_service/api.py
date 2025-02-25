@@ -31,15 +31,24 @@ class PredictionResponse(BaseModel):
     predicted_days_until_low: int
     confidence_score: float
     recommended_restock_date: str
-    usage_history: list[dict] = []  # Add this
-    daily_consumption: float        # Add this
+    usage_history: list[dict] = []
+    daily_consumption: float
+    price: float  # Add price field
+    category: str  # Add category field
 
 @app.get("/predictions", response_model=List[PredictionResponse])
 async def get_predictions():
-    print("Received prediction request")  # Add debug log
-    predictions = predictor.predict_stock_levels()
-    print(f"Returning {len(predictions)} predictions")  # Add debug log
-    return predictions
+    print("Received prediction request")
+    try:
+        predictions = predictor.predict_stock_levels()
+        # Debug logging for prices
+        for pred in predictions:
+            print(f"Item: {pred['name']}, Price: €{pred.get('price', 0)}")
+        print(f"Returning {len(predictions)} predictions")
+        return predictions
+    except Exception as e:
+        print(f"Error in get_predictions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/train")
 async def train_model():
