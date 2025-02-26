@@ -465,9 +465,29 @@ Hannons Kitchens`;
             handler: async () => {
               if (newStatus && editingOrder) {
                 try {
+                  // Update the editingOrder status
+                  setEditingOrder(prev => ({
+                    ...prev!,
+                    status: newStatus
+                  }));
+                  
                   await updateOrderStatus(editingOrder.id, newStatus, statusNotes);
-                  // Rest of your status update logic
+                  
+                  // Add to status history
+                  const statusUpdate = {
+                    status: newStatus,
+                    date: new Date().toISOString(),
+                    updatedBy: auth.currentUser?.email || 'unknown',
+                    notes: statusNotes
+                  };
+                  
+                  setEditingOrder(prev => ({
+                    ...prev!,
+                    statusHistory: [...(prev?.statusHistory || []), statusUpdate]
+                  }));
+
                   if (newStatus === 'received') {
+                    // Add items to inventory
                     for (const item of editingOrder.items) {
                       await addInventoryItem({
                         name: item.name,
@@ -486,6 +506,11 @@ Hannons Kitchens`;
                         }
                       });
                     }
+
+                    // Force a refresh of ML predictions by triggering a page reload
+                    // This will recalculate restock suggestions with the new quantities
+                    window.location.reload();
+                    
                     alert('All items have been added to inventory');
                   }
                 } catch (error) {

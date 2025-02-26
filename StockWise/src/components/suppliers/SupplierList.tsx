@@ -52,8 +52,10 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
     'Tools',
     'Paint',
     'Edge/Trim',
-    'Screws/Nails'
-  ];
+    'Screw',
+    'Nail',
+    'Screw'
+  ] as const;
 
   const columns = [
     { field: 'name', headerName: 'Name', width: '20%' },

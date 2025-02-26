@@ -57,15 +57,41 @@ interface Supplier {
   category: string;
 }
 
-// First, ensure VALID_CATEGORIES matches exactly with supplier categories
+// Update VALID_CATEGORIES to have separate Screw and Nail categories
 const VALID_CATEGORIES = [
   'Timber',
   'Paint',
   'Edge/Trim',
-  'Countertops',  // Make sure this matches exactly
-  'Tools',
-  'Screws/Nails'
+  'Screw',
+  'Nail'  
 ] as const;
+
+// Update CATEGORY_MAPPINGS to map to separate categories
+const CATEGORY_MAPPINGS: Record<string, string> = {
+  // Screw category
+  'screw': 'Screw',
+  'wood screw': 'Screw',
+  'machine screw': 'Screw',
+  'bolt': 'Screw',
+  'fastener': 'Screw',
+  
+  // Nail category
+  'nail': 'Nail',
+  'brad': 'Nail',
+  'pin': 'Nail',
+  'tack': 'Nail',
+  
+  // Other categories
+  'timber': 'Timber',
+  'sheet': 'Timber',
+  'plank': 'Timber',
+  'paint': 'Paint',
+  'stain': 'Paint',
+  'varnish': 'Paint',
+  'edge': 'Edge/Trim',
+  'trim': 'Edge/Trim',
+  'border': 'Edge/Trim'
+};
 
 const Restock: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -110,15 +136,38 @@ const Restock: React.FC = () => {
           price
         });
 
+        // Improved category mapping
+        const determineCategory = (itemName: string, currentCategory: string): string => {
+          const nameLower = itemName.toLowerCase();
+          
+          // Check for nails first
+          if (nameLower.includes('nail') || nameLower.includes('pin') || nameLower.includes('brad')) {
+            return 'Nail';
+          }
+          
+          // Then check for screws
+          if (nameLower.includes('screw') || nameLower.includes('bolt')) {
+            return 'Screw';
+          }
+        
+          // Try other category matches
+          const includesMatch = Object.entries(CATEGORY_MAPPINGS).find(([key]) => 
+            nameLower.includes(key)
+          );
+          if (includesMatch) {
+            return includesMatch[1];
+          }
+          
+          return currentCategory || 'Screw';
+        };
+
         return {
           id: pred.product_id,
           name: pred.name,
           currentQuantity,
           recommendedQuantity,
           price, // Set the item price
-          category: VALID_CATEGORIES.find(cat => 
-            pred.category?.toLowerCase() === cat.toLowerCase()
-          ) || 'Paint',
+          category: determineCategory(pred.name, pred.category),
           urgency: pred.predicted_days_until_low < 7 
             ? 'high' 
             : pred.predicted_days_until_low < 14 
@@ -173,19 +222,29 @@ const Restock: React.FC = () => {
       console.log('Available suppliers:', suppliers);
       console.log('Item details:', item);
 
-      // Case-insensitive category matching
-      const supplier = suppliers.find(s => 
-        s.category.toLowerCase() === item.category.toLowerCase() ||
-        s.category.replace(/[^a-zA-Z]/g, '').toLowerCase() === 
-        item.category.replace(/[^a-zA-Z]/g, '').toLowerCase()
-      );
-      
-      if (!supplier) {
-        const availableCategories = Array.from(new Set(suppliers.map(s => s.category)));
+      // First validate that the category is one of our valid categories
+      if (!VALID_CATEGORIES.includes(item.category as any)) {
         alert(
-          `Please select a supplier category for ${item.name}:\n` +
-          `Available categories: ${availableCategories.join(', ')}\n` +
-          `Current category: ${item.category}`
+          `Invalid category: ${item.category}\n` +
+          `Valid categories are: ${VALID_CATEGORIES.join(', ')}`
+        );
+        return;
+      }
+
+      // Then check if we have a supplier for this category
+      const supplier = suppliers.find(s => {
+        const normalizedSupplierCategory = s.category.toLowerCase().trim();
+        const normalizedItemCategory = item.category.toLowerCase().trim();
+        return normalizedSupplierCategory === normalizedItemCategory;
+      });
+
+      if (!supplier) {
+        // Show both valid categories and available supplier categories
+        const availableSupplierCategories = Array.from(new Set(suppliers.map(s => s.category)));
+        alert(
+          `Please add a supplier for category: ${item.category}\n` +
+          `Current supplier categories: ${availableSupplierCategories.join(', ')}\n` +
+          `Valid system categories: ${VALID_CATEGORIES.join(', ')}`
         );
         return;
       }

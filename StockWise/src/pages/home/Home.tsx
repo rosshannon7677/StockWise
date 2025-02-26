@@ -27,14 +27,14 @@ import { auth } from '../../../firebaseConfig';
 import { useIonRouter } from '@ionic/react';
 import { getInventoryItems, getStockPredictions, StockPrediction } from '../../firestoreService';
 
-// Define valid supplier categories
+// Update VALID_CATEGORIES to match exactly with supplier categories
 const VALID_CATEGORIES = [
   'Timber',
-  'Countertops',
-  'Tools',
   'Paint',
   'Edge/Trim',
-  'Screws/Nails'
+  'Screws/Nails',
+  'Tools',  // Add Tools
+  'Countertops'  // Add Countertops
 ] as const;
 
 // Add type for the categories

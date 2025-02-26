@@ -28,8 +28,9 @@ const AddSupplier: React.FC<AddSupplierProps> = ({ onClose }) => {
     'Tools',
     'Paint',
     'Edge/Trim',
-    'Screws/Nails'
-  ];
+    'Screw',
+    'Nail',
+  ] as const;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
