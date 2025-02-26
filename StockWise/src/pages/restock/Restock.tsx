@@ -43,7 +43,8 @@ interface RestockSuggestion {
   lastRestocked?: string;
   confidence: number;
   predicted_days_until_low: number;
-  dimensions?: {  // Add dimensions property
+  dailyConsumption: number;  // Add this field
+  dimensions?: {
     length: number;
     width: number;
     height: number;
@@ -112,76 +113,75 @@ const Restock: React.FC = () => {
       setMlPredictions(fetchedPredictions);
       setPredictions(fetchedPredictions);
       
-      const suggestions = fetchedPredictions.map(pred => {
-        // Parse numbers safely
-        const currentQuantity = Number(pred.current_quantity) || 0;
-        const dailyConsumption = Number(pred.daily_consumption) || 0;
-        const price = Number(pred.price) || 0;
+      const suggestions = fetchedPredictions
+        .map(pred => {
+          const currentQuantity = Number(pred.current_quantity) || 0;
+          const dailyConsumption = Number(pred.daily_consumption) || 0;
+          const price = Number(pred.price) || 0;
 
-        // Simplified calculation:
-        // 1. Calculate total need (7 days + 3 days buffer)
-        const totalNeeded = Math.ceil(dailyConsumption * 10); // 7 + 3 days
+          // Calculate total need (7 days + 3 days buffer)
+          const totalNeeded = Math.ceil(dailyConsumption * 10);
 
-        // 2. Calculate how many to order by subtracting current stock
-        const recommendedQuantity = Math.max(
-          totalNeeded - currentQuantity, // Only subtract current stock once
-          5 // Minimum order size
+          // Only calculate recommended quantity if we need to restock
+          const recommendedQuantity = totalNeeded > currentQuantity ? 
+            Math.max(totalNeeded - currentQuantity, 5) : 0;
+
+          // Improved category mapping
+          const determineCategory = (itemName: string, currentCategory: string): string => {
+            const nameLower = itemName.toLowerCase();
+            
+            // Check timber/wood related terms first
+            if (nameLower.includes('pine') || nameLower.includes('timber') || nameLower.includes('wood')) {
+              return 'Timber';
+            }
+            
+            // Then check for nails/screws
+            if (nameLower.includes('nail') || nameLower.includes('pin') || nameLower.includes('brad')) {
+              return 'Nail';
+            }
+            
+            if (nameLower.includes('screw') || nameLower.includes('bolt')) {
+              return 'Screw';
+            }
+          
+            // Try other category matches
+            const includesMatch = Object.entries(CATEGORY_MAPPINGS).find(([key]) => 
+              nameLower.includes(key)
+            );
+            if (includesMatch) {
+              return includesMatch[1];
+            }
+            
+            return currentCategory || 'Timber'; // Default to Timber instead of Screw
+          };
+
+          return {
+            id: pred.product_id,
+            name: pred.name,
+            currentQuantity,
+            recommendedQuantity,
+            price,
+            dailyConsumption, // Add this
+            category: determineCategory(pred.name, pred.category),
+            urgency: pred.predicted_days_until_low < 7 
+              ? 'high' 
+              : pred.predicted_days_until_low < 14 
+                ? 'medium' 
+                : 'low',
+            confidence: pred.confidence_score,
+            predicted_days_until_low: pred.predicted_days_until_low,
+            dimensions: pred.dimensions || {
+              length: 0,
+              width: 0,
+              height: 0
+            }
+          } as RestockSuggestion;
+        })
+        .filter(suggestion => 
+          // Only include items that actually need restocking
+          suggestion.recommendedQuantity > 0 && 
+          suggestion.currentQuantity < (suggestion.dailyConsumption * 10)
         );
-
-        console.log(`Processing ${pred.name}:`, {
-          currentQuantity,
-          dailyConsumption,
-          totalNeeded,
-          recommendedQuantity,
-          price
-        });
-
-        // Improved category mapping
-        const determineCategory = (itemName: string, currentCategory: string): string => {
-          const nameLower = itemName.toLowerCase();
-          
-          // Check for nails first
-          if (nameLower.includes('nail') || nameLower.includes('pin') || nameLower.includes('brad')) {
-            return 'Nail';
-          }
-          
-          // Then check for screws
-          if (nameLower.includes('screw') || nameLower.includes('bolt')) {
-            return 'Screw';
-          }
-        
-          // Try other category matches
-          const includesMatch = Object.entries(CATEGORY_MAPPINGS).find(([key]) => 
-            nameLower.includes(key)
-          );
-          if (includesMatch) {
-            return includesMatch[1];
-          }
-          
-          return currentCategory || 'Screw';
-        };
-
-        return {
-          id: pred.product_id,
-          name: pred.name,
-          currentQuantity,
-          recommendedQuantity,
-          price, // Set the item price
-          category: determineCategory(pred.name, pred.category),
-          urgency: pred.predicted_days_until_low < 7 
-            ? 'high' 
-            : pred.predicted_days_until_low < 14 
-              ? 'medium' 
-              : 'low',
-          confidence: pred.confidence_score,
-          predicted_days_until_low: pred.predicted_days_until_low,
-          dimensions: pred.dimensions || {
-            length: 0,
-            width: 0,
-            height: 0
-          }
-        } as RestockSuggestion;
-      });
 
       // Log suggestions for debugging
       console.log('Generated suggestions:', suggestions);
