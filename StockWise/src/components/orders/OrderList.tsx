@@ -14,11 +14,16 @@ import {
     closeCircleOutline
 } from 'ionicons/icons';
 import './OrderList.css';
-import { SupplierOrder, deleteOrder, updateOrder, updateOrderStatus, addInventoryItem } from '../../firestoreService';
+import { SupplierOrder, deleteOrder, updateOrder, updateOrderStatus, addInventoryItem, updateInventoryItem } from '../../firestoreService';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import autoTable from 'jspdf-autotable';
+import { getFirestore } from 'firebase/firestore';
+import { app } from '../../../firebaseConfig';
+
+const db = getFirestore(app);
 import type { UserOptions } from 'jspdf-autotable';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 // Add type declaration for jsPDF with autoTable
 declare module 'jspdf' {
@@ -487,28 +492,45 @@ Hannons Kitchens`;
                   }));
 
                   if (newStatus === 'received') {
-                    // Add items to inventory
+                    // Update existing inventory items instead of adding new ones
                     for (const item of editingOrder.items) {
-                      await addInventoryItem({
-                        name: item.name,
-                        quantity: item.quantity,
-                        price: item.price,
-                        category: editingOrder.supplier.category,
-                        dimensions: item.dimensions,
-                        location: {
-                          aisle: "",
-                          shelf: "",
-                          section: ""
-                        },
-                        metadata: {
-                          addedBy: auth.currentUser?.email || 'unknown',
-                          addedDate: new Date().toISOString()
-                        }
-                      });
+                      // Try to find existing item by name
+                      const inventoryRef = collection(db, "inventoryItems");
+                      const q = query(inventoryRef, where("name", "==", item.name));
+                      const querySnapshot = await getDocs(q);
+                      
+                      if (!querySnapshot.empty) {
+                        // Update existing item
+                        const existingItem = querySnapshot.docs[0];
+                        await updateInventoryItem(existingItem.id, {
+                          quantity: existingItem.data().quantity + item.quantity,
+                          metadata: {
+                            ...existingItem.data().metadata,
+                            lastUpdated: new Date().toISOString()
+                          }
+                        });
+                      } else {
+                        // Only create new item if it doesn't exist
+                        await addInventoryItem({
+                          name: item.name,
+                          quantity: item.quantity,
+                          price: item.price,
+                          category: editingOrder.supplier.category,
+                          dimensions: item.dimensions,
+                          location: {
+                            aisle: "",
+                            shelf: "",
+                            section: ""
+                          },
+                          metadata: {
+                            addedBy: auth.currentUser?.email || 'unknown',
+                            addedDate: new Date().toISOString()
+                          }
+                        });
+                      }
                     }
 
-                    // Force a refresh of ML predictions by triggering a page reload
-                    // This will recalculate restock suggestions with the new quantities
+                    // Force refresh of ML predictions
                     window.location.reload();
                     
                     alert('All items have been added to inventory');

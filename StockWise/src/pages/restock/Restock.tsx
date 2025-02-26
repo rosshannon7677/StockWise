@@ -19,16 +19,17 @@ import {
   cartOutline,
   analyticsOutline
 } from 'ionicons/icons';
-import { getInventoryItems, getStockPredictions, StockPrediction, addOrder, getSuppliers, SupplierOrder} from '../../firestoreService';
+import { getInventoryItems, getStockPredictions, StockPrediction, addOrder, getSuppliers, SupplierOrder, updateInventoryItem, addInventoryItem } from '../../firestoreService';
 import { auth } from '../../../firebaseConfig';
 import { useIonRouter } from '@ionic/react';
 import './Restock.css';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 // Remove the local StockPrediction interface since we're importing it
 
 interface UsageRecord {
   date: string;
-  quantity: number;
+  quantity: number; // Add this property
 }
 
 interface RestockSuggestion {
@@ -117,21 +118,20 @@ const Restock: React.FC = () => {
         const dailyConsumption = Number(pred.daily_consumption) || 0;
         const price = Number(pred.price) || 0;
 
-        // New recommended quantity calculation:
-        // 1. Calculate base need (7 days instead of 14)
-        // 2. Add smaller safety buffer (3 days)
-        // 3. Subtract current quantity
-        // 4. Ensure minimum order size
-        const daysToStock = 7; // Reduced from 14 to 7 days
-        const safetyBuffer = Math.ceil(dailyConsumption * 3); // 3 days safety stock
+        // Simplified calculation:
+        // 1. Calculate total need (7 days + 3 days buffer)
+        const totalNeeded = Math.ceil(dailyConsumption * 10); // 7 + 3 days
+
+        // 2. Calculate how many to order by subtracting current stock
         const recommendedQuantity = Math.max(
-          Math.ceil((dailyConsumption * daysToStock) + safetyBuffer - currentQuantity),
+          totalNeeded - currentQuantity, // Only subtract current stock once
           5 // Minimum order size
         );
 
         console.log(`Processing ${pred.name}:`, {
           currentQuantity,
           dailyConsumption,
+          totalNeeded,
           recommendedQuantity,
           price
         });
