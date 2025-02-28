@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../../../firebaseConfig';
+
 import { IonIcon, IonModal, IonButton, IonInput, IonSelect, IonSelectOption, useIonRouter, IonAlert } from '@ionic/react';
 import { 
     chevronForwardOutline, 
@@ -14,7 +15,15 @@ import {
     closeCircleOutline
 } from 'ionicons/icons';
 import './OrderList.css';
-import { SupplierOrder, deleteOrder, updateOrder, updateOrderStatus, addInventoryItem, updateInventoryItem } from '../../firestoreService';
+import { 
+    OrderStatus, // Keep this import
+    SupplierOrder as ImportedSupplierOrder,
+    deleteOrder, 
+    updateOrder, 
+    updateOrderStatus, 
+    addInventoryItem, 
+    updateInventoryItem 
+} from '../../firestoreService';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import autoTable from 'jspdf-autotable';
@@ -32,7 +41,13 @@ declare module 'jspdf' {
   }
 }
 
-type OrderStatus = 'pending' | 'sent' | 'confirmed' | 'shipped' | 'partially_received' | 'received' | 'canceled';
+// Remove this duplicate declaration
+// export type OrderStatus = 'pending' | 'sent' | 'confirmed' | 'shipped' | 'partially_received' | 'received' | 'canceled';
+
+// Update the interface to use the imported type
+export interface SupplierOrder extends Omit<ImportedSupplierOrder, 'status'> {
+    status: OrderStatus; // Use the imported OrderStatus type
+}
 
 const statusConfig: Record<OrderStatus, { color: string; icon: string }> = {
     pending: { color: 'warning', icon: timeOutline },
@@ -476,7 +491,13 @@ Hannons Kitchens`;
                     status: newStatus
                   }));
                   
-                  await updateOrderStatus(editingOrder.id, newStatus, statusNotes);
+                  if (newStatus === 'received') {
+                    // First inventory update happens here through updateInventoryOnReceival
+                    await updateOrderStatus(editingOrder.id, newStatus, statusNotes);
+                    // Shows "All items have been added to inventory" alert
+                  } else {
+                    await updateOrderStatus(editingOrder.id, newStatus, statusNotes);
+                  }
                   
                   // Add to status history
                   const statusUpdate = {

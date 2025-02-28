@@ -23,6 +23,7 @@ import {
   analyticsOutline
 } from 'ionicons/icons';
 import './Home.css';
+import { RestockSuggestion } from '../restock/Restock';
 import { auth } from '../../../firebaseConfig';
 import { useIonRouter } from '@ionic/react';
 import { getInventoryItems, getStockPredictions, StockPrediction } from '../../firestoreService';
@@ -163,46 +164,37 @@ const Home: React.FC = () => {
     .slice(0, 5);
 
   const suggestions = predictions.map(pred => {
-    // Parse numbers safely and ensure price is properly set
+    // Parse values as numbers
     const currentQuantity = Number(pred.current_quantity) || 0;
     const dailyConsumption = Number(pred.daily_consumption) || 0;
-    const price = Number(pred.price) || 0;
-    
-    // Debug price
-    console.log(`Item ${pred.name} price:`, pred.price);
-    
-    // Calculate recommended quantity based on ML predictions:
-    const daysToOrder = Math.max(14, pred.predicted_days_until_low * 2);
-    const safetyBuffer = Math.ceil(dailyConsumption * 7);
-    const recommendedQuantity = Math.max(
-      Math.ceil(dailyConsumption * daysToOrder) + safetyBuffer - currentQuantity,
-      0
-    );
-  
-    // Ensure price is properly passed and calculated
+    const daysUntilLow = Number(pred.predicted_days_until_low) || 0;
+
+    // Use the ML service's recommended quantity directly
+    const recommendedQuantity = Number(pred.recommended_quantity) || 0;
+
+    // Type the urgency explicitly
+    const urgency: 'high' | 'medium' | 'low' = 
+      daysUntilLow < 7 ? 'high' : 
+      daysUntilLow < 14 ? 'medium' : 
+      'low';
+
     return {
       id: pred.product_id,
       name: pred.name,
-      currentQuantity: currentQuantity,
-      recommendedQuantity: recommendedQuantity,
-      price: Number(pred.price) || 0, // Ensure price is a number
-      category: VALID_CATEGORIES.find(cat => 
-        pred.category?.toLowerCase() === cat.toLowerCase()
-      ) as ValidCategory || 'Paint',
-      urgency: (pred.predicted_days_until_low < 7 
-        ? 'high' 
-        : pred.predicted_days_until_low < 14 
-          ? 'medium' 
-          : 'low') as 'high' | 'medium' | 'low',
-      lastRestocked: undefined,
+      currentQuantity,
+      recommendedQuantity, // Use ML service value directly
+      price: Number(pred.price) || 0,
+      category: pred.category || 'Uncategorized',
+      urgency,
       confidence: pred.confidence_score,
-      predicted_days_until_low: pred.predicted_days_until_low,
-      dimensions: {
-        length: Number(pred.dimensions?.length) || 0,
-        width: Number(pred.dimensions?.width) || 0,
-        height: Number(pred.dimensions?.height) || 0
+      predicted_days_until_low: daysUntilLow,
+      dailyConsumption,
+      dimensions: pred.dimensions || {
+        length: 0,
+        width: 0,
+        height: 0
       }
-    };
+    } satisfies RestockSuggestion;
   });
 
   return (
