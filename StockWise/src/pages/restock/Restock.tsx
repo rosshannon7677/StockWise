@@ -33,7 +33,8 @@ interface UsageRecord {
   quantity: number; // Add this property
 }
 
-interface RestockSuggestion {
+// In Restock.tsx
+export interface RestockSuggestion {
   id: string;
   name: string;
   currentQuantity: number;
@@ -44,7 +45,7 @@ interface RestockSuggestion {
   lastRestocked?: string;
   confidence: number;
   predicted_days_until_low: number;
-  dailyConsumption: number;  // Add this field
+  dailyConsumption: number;
   dimensions?: {
     length: number;
     width: number;
@@ -60,16 +61,17 @@ interface Supplier {
   category: string;
 }
 
-// Update VALID_CATEGORIES to have separate Screw and Nail categories
+// Update VALID_CATEGORIES to include Countertops
 const VALID_CATEGORIES = [
   'Timber',
   'Paint',
   'Edge/Trim',
   'Screw',
-  'Nail'  
+  'Nail',
+  'Countertops'  // Add this
 ] as const;
 
-// Update CATEGORY_MAPPINGS to map to separate categories
+// Also update CATEGORY_MAPPINGS to include countertop-related terms
 const CATEGORY_MAPPINGS: Record<string, string> = {
   // Screw category
   'screw': 'Screw',
@@ -84,6 +86,12 @@ const CATEGORY_MAPPINGS: Record<string, string> = {
   'pin': 'Nail',
   'tack': 'Nail',
   
+  // Add countertop mappings
+  'granite': 'Countertops',
+  'countertop': 'Countertops',
+  'marble': 'Countertops',
+  'surface': 'Countertops',
+  
   // Other categories
   'timber': 'Timber',
   'sheet': 'Timber',
@@ -94,6 +102,37 @@ const CATEGORY_MAPPINGS: Record<string, string> = {
   'edge': 'Edge/Trim',
   'trim': 'Edge/Trim',
   'border': 'Edge/Trim'
+};
+
+// Add this function before the Restock component
+const determineCategory = (itemName: string, currentCategory: string): string => {
+  const nameLower = itemName.toLowerCase();
+  
+  // Check for specific patterns first
+  if (nameLower.includes('screw') || nameLower.includes('bolt') || nameLower.includes('fastener')) {
+    return 'Screw';
+  }
+  
+  if (nameLower.includes('nail') || nameLower.includes('brad') || nameLower.includes('pin')) {
+    return 'Nail';
+  }
+
+  // Then try exact matches from CATEGORY_MAPPINGS
+  const matchedCategory = Object.entries(CATEGORY_MAPPINGS).find(([key]) => 
+    nameLower.includes(key.toLowerCase())
+  );
+  
+  if (matchedCategory) {
+    return matchedCategory[1];
+  }
+  
+  // Fallback to current category if it's valid
+  if (VALID_CATEGORIES.includes(currentCategory as any)) {
+    return currentCategory;
+  }
+
+  // Default fallback
+  return 'Screw';
 };
 
 const Restock: React.FC = () => {
@@ -115,90 +154,64 @@ const Restock: React.FC = () => {
     const fetchPredictions = async () => {
       try {
         const fetchedPredictions = await getStockPredictions();
-        console.log('Fetched predictions:', fetchedPredictions);
+        console.log('Raw fetched predictions:', fetchedPredictions);
         
-        if (!fetchedPredictions) {
-          console.error('No predictions received');
+        if (!fetchedPredictions || !Array.isArray(fetchedPredictions)) {
+          console.error('Invalid predictions data:', fetchedPredictions);
           return;
         }
   
         setMlPredictions(fetchedPredictions);
         setPredictions(fetchedPredictions);
         
-        const suggestions = fetchedPredictions
-          .map(pred => {
-            const currentQuantity = Number(pred.current_quantity) || 0;
-            const dailyConsumption = Number(pred.daily_consumption) || 0;
-            const price = Number(pred.price) || 0;
+        const suggestions = fetchedPredictions.map(pred => {
+          const currentQuantity = Number(pred.current_quantity) || 0;
+          const dailyConsumption = Number(pred.daily_consumption) || 0;
+          const daysUntilLow = Number(pred.predicted_days_until_low) || 0;
+        
+          // Calculate recommended quantity when:
+          // 1. Stock is below target (10 days worth) OR
+          // 2. Days until low is less than 7 days
+          const targetStock = Math.ceil(dailyConsumption * 10); // 10 days worth
+          const recommendedQuantity = daysUntilLow < 7 || currentQuantity < targetStock ? 
+            Math.max(0, targetStock - currentQuantity) : 
+            0;
+        
+          const urgency: 'high' | 'medium' | 'low' = 
+            daysUntilLow < 7 ? 'high' : 
+            daysUntilLow < 14 ? 'medium' : 
+            'low';
+        
+          console.log(`Processing ${pred.name}:`, {
+            currentQty: currentQuantity,
+            dailyUse: dailyConsumption,
+            targetStock,
+            daysUntilLow,
+            recommended: recommendedQuantity
+          });
+        
+          return {
+            id: pred.product_id,
+            name: pred.name,
+            currentQuantity,
+            recommendedQuantity,
+            price: Number(pred.price) || 0,
+            category: pred.category || 'Uncategorized',
+            urgency,
+            confidence: pred.confidence_score,
+            predicted_days_until_low: daysUntilLow,
+            dailyConsumption,
+            dimensions: pred.dimensions || {
+              length: 0,
+              width: 0,
+              height: 0
+            }
+          } satisfies RestockSuggestion;
+        });
   
-            // Calculate total need (7 days + 3 days buffer)
-            const totalNeeded = Math.ceil(dailyConsumption * 10);
-  
-            // Only calculate recommended quantity if we need to restock
-            const recommendedQuantity = totalNeeded > currentQuantity ? 
-              Math.max(totalNeeded - currentQuantity, 5) : 0;
-  
-            // Improved category mapping
-            const determineCategory = (itemName: string, currentCategory: string): string => {
-              const nameLower = itemName.toLowerCase();
-              
-              // Check timber/wood related terms first
-              if (nameLower.includes('pine') || nameLower.includes('timber') || nameLower.includes('wood')) {
-                return 'Timber';
-              }
-              
-              // Then check for nails/screws
-              if (nameLower.includes('nail') || nameLower.includes('pin') || nameLower.includes('brad')) {
-                return 'Nail';
-              }
-              
-              if (nameLower.includes('screw') || nameLower.includes('bolt')) {
-                return 'Screw';
-              }
-            
-              // Try other category matches
-              const includesMatch = Object.entries(CATEGORY_MAPPINGS).find(([key]) => 
-                nameLower.includes(key)
-              );
-              if (includesMatch) {
-                return includesMatch[1];
-              }
-              
-              return currentCategory || 'Timber'; // Default to Timber instead of Screw
-            };
-  
-            return {
-              id: pred.product_id,
-              name: pred.name,
-              currentQuantity,
-              recommendedQuantity,
-              price,
-              dailyConsumption, // Add this
-              category: determineCategory(pred.name, pred.category),
-              urgency: pred.predicted_days_until_low < 7 
-                ? 'high' 
-                : pred.predicted_days_until_low < 14 
-                  ? 'medium' 
-                  : 'low',
-              confidence: pred.confidence_score,
-              predicted_days_until_low: pred.predicted_days_until_low,
-              dimensions: pred.dimensions || {
-                length: 0,
-                width: 0,
-                height: 0
-              }
-            } as RestockSuggestion;
-          })
-          .filter(suggestion => 
-            // Only include items that actually need restocking
-            suggestion.recommendedQuantity > 0 && 
-            suggestion.currentQuantity < (suggestion.dailyConsumption * 10)
-          );
-  
-        // Log suggestions for debugging
-        console.log('Generated suggestions:', suggestions);
-  
+        console.log('Processed suggestions:', suggestions);
         setRestockSuggestions(suggestions);
+  
       } catch (error) {
         console.error('Error fetching predictions:', error);
       }
@@ -459,37 +472,46 @@ const Restock: React.FC = () => {
                   </IonCardHeader>
                   <IonCardContent>
                     <div className="restock-list">
-                      {restockSuggestions.map((item) => (
-                        <div key={item.id} className={`restock-item ${item.urgency}`}>
-                          <div className="item-info">
-                            <h3>{item.name}</h3>
-                            <p>Current Stock: {item.currentQuantity}</p>
-                            <p>Daily Usage: {mlPredictions.find(p => p.product_id === item.id)?.daily_consumption.toFixed(2)} units</p>
-                            <p>Recommended Order: {item.recommendedQuantity}</p>
-                            <p>Days until Low: {mlPredictions.find(p => p.product_id === item.id)?.predicted_days_until_low}</p>
-                          </div>
-                          <div className="item-actions">
-                            <IonBadge color={item.urgency === 'high' ? 'danger' : 'warning'}>
-                              {item.urgency.toUpperCase()}
-                            </IonBadge>
-                            <div className="confidence-score">
-                              {(item.confidence * 100).toFixed(0)}% confidence
+                      {restockSuggestions.length > 0 ? (
+                        restockSuggestions
+                          .filter(item => {
+                            const shouldShow = item.recommendedQuantity > 0;
+                            console.log(`Filtering ${item.name}: recommendedQty=${item.recommendedQuantity}, showing=${shouldShow}`);
+                            return shouldShow;
+                          })
+                          .map((item) => (
+                            <div key={item.id} className={`restock-item ${item.urgency}`}>
+                              <div className="item-info">
+                                <h3>{item.name}</h3>
+                                <p>Current Stock: {item.currentQuantity}</p>
+                                <p>Daily Usage: {item.dailyConsumption.toFixed(2)} units</p>
+                                <p>Recommended Order: {item.recommendedQuantity}</p>
+                                <p>Days until Low: {item.predicted_days_until_low}</p>
+                              </div>
+                              <div className="item-actions">
+                                <IonBadge color={item.urgency === 'high' ? 'danger' : 'warning'}>
+                                  {item.urgency.toUpperCase()}
+                                </IonBadge>
+                                <div className="confidence-score">
+                                  {(item.confidence * 100).toFixed(0)}% confidence
+                                </div>
+                                <p className="cost">
+                                  €{(item.price * item.recommendedQuantity).toFixed(2)}
+                                  <span className="unit-price">(€{item.price.toFixed(2)} each)</span>
+                                </p>
+                                <IonButton 
+                                  size="small" 
+                                  onClick={() => handleOrderNow(item)}
+                                  disabled={!suppliers.length || orderedItems.has(item.id)}
+                                >
+                                  {orderedItems.has(item.id) ? 'Order Pending' : 'Order Now'}
+                                </IonButton>
+                              </div>
                             </div>
-                            <p className="cost">
-                              €{(item.price * item.recommendedQuantity).toFixed(2)}
-                              {/* Add unit price */}
-                              <span className="unit-price">(€{item.price.toFixed(2)} each)</span>
-                            </p>
-                            <IonButton 
-                              size="small" 
-                              onClick={() => handleOrderNow(item)}
-                              disabled={!suppliers.length || orderedItems.has(item.id)}
-                            >
-                              {orderedItems.has(item.id) ? 'Order Pending' : 'Order Now'}
-                            </IonButton>
-                          </div>
-                        </div>
-                      ))}
+                          ))
+                      ) : (
+                        <div>No restock suggestions available</div>
+                      )}
                     </div>
                   </IonCardContent>
                 </IonCard>

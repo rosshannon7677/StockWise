@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 import numpy as np
+import math  # Add this import
 from fastapi import HTTPException
 import logging
 
@@ -108,14 +109,24 @@ class StockPredictor:
     
     def _calculate_days_until_low(self, item_data, daily_consumption):
         current_quantity = item_data['quantity']
+        
+        self.logger.debug(f"""
+            Days until low detailed calculation:
+            - Item name: {item_data.get('name')}
+            - Current quantity: {current_quantity}
+            - Daily consumption: {daily_consumption}
+            - Target threshold: 10
+        """)
+        
         if current_quantity <= 10:
             return 0
-        
+            
         # Use actual consumption rate if available
         if daily_consumption > 0:
-            return int((current_quantity - 10) / daily_consumption)
-        
-        # Fallback to estimation if no usage history
+            days = int((current_quantity - 10) / daily_consumption)
+            self.logger.debug(f"Calculated days until low: {days}")
+            return days
+            
         return int((current_quantity - 10) / (0.5 if current_quantity > 20 else 1))
     
     def train_model(self):
@@ -141,48 +152,42 @@ class StockPredictor:
     
     def predict_stock_levels(self):
         try:
-            if not self.is_trained:
-                self.train_model()
-                self.is_trained = True
-                
             data = self.fetch_inventory_data()
             predictions = []
             
             for _, item in data.iterrows():
                 current_quantity = item['current_quantity']
                 daily_consumption = item['daily_consumption']
-                price = float(item['price'])
                 
-                # Calculate days_until_low before using it
                 days_until_low = self._calculate_days_until_low(
                     {'quantity': current_quantity}, 
                     daily_consumption
                 )
-                
-                self.logger.debug(f"""
-                    Prediction calculation for {item['name']}:
-                    Current quantity: {current_quantity}
-                    Daily consumption: {daily_consumption}
-                    Price: €{price}
-                    Days until low: {days_until_low}
-                """)
 
                 prediction = {
                     'product_id': item['product_id'],
                     'name': item['name'],
                     'current_quantity': current_quantity,
                     'predicted_days_until_low': days_until_low,
+                    'daily_consumption': daily_consumption,
+                    'recommended_quantity': self._calculate_recommended_quantity(
+                        current_quantity, 
+                        daily_consumption
+                    ),
+                    'price': float(item['price']),
+                    # Add missing required fields
                     'confidence_score': self._calculate_confidence(item),
                     'recommended_restock_date': (
-                        datetime.now() + timedelta(days=days_until_low)
+                        datetime.now() + 
+                        timedelta(days=days_until_low)
                     ).isoformat(),
-                    'usage_history': item['used_stock'],
-                    'daily_consumption': float(daily_consumption),
-                    'price': price,
-                    'category': item['category']
+                    'category': item['category'],
+                    'usage_history': item.get('used_stock', [])
                 }
+                
+                self.logger.debug(f"Final prediction for {item['name']}: {prediction}")
                 predictions.append(prediction)
-            
+
             return predictions
         except Exception as e:
             self.logger.error(f"Error in predict_stock_levels: {e}", exc_info=True)
@@ -282,3 +287,26 @@ class StockPredictor:
         except Exception as e:
             self.logger.error(f"Error generating plot for {item_name}: {e}", exc_info=True)
             raise HTTPException(status_code=400, detail=str(e))
+
+    def _calculate_recommended_quantity(self, current_quantity: float, daily_consumption: float) -> float:
+        """Calculate the recommended quantity to order based on current stock and daily consumption"""
+        # Calculate target stock level (10 days worth)
+        target_stock = math.ceil(daily_consumption * 10)
+        
+        # Add minimum target stock threshold
+        min_target = 10  # Minimum stock to maintain
+        target_stock = max(target_stock, min_target)
+        
+        # Calculate difference needed
+        recommended = target_stock - current_quantity
+        
+        self.logger.debug(f"""
+                Calculating recommended quantity:
+                - Current quantity: {current_quantity}
+                - Daily consumption: {daily_consumption}
+                - Target stock: {target_stock}
+                - Recommended: {max(recommended, 0)}
+        """)
+        
+        # Return max of 0 and recommended quantity
+        return max(recommended, 0)
