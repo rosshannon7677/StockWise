@@ -20,6 +20,9 @@ import { app } from "./../firebaseConfig";
 import { auth } from '../firebaseConfig';
 import type { UserRole, UserRoleData } from './types/roles';
 
+// Add OrderStatus type definition
+export type OrderStatus = 'pending' | 'sent' | 'confirmed' | 'shipped' | 'partially_received' | 'received' | 'canceled';
+
 export interface InventoryItem {
   id: string;
   name: string;
@@ -84,6 +87,7 @@ export interface CustomerOrder {
   };
 }
 
+// Update SupplierOrder interface to use OrderStatus type
 export interface SupplierOrder {
   id: string;
   supplier: {
@@ -105,7 +109,7 @@ export interface SupplierOrder {
     };
     receivedQuantity?: number; // Add this for partial receipts
   }[];
-  status: 'pending' | 'sent' | 'confirmed' | 'shipped' | 'partially_received' | 'received' | 'canceled';
+  status: OrderStatus; // Use the OrderStatus type here
   totalAmount: number;
   orderDate: string;
   notes?: string;
@@ -141,7 +145,8 @@ export interface StockPrediction {
   daily_consumption: number;
   price: number;
   category: string;
-  dimensions?: {  // Add dimensions property
+  recommended_quantity: number; // Add this field
+  dimensions?: {
     length: number;
     width: number;
     height: number;
@@ -333,20 +338,18 @@ export const updateOrder = async (id: string, orderData: Partial<SupplierOrder>)
   }
 };
 
-export const updateOrderStatus = async (
-  orderId: string, 
-  newStatus: SupplierOrder['status'],
-  notes?: string
-) => {
+export const updateOrderStatus = async (orderId: string, newStatus: OrderStatus, notes?: string) => {
   try {
+    // Change from "orders" to "supplierOrders" to match the collection name
     const orderRef = doc(db, "supplierOrders", orderId);
     const orderDoc = await getDoc(orderRef);
     
     if (!orderDoc.exists()) {
-      throw new Error('Order not found');
+      throw new Error(`Order ${orderId} not found`);
     }
+    
+    const currentOrder = { id: orderDoc.id, ...orderDoc.data() } as SupplierOrder;
 
-    const currentOrder = orderDoc.data() as SupplierOrder;
     const statusUpdate = {
       status: newStatus,
       date: new Date().toISOString(),
@@ -359,11 +362,6 @@ export const updateOrderStatus = async (
       statusHistory: [...(currentOrder.statusHistory || []), statusUpdate],
       'metadata.lastUpdated': new Date().toISOString()
     });
-
-    // If status is 'received' or 'partially_received', update inventory
-    if (newStatus === 'received' || newStatus === 'partially_received') {
-      await updateInventoryOnReceival(currentOrder);
-    }
 
     return true;
   } catch (error) {
