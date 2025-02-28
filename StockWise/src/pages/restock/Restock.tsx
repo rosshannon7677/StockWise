@@ -239,6 +239,37 @@ const Restock: React.FC = () => {
     checkOrderStatus();
   }, []);
 
+  // Add effect to remove items from orderedItems when order is completed/cancelled/deleted
+  useEffect(() => {
+    const checkOrderStatus = () => {
+      getOrders((orders: SupplierOrder[]) => {
+        // Get all current active order item IDs
+        const activeOrderItemIds = orders
+          .filter(order => order.status !== 'received' && order.status !== 'canceled')
+          .flatMap(order => order.items.map(item => item.itemId));
+
+        // Update orderedItems to only include items that are in active orders
+        setOrderedItems(prev => {
+          const newSet = new Set<string>();
+          // Only keep items that are still in active orders
+          for (const itemId of prev) {
+            if (activeOrderItemIds.includes(itemId)) {
+              newSet.add(itemId);
+            }
+          }
+          return newSet;
+        });
+      });
+    };
+
+    checkOrderStatus();
+    
+    // Add an interval to check periodically
+    const interval = setInterval(checkOrderStatus, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+
   const handleItemClick = async (itemName: string) => {
     setSelectedItem(itemName);
     try {
