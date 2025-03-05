@@ -20,8 +20,8 @@ import { app } from "./../firebaseConfig";
 import { auth } from '../firebaseConfig';
 import type { UserRole, UserRoleData } from './types/roles';
 
-// Add OrderStatus type definition
-export type OrderStatus = 'pending' | 'sent' | 'confirmed' | 'shipped' | 'partially_received' | 'received' | 'canceled';
+// Remove 'partially_received' and 'confirmed' from the type
+export type OrderStatus = 'pending' | 'sent' | 'shipped' | 'received' | 'canceled';
 
 export interface InventoryItem {
   id: string;

@@ -397,3 +397,18 @@
   background: var(--ion-color-danger-tint);
   color: var(--ion-color-danger-shade);
 }
+
+.filters {
+  padding: 1rem;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.filters ion-select {
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  width: 200px;
+  border: 1px solid var(--ion-color-medium-tint);
+  border-radius: 4px;
+}

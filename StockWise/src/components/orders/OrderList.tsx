@@ -52,9 +52,7 @@ export interface SupplierOrder extends Omit<ImportedSupplierOrder, 'status'> {
 const statusConfig: Record<OrderStatus, { color: string; icon: string }> = {
     pending: { color: 'warning', icon: timeOutline },
     sent: { color: 'primary', icon: paperPlaneOutline },
-    confirmed: { color: 'secondary', icon: checkmarkCircleOutline },
     shipped: { color: 'tertiary', icon: carOutline },
-    partially_received: { color: 'warning', icon: archiveOutline },
     received: { color: 'success', icon: checkmarkDoneCircleOutline },
     canceled: { color: 'danger', icon: closeCircleOutline }
 };
@@ -87,6 +85,9 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   const [showStatusAlert, setShowStatusAlert] = useState(false);
   const [newStatus, setNewStatus] = useState<OrderStatus | null>(null);
+
+  // Add state for filter
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
 
   const toggleOrderExpansion = (orderId: string) => {
     setExpandedOrders(prev => 
@@ -212,13 +213,37 @@ Hannons Kitchens`;
     setShowStatusAlert(true);
   };
 
+  // Filter orders before pagination
+  const filteredOrders = orders.filter(order => 
+    statusFilter === 'all' || order.status === statusFilter
+  );
+
+  // By default, hide received orders
+  const visibleOrders = filteredOrders.filter(order => 
+    order.status !== 'received' || statusFilter === 'received'
+  );
+
+  // Update pagination to use visibleOrders
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
+  const currentOrders = visibleOrders.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(visibleOrders.length / itemsPerPage);
 
   return (
     <div className="orders-container">
+      <div className="filters">
+        <IonSelect 
+          value={statusFilter}
+          onIonChange={e => setStatusFilter(e.detail.value)}
+        >
+          <IonSelectOption value="all">All Orders</IonSelectOption>
+          {Object.keys(statusConfig).map(status => (
+            <IonSelectOption key={status} value={status}>
+              {status.replace('_', ' ').toUpperCase()}
+            </IonSelectOption>
+          ))}
+        </IonSelect>
+      </div>
       <div className="table-header">
         <div className="header-cell">Supplier</div>
         <div className="header-cell">Items</div>
