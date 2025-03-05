@@ -414,55 +414,8 @@ const Restock: React.FC = () => {
           
           <IonGrid>
             <IonRow>
-              <IonCol sizeMd="3" sizeSm="6" size="12">
-                <IonCard className="dashboard-card">
-                  <IonCardHeader>
-                    <IonIcon icon={alertCircleOutline} className="card-icon warning" />
-                    <IonCardTitle>Items to Restock</IonCardTitle>
-                  </IonCardHeader>
-                  <IonCardContent>
-                    <h2 className="metric-value">{restockSuggestions.length}</h2>
-                  </IonCardContent>
-                </IonCard>
-              </IonCol>
-
-              <IonCol sizeMd="3" sizeSm="6" size="12">
-                <IonCard className="dashboard-card">
-                  <IonCardHeader>
-                    <IonIcon icon={cartOutline} className="card-icon danger" />
-                    <IonCardTitle>Urgent Items</IonCardTitle>
-                  </IonCardHeader>
-                  <IonCardContent>
-                    <h2 className="metric-value">{urgentItems.length}</h2>
-                  </IonCardContent>
-                </IonCard>
-              </IonCol>
-
-              <IonCol sizeMd="3" sizeSm="6" size="12">
-                <IonCard className="dashboard-card">
-                  <IonCardHeader>
-                    <IonIcon icon={trendingUpOutline} className="card-icon" />
-                    <IonCardTitle>Restock Cost</IonCardTitle>
-                  </IonCardHeader>
-                  <IonCardContent>
-                    <h2 className="metric-value">€{totalRestockCost.toFixed(2)}</h2>
-                  </IonCardContent>
-                </IonCard>
-              </IonCol>
-
-              <IonCol sizeMd="3" sizeSm="6" size="12">
-                <IonCard className="dashboard-card">
-                  <IonCardHeader>
-                    <IonIcon icon={reloadOutline} className="card-icon" />
-                    <IonCardTitle>Categories</IonCardTitle>
-                  </IonCardHeader>
-                  <IonCardContent>
-                    <h2 className="metric-value">
-                      {new Set(restockSuggestions.map(item => item.category)).size}
-                    </h2>
-                  </IonCardContent>
-                </IonCard>
-              </IonCol>
+            
+              
             </IonRow>
 
               
