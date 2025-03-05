@@ -376,6 +376,15 @@ ion-content {
   border-top: 1px solid var(--ion-color-light-shade);
 }
 
+/* Keep charts full width */
+.usage-plot img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
 .no-predictions {
   text-align: center;
   padding: 2rem;
@@ -385,8 +394,9 @@ ion-content {
 .info-table, .usage-table {
   width: 100%;
   margin: 1rem 0;
-  border-collapse: collapse;
-  border: 1px solid var(--ion-color-dark);
+  border-collapse: separate;
+  border-spacing: 0;
+  border: none;
 }
 
 .info-table th,
@@ -395,7 +405,14 @@ ion-content {
 .usage-table td {
   padding: 0.75rem;
   text-align: left;
-  border: 1px solid var(--ion-color-dark);
+  border: none;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+/* Remove last border */
+.info-table tr:last-child td,
+.usage-table tr:last-child td {
+  border-bottom: none;
 }
 
 .info-table th,
@@ -419,6 +436,32 @@ ion-content {
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Make tables more compact and visually appealing */
+.tables-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--ion-color-light-tint);
+  border-radius: 12px;
+}
+
+.table-section {
+  background: var(--ion-background-color);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.table-section h4 {
+  margin: 0 0 1rem 0;
+  color: var(--ion-color-dark);
+  font-size: 1.1rem;
+  border-bottom: 2px solid var(--ion-color-primary);
+  padding-bottom: 0.5rem;
 }
 
 .tables-container {
