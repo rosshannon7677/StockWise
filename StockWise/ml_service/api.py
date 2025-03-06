@@ -15,7 +15,12 @@ app = FastAPI(title="StockWise ML API", debug=True)
 # Update CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8100", "http://localhost:8000"],
+    allow_origins=[
+        "http://localhost:8100",
+        "http://localhost:8000",
+        "https://stockwise-8351f.web.app",  # Add your Firebase hosting URL
+        "https://ml-service-519269717450.europe-west1.run.app"  # Add this
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,6 +40,10 @@ class PredictionResponse(BaseModel):
     daily_consumption: float
     price: float  # Add price field
     category: str  # Add category field
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to StockWise ML API"}  # Add this endpoint
 
 @app.get("/predictions", response_model=List[PredictionResponse])
 async def get_predictions():
