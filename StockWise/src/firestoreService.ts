@@ -47,13 +47,14 @@ export interface InventoryItem {
   };
 }
 
+// In firestoreService.ts
 export interface Supplier {
   id: string;
   name: string;
   email: string;
   phone: string;
   address: string;
-  category: string; // Add supplier category
+  category: string; // Add this field
   notes?: string;
   metadata: {
     addedBy: string;
@@ -186,9 +187,15 @@ export const getInventoryItems = (callback: (items: InventoryItem[]) => void) =>
   });
 };
 
-// Function to update an inventory item
+// Function to update an inventory item with role check
 export const updateInventoryItem = async (id: string, updatedItem: Partial<InventoryItem>) => {
   try {
+    const userRole = await getUserRole(auth.currentUser?.uid || '');
+    // Allow employees to update inventory
+    if (!['admin', 'manager', 'employee'].includes(userRole)) {
+      throw new Error('Insufficient permissions');
+    }
+
     const itemRef = doc(db, "inventoryItems", id);
     const itemDoc = await getDoc(itemRef);
     
@@ -204,8 +211,6 @@ export const updateInventoryItem = async (id: string, updatedItem: Partial<Inven
         ...updatedItem.metadata
       }
     });
-    
-    console.log("Document updated with ID: ", id);
   } catch (error) {
     console.error("Error updating document: ", error);
     throw error;
@@ -215,11 +220,17 @@ export const updateInventoryItem = async (id: string, updatedItem: Partial<Inven
 // Function to delete an inventory item
 export const deleteInventoryItem = async (id: string) => {
   try {
-    const itemRef = doc(db, "inventoryItems", id); // Reference the document by ID
+    const userRole = await getUserRole(auth.currentUser?.uid || '');
+    // Allow employees to delete inventory items
+    if (!['admin', 'manager', 'employee'].includes(userRole)) {
+      throw new Error('Insufficient permissions');
+    }
+
+    const itemRef = doc(db, "inventoryItems", id);
     await deleteDoc(itemRef);
-    console.log("Document deleted with ID: ", id);
   } catch (error) {
     console.error("Error deleting document: ", error);
+    throw error;
   }
 };
 
@@ -513,7 +524,12 @@ export const updateUserRole = async (userId: string, newRole: UserRole) => {
 export const getStockPredictions = async (): Promise<StockPrediction[]> => {
   try {
     console.log('Fetching predictions...');
-    const response = await fetch('http://localhost:8000/predictions');
+    // Remove /predictions from the base URL
+    const ML_SERVICE_URL = process.env.NODE_ENV === 'production' 
+      ? 'https://ml-service-519269717450.europe-west1.run.app' // Remove /predictions here
+      : 'http://localhost:8000';
+      
+    const response = await fetch(`${ML_SERVICE_URL}/predictions`); // /predictions is added here
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -522,7 +538,6 @@ export const getStockPredictions = async (): Promise<StockPrediction[]> => {
     const predictions = await response.json();
     console.log('Raw predictions response:', predictions);
     
-    // Add type to the parameter
     const validatedPredictions = predictions.map((p: Partial<StockPrediction>) => ({
       ...p,
       daily_consumption: Number(p.daily_consumption) || 0
@@ -532,5 +547,26 @@ export const getStockPredictions = async (): Promise<StockPrediction[]> => {
   } catch (error) {
     console.error('Error fetching predictions:', error);
     return [];
+  }
+};
+
+export const getConsumptionPlot = async (itemName: string): Promise<string | null> => {
+  try {
+    // Use the same ML service URL as predictions
+    const ML_SERVICE_URL = process.env.NODE_ENV === 'production' 
+      ? 'https://ml-service-519269717450.europe-west1.run.app'
+      : 'http://localhost:8000';
+      
+    const response = await fetch(`${ML_SERVICE_URL}/consumption-plot/${encodeURIComponent(itemName)}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.plot;
+  } catch (error) {
+    console.error('Error fetching consumption plot:', error);
+    return null;
   }
 };
