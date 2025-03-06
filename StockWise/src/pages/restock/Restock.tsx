@@ -21,7 +21,18 @@ import {
   cartOutline,
   analyticsOutline
 } from 'ionicons/icons';
-import { getInventoryItems, getStockPredictions, StockPrediction, addOrder, getSuppliers, SupplierOrder, updateInventoryItem, addInventoryItem, getOrders } from '../../firestoreService';
+import { 
+  getInventoryItems, 
+  getStockPredictions, 
+  StockPrediction, 
+  addOrder, 
+  getSuppliers, 
+  SupplierOrder, 
+  updateInventoryItem, 
+  addInventoryItem, 
+  getOrders,
+  getConsumptionPlot // Add this import
+} from '../../firestoreService';
 import { auth } from '../../../firebaseConfig';
 import './Restock.css';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -286,14 +297,8 @@ const Restock: React.FC = () => {
   const handleItemClick = async (itemName: string) => {
     setSelectedItem(itemName);
     try {
-      const response = await fetch(
-        `http://localhost:8000/consumption-plot/${encodeURIComponent(itemName)}`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setPlotData(data.plot);
+      const plotData = await getConsumptionPlot(itemName);
+      setPlotData(plotData);
     } catch (error) {
       console.error('Error fetching plot:', error);
       setPlotData(null);

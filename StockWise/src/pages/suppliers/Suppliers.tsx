@@ -7,30 +7,17 @@ import {
 } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import SupplierList from '../../components/suppliers/SupplierList';
-import { getSuppliers } from '../../firestoreService';
+import { getSuppliers, Supplier } from '../../firestoreService'; // Import the type
 import AddSupplier from '../../components/suppliers/AddSupplier';
 
-// Add interface for Supplier
-interface Supplier {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  notes?: string;
-  metadata: {
-    addedBy: string;
-    addedDate: string;
-  };
-}
+// Remove local interface since we're importing it
 
 const Suppliers: React.FC = () => {
-  // Update state type to Supplier[]
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
-    getSuppliers((fetchedSuppliers: Supplier[]) => {
+    getSuppliers((fetchedSuppliers) => {
       setSuppliers(fetchedSuppliers);
     });
   }, []);

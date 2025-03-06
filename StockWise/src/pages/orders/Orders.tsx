@@ -92,12 +92,18 @@ const Orders: React.FC = () => {
           name: supplier.name,
           email: supplier.email,
           phone: supplier.phone,
-          category: supplier.category // Add supplier category
+          category: supplier.category
         },
         items: selectedItems,
         status: 'pending',
         totalAmount: calculateTotal(),
         orderDate: new Date().toISOString(),
+        statusHistory: [{ // Add this field
+          status: 'pending',
+          date: new Date().toISOString(),
+          updatedBy: auth.currentUser?.email || 'unknown',
+          notes: ''
+        }],
         metadata: {
           addedBy: auth.currentUser?.email || '',
           addedDate: new Date().toISOString(),
