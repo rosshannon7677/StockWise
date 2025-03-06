@@ -134,7 +134,7 @@ const Home: React.FC = () => {
   const cardComponent = [
     {
       icon: cubeOutline,
-      title: "Total Items",
+      title: "CI/CID test ",
       subTitle: inventoryItems.length.toString(),
       color: "primary"
     },
