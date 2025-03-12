@@ -306,55 +306,62 @@ ion-card-content {
 }
 
 .activity-card {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
+  max-height: 500px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .activity-list {
-  max-height: 400px;
+  max-height: 450px;
   overflow-y: auto;
   padding: 0.5rem;
 }
 
 .activity-item {
-  padding: 1rem;
+  padding: 0.35rem;
   border-bottom: 1px solid var(--ion-color-light-shade);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.15rem;
+  font-size: 0.85rem;
+  line-height: 1.2;
 }
 
 .activity-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.15rem;
 }
 
 .activity-type {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
+.activity-time {
+  color: var(--ion-color-medium);
+  font-size: 0.75rem;
+}
+
+.activity-content {
+  margin: 0.15rem 0;
+  color: var(--ion-color-dark);
+}
+
+.activity-user {
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+  margin-top: 0.15rem;
+}
+
+/* Activity type colors */
 .activity-type.add { background: var(--ion-color-success-tint); }
 .activity-type.update { background: var(--ion-color-warning-tint); }
 .activity-type.delete { background: var(--ion-color-danger-tint); }
 .activity-type.order { background: var(--ion-color-primary-tint); }
 .activity-type.stock_use { background: var(--ion-color-secondary-tint); }
-
-.activity-time {
-  color: var(--ion-color-medium);
-  font-size: 0.9rem;
-}
-
-.activity-content {
-  margin: 0.5rem 0;
-  color: var(--ion-color-dark);
-}
-
-.activity-user {
-  font-size: 0.9rem;
-  color: var(--ion-color-medium);
-}
 
 .no-activity {
   text-align: center;

@@ -134,32 +134,6 @@ const Home: React.FC = () => {
     }
   };
 
-  const cardComponent = [
-    {
-      icon: cubeOutline,
-      title: "Total Items",
-      subTitle: inventoryItems.length.toString(),
-      color: "primary"
-    },
-    {
-      icon: checkmarkCircleOutline,
-      title: "In Stock",
-      subTitle: inventoryItems.filter(item => item.quantity > 0).length.toString(),
-      color: "success"
-    },
-    {
-      icon: cartOutline,
-      title: "Low Stock",
-      subTitle: inventoryItems.filter(item => item.quantity < 10).length.toString(),
-      color: "warning"
-    },
-    {
-      icon: receiptOutline,
-      title: "Total Value",
-      subTitle: `€${inventoryItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}`,
-      color: "tertiary"
-    }
-  ];
 
   // Get top selling products
   const topProducts = [...inventoryItems]
@@ -202,21 +176,7 @@ const Home: React.FC = () => {
     <IonContent>
       <div className="dashboard-container">
         <IonGrid>
-          <IonRow>
-            {cardComponent.map((card, index) => (
-              <IonCol sizeMd="3" sizeSm="6" size="12" key={index}>
-                <IonCard className="dashboard-card" style={{ height: 'auto', padding: '0.5rem' }}>
-                  <IonCardHeader style={{ padding: '0.5rem' }}>
-                    <IonIcon icon={card.icon} className="card-icon" color={card.color} />
-                    <IonCardTitle style={{ fontSize: '1rem' }}>{card.title}</IonCardTitle>
-                  </IonCardHeader>
-                  <IonCardContent style={{ padding: '0.5rem' }}>
-                    <div className="metric-value" style={{ fontSize: '1.2rem' }}>{card.subTitle}</div>
-                  </IonCardContent>
-                </IonCard>
-              </IonCol>
-            ))}
-          </IonRow>
+          
 
           <IonRow>
             <IonCol sizeMd="8" sizeSm="12">
@@ -262,7 +222,8 @@ const Home: React.FC = () => {
           </IonRow>
           
           <IonRow>
-            <IonCol sizeMd="12">
+            {/* Activity Log Column - Left Side */}
+            <IonCol sizeMd="6" sizeSm="12">
               <IonCard className="dashboard-card activity-card">
                 <IonCardHeader>
                   <IonIcon icon={receiptOutline} className="card-icon" />
@@ -290,6 +251,22 @@ const Home: React.FC = () => {
                     ) : (
                       <div className="no-activity">No recent activity</div>
                     )}
+                  </div>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+
+            {/* Additional Content - Right Side */}
+            <IonCol sizeMd="6" sizeSm="12">
+              <IonCard className="dashboard-card">
+                <IonCardHeader>
+                  <IonIcon icon={analyticsOutline} className="card-icon" />
+                  <IonCardTitle>Usage Analysis</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  {/* Add any additional content here */}
+                  <div className="analysis-content">
+                    {/* You can add charts, stats, or other relevant info here */}
                   </div>
                 </IonCardContent>
               </IonCard>
