@@ -521,6 +521,32 @@ export const updateUserRole = async (userId: string, newRole: UserRole) => {
   }
 };
 
+export const deleteUser = async (userId: string, userEmail: string) => {
+  try {
+    // Check if current user is admin
+    const currentUser = auth.currentUser;
+    const userRole = await getUserRole(currentUser?.uid || '');
+    
+    if (!currentUser || userRole !== 'admin') {
+      throw new Error('Only administrators can delete users');
+    }
+    
+    // Prevent deleting the admin account
+    if (userEmail === 'rosshannonty@gmail.com') {
+      throw new Error('Cannot delete admin account');
+    }
+
+    // Delete user document from Firestore
+    const userRef = doc(db, "users", userId);
+    await deleteDoc(userRef);
+    
+    return true;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
+  }
+};
+
 export const getStockPredictions = async (): Promise<StockPrediction[]> => {
   try {
     console.log('Fetching predictions...');

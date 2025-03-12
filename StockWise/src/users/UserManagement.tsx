@@ -8,16 +8,21 @@ import {
   IonSelect,
   IonSelectOption,
   IonList,
-  IonAlert
+  IonAlert,
+  IonButton,
+  IonIcon
 } from '@ionic/react';
-import { getUsers, updateUserRole, setDefaultAdmin } from '../firestoreService';
+import { getUsers, updateUserRole, setDefaultAdmin, deleteUser } from '../firestoreService';
 import { UserRole, UserRoleData } from '../types/roles';
 import { auth } from '../../firebaseConfig';
+import { trash } from 'ionicons/icons';
 import './UserManagement.css';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<UserRoleData[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserRoleData | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -48,6 +53,24 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  const handleDeleteUser = async (user: UserRoleData) => {
+    setUserToDelete(user);
+    setShowDeleteAlert(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+    
+    try {
+      await deleteUser(userToDelete.userId, userToDelete.email);
+      setUsers(users.filter(u => u.userId !== userToDelete.userId));
+      setShowDeleteAlert(false);
+      setUserToDelete(null);
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
   return (
     <IonContent>
       <div className="user-management-container">
@@ -73,6 +96,15 @@ const UserManagement: React.FC = () => {
                     <IonSelectOption value="manager">Manager</IonSelectOption>
                     <IonSelectOption value="employee">Employee</IonSelectOption>
                   </IonSelect>
+                  {user.email !== 'rosshannonty@gmail.com' && (
+                    <IonButton 
+                      fill="clear" 
+                      color="danger"
+                      onClick={() => handleDeleteUser(user)}
+                    >
+                      <IonIcon icon={trash} />
+                    </IonButton>
+                  )}
                 </IonItem>
               ))}
             </IonList>
@@ -87,6 +119,23 @@ const UserManagement: React.FC = () => {
             buttons={['OK']}
           />
         )}
+        <IonAlert
+          isOpen={showDeleteAlert}
+          onDidDismiss={() => setShowDeleteAlert(false)}
+          header="Confirm Delete"
+          message={`Are you sure you want to remove ${userToDelete?.name} (${userToDelete?.email})?`}
+          buttons={[
+            {
+              text: 'Cancel',
+              role: 'cancel'
+            },
+            {
+              text: 'Delete',
+              role: 'confirm',
+              handler: confirmDelete
+            }
+          ]}
+        />
       </div>
     </IonContent>
   );
