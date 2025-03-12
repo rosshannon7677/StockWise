@@ -1,32 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { 
-  IonContent,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonIcon,
-  IonButton
+  IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader,
+  IonCardTitle, IonCardContent, IonIcon, IonButton
 } from '@ionic/react';
 import { 
-  logOutOutline,
-  cubeOutline,
-  checkmarkCircleOutline,
-  receiptOutline,
-  cartOutline,
-  trendingUpOutline,
-  statsChartOutline,
-  settingsOutline,
-  analyticsOutline
+  logOutOutline, cubeOutline, checkmarkCircleOutline,
+  receiptOutline, cartOutline, trendingUpOutline,
+  statsChartOutline, settingsOutline, analyticsOutline
 } from 'ionicons/icons';
 import './Home.css';
 import { RestockSuggestion } from '../restock/Restock';
 import { auth } from '../../../firebaseConfig';
 import { useIonRouter } from '@ionic/react';
-import { getInventoryItems, getStockPredictions, StockPrediction } from '../../firestoreService';
+import { 
+  getInventoryItems, getStockPredictions, StockPrediction, getActivityLogs 
+} from '../../firestoreService';
 
 // Update VALID_CATEGORIES to match exactly with supplier categories
 const VALID_CATEGORIES = [
@@ -64,12 +52,22 @@ interface InventoryItem {
   };
 }
 
+interface ActivityLog {
+  id: string;
+  action: 'add' | 'update' | 'delete' | 'order' | 'stock_use';
+  itemName: string;
+  timestamp: string;
+  user: string;
+  details: string;
+}
+
 const Home: React.FC = () => {
-  const navigation = useIonRouter();
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [predictions, setPredictions] = useState<StockPrediction[]>([]);
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [plotData, setPlotData] = useState<string | null>(null);
+  const navigation = useIonRouter();
 
   useEffect(() => {
     getInventoryItems((items) => {
@@ -85,16 +83,21 @@ const Home: React.FC = () => {
     fetchPredictions();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = getActivityLogs((logs) => {
+      setActivityLogs(logs);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const fetchPlot = async (itemName: string) => {
     console.log(`Fetching plot for: ${itemName}`);  // Debug log
     try {
-      // Make sure to encode the item name properly
       const encodedName = encodeURIComponent(itemName);
       const url = `http://localhost:8000/consumption-plot/${encodedName}`;
       console.log(`Requesting URL: ${url}`);  // Debug log
       
       const response = await fetch(url);
-      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
@@ -167,10 +170,8 @@ const Home: React.FC = () => {
     // Parse values as numbers
     const currentQuantity = Number(pred.current_quantity) || 0;
     const dailyConsumption = Number(pred.daily_consumption) || 0;
-    const daysUntilLow = Number(pred.predicted_days_until_low) || 0;
-
-    // Use the ML service's recommended quantity directly
     const recommendedQuantity = Number(pred.recommended_quantity) || 0;
+    const daysUntilLow = Number(pred.predicted_days_until_low) || 0;
 
     // Type the urgency explicitly
     const urgency: 'high' | 'medium' | 'low' = 
@@ -260,6 +261,40 @@ const Home: React.FC = () => {
             </IonCol>
           </IonRow>
           
+          <IonRow>
+            <IonCol sizeMd="12">
+              <IonCard className="dashboard-card activity-card">
+                <IonCardHeader>
+                  <IonIcon icon={receiptOutline} className="card-icon" />
+                  <IonCardTitle>Recent Activity</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  <div className="activity-list">
+                    {activityLogs.length > 0 ? (
+                      activityLogs.map((log) => (
+                        <div key={log.id} className="activity-item">
+                          <div className="activity-header">
+                            <span className={`activity-type ${log.action}`}>
+                              {log.action.toUpperCase()}
+                            </span>
+                            <span className="activity-time">
+                              {new Date(log.timestamp).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="activity-content">
+                            <strong>{log.itemName}</strong> - {log.details}
+                          </div>
+                          <div className="activity-user">By: {log.user}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-activity">No recent activity</div>
+                    )}
+                  </div>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
         </IonGrid>
       </div>
     </IonContent>

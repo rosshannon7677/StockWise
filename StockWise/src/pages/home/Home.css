@@ -305,6 +305,63 @@ ion-card-content {
   font-size: 0.9rem;
 }
 
+.activity-card {
+  margin-top: 1rem;
+}
+
+.activity-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.activity-item {
+  padding: 1rem;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+  margin-bottom: 0.5rem;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.activity-type {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.activity-type.add { background: var(--ion-color-success-tint); }
+.activity-type.update { background: var(--ion-color-warning-tint); }
+.activity-type.delete { background: var(--ion-color-danger-tint); }
+.activity-type.order { background: var(--ion-color-primary-tint); }
+.activity-type.stock_use { background: var(--ion-color-secondary-tint); }
+
+.activity-time {
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}
+
+.activity-content {
+  margin: 0.5rem 0;
+  color: var(--ion-color-dark);
+}
+
+.activity-user {
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
+
+.no-activity {
+  text-align: center;
+  color: var(--ion-color-medium);
+  padding: 2rem;
+}
+
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 1rem;

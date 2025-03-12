@@ -14,7 +14,9 @@ import {
   getDoc,
   query,
   where,
-  getDocs
+  getDocs,
+  orderBy,
+  limit
 } from "firebase/firestore";
 import { app } from "./../firebaseConfig";
 import { auth } from '../firebaseConfig';
@@ -154,13 +156,22 @@ export interface StockPrediction {
   };
 }
 
+interface ActivityLog {
+  id: string;
+  action: 'add' | 'update' | 'delete' | 'order' | 'stock_use';
+  itemName: string;
+  timestamp: string;
+  user: string;
+  details: string;
+}
+
 // Initialize Firestore
 const db = getFirestore(app);
 
 // Function to add an inventory item
 export const addInventoryItem = async (item: Omit<InventoryItem, 'id'>) => {
   try {
-    await addDoc(collection(db, "inventoryItems"), {
+    const docRef = await addDoc(collection(db, "inventoryItems"), {
       ...item,
       dimensions: item.dimensions || { length: 0, width: 0, height: 0 },
       location: item.location || { aisle: '', shelf: '', section: '' },
@@ -169,6 +180,16 @@ export const addInventoryItem = async (item: Omit<InventoryItem, 'id'>) => {
         addedDate: item.metadata?.addedDate || new Date().toISOString()
       }
     });
+
+    // Add user field to activity log
+    await addActivityLog({
+      action: 'add',
+      itemName: item.name,
+      details: `Added ${item.quantity} units of ${item.name}`,
+      user: auth.currentUser?.email || 'unknown'
+    });
+
+    return docRef.id;
   } catch (error) {
     console.error("Error adding document: ", error);
     throw error;
@@ -191,7 +212,6 @@ export const getInventoryItems = (callback: (items: InventoryItem[]) => void) =>
 export const updateInventoryItem = async (id: string, updatedItem: Partial<InventoryItem>) => {
   try {
     const userRole = await getUserRole(auth.currentUser?.uid || '');
-    // Allow employees to update inventory
     if (!['admin', 'manager', 'employee'].includes(userRole)) {
       throw new Error('Insufficient permissions');
     }
@@ -203,7 +223,19 @@ export const updateInventoryItem = async (id: string, updatedItem: Partial<Inven
       throw new Error('Item not found');
     }
 
-    const currentData = itemDoc.data();
+    const currentData = itemDoc.data() as InventoryItem;
+
+    // Only track quantity changes
+    if (updatedItem.quantity !== undefined && updatedItem.quantity !== currentData.quantity) {
+      const quantityChange = updatedItem.quantity - currentData.quantity;
+      await addActivityLog({
+        action: 'update',
+        itemName: currentData.name,
+        details: `quantity by ${quantityChange > 0 ? '+' : ''}${quantityChange} units`,
+        user: auth.currentUser?.email || 'unknown'
+      });
+    }
+
     await updateDoc(itemRef, {
       ...updatedItem,
       metadata: {
@@ -221,13 +253,24 @@ export const updateInventoryItem = async (id: string, updatedItem: Partial<Inven
 export const deleteInventoryItem = async (id: string) => {
   try {
     const userRole = await getUserRole(auth.currentUser?.uid || '');
-    // Allow employees to delete inventory items
     if (!['admin', 'manager', 'employee'].includes(userRole)) {
       throw new Error('Insufficient permissions');
     }
 
     const itemRef = doc(db, "inventoryItems", id);
+    const itemDoc = await getDoc(itemRef);
+    if (!itemDoc.exists()) throw new Error('Item not found');
+    
+    const item = itemDoc.data() as InventoryItem;
     await deleteDoc(itemRef);
+
+    // Update the activity log call to include user
+    await addActivityLog({
+      action: 'delete',
+      itemName: item.name,
+      details: `Deleted ${item.name}`,
+      user: auth.currentUser?.email || 'unknown'
+    });
   } catch (error) {
     console.error("Error deleting document: ", error);
     throw error;
@@ -595,4 +638,42 @@ export const getConsumptionPlot = async (itemName: string): Promise<string | nul
     console.error('Error fetching consumption plot:', error);
     return null;
   }
+};
+
+// Add this to firestoreService.ts after the existing interfaces
+export const addActivityLog = async (log: Omit<ActivityLog, 'id' | 'timestamp'>) => {
+  try {
+    let details = log.details;
+    const match = log.details.match(/(-?\d+)/); // Extract quantity change
+
+    // Only log if it's a quantity change
+    if (log.action === 'stock_use' || 
+        (log.action === 'update' && match) || 
+        (log.action === 'add' && log.details.includes('units'))) {
+      
+      const activityLogData = {
+        ...log,
+        details,
+        timestamp: new Date().toISOString(),
+        user: auth.currentUser?.email || 'unknown'
+      };
+      
+      await addDoc(collection(db, "activityLogs"), activityLogData);
+    }
+  } catch (error) {
+    console.error("Error adding activity log:", error);
+  }
+};
+
+export const getActivityLogs = (callback: (logs: ActivityLog[]) => void) => {
+  const collectionRef = collection(db, "activityLogs");
+  const q = query(collectionRef, orderBy("timestamp", "desc"), limit(50));
+  
+  return onSnapshot(q, (snapshot) => {
+    const logs = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ActivityLog[];
+    callback(logs);
+  });
 };
