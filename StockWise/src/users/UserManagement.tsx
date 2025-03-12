@@ -74,7 +74,6 @@ const UserManagement: React.FC = () => {
   return (
     <IonContent>
       <div className="user-management-container">
-        <h1>User Management</h1>
         <IonCard>
           <IonCardContent>
             <IonList>
