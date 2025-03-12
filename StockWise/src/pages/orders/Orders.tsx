@@ -98,6 +98,13 @@ const Orders: React.FC = () => {
         status: 'pending',
         totalAmount: calculateTotal(),
         orderDate: new Date().toISOString(),
+        statusHistory: [  // Add this field
+          {
+            status: 'pending',
+            date: new Date().toISOString(),
+            updatedBy: auth.currentUser?.email || 'unknown'
+          }
+        ],
         metadata: {
           addedBy: auth.currentUser?.email || '',
           addedDate: new Date().toISOString(),
