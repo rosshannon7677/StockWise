@@ -264,9 +264,37 @@ const Home: React.FC = () => {
                   <IonCardTitle>Usage Analysis</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  {/* Add any additional content here */}
                   <div className="analysis-content">
-                    {/* You can add charts, stats, or other relevant info here */}
+                    {/* Daily Usage Summary */}
+                    <div className="usage-summary">
+                      <h4>Daily Usage Summary</h4>
+                      {predictions
+                        .filter(pred => pred.daily_consumption > 0)
+                        .sort((a, b) => b.daily_consumption - a.daily_consumption)
+                        .slice(0, 5)
+                        .map(item => (
+                          <div key={item.name} className="usage-item" onClick={() => handleItemClick(item.name)}>
+                            <div className="usage-item-header">
+                              <span className="item-name">{item.name}</span>
+                              <span className="daily-rate">{item.daily_consumption.toFixed(1)} units/day</span>
+                            </div>
+                            <div className="usage-item-footer">
+                              <span className="stock-level">Current Stock: {item.current_quantity}</span>
+                              <span className="days-remaining">
+                                {item.predicted_days_until_low} days until low
+                              </span>
+                            </div>
+                            {selectedItem === item.name && plotData && (
+                              <div className="usage-trend">
+                                <img 
+                                  src={`data:image/png;base64,${plotData}`} 
+                                  alt={`Usage trend for ${item.name}`}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 </IonCardContent>
               </IonCard>
