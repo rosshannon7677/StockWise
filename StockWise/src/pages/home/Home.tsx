@@ -67,6 +67,7 @@ const Home: React.FC = () => {
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [plotData, setPlotData] = useState<string | null>(null);
+  const [selectedAisle, setSelectedAisle] = useState<string | null>(null);
   const navigation = useIonRouter();
 
   useEffect(() => {
@@ -188,11 +189,30 @@ const Home: React.FC = () => {
                 <IonCardContent>
                   <div className="location-grid">
                     {Array.from(new Set(inventoryItems.map(item => item.location.aisle))).map(aisle => (
-                      <div key={aisle} className="location-card">
+                      <div 
+                        key={aisle} 
+                        className={`location-card ${selectedAisle === aisle ? 'active' : ''}`}
+                        onClick={() => setSelectedAisle(aisle === selectedAisle ? null : aisle)}
+                      >
                         <div className="location-title">Aisle {aisle}</div>
                         <div className="location-count">
                           {inventoryItems.filter(item => item.location.aisle === aisle).length} items
                         </div>
+                        
+                        {selectedAisle === aisle && (
+                          <div className="aisle-items">
+                            {inventoryItems
+                              .filter(item => item.location.aisle === aisle)
+                              .map(item => (
+                                <div key={item.id} className="aisle-item">
+                                  <div className="item-name">{item.name}</div>
+                                  <div className="item-details">
+                                    <span className="quantity">Qty: {item.quantity}</span>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

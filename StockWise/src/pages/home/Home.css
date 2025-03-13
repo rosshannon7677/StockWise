@@ -111,7 +111,13 @@ ion-card-content {
   padding: 0.75rem;
   border-radius: 8px;
   text-align: center;
-  transition: transform 0.2s;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.location-card.active {
+  background: var(--ion-color-primary-tint);
+  transform: scale(1.02);
 }
 
 .location-card:hover {
@@ -151,6 +157,53 @@ ion-card-content {
 .aisle.has-items {
   background: var(--ion-color-primary-tint);
   border-color: var(--ion-color-primary);
+}
+
+.aisle-items {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ion-color-medium-tint);
+  text-align: left;
+}
+
+.aisle-item {
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+  background: var(--ion-background-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.aisle-item:hover {
+  background: var(--ion-color-light);
+}
+
+.aisle-item .item-name {
+  font-weight: 500;
+  color: var(--ion-color-dark);
+}
+
+.aisle-item .item-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.item-details .quantity {
+  background: var(--ion-color-light);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  color: var(--ion-color-medium);
+  font-size: 0.8rem;
+}
+
+.item-details span {
+  background: var(--ion-color-light);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
 }
 
 .ml-insights {
