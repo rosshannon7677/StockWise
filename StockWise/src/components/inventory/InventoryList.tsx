@@ -217,87 +217,44 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     }
   };
 
-  const columns = [
-    {
-      field: 'name',
-      headerName: 'Name',
-      width: 200,
-    },
-    {
-      field: 'category',
-      headerName: 'Category',
-      width: 150,
-    },
-    {
-      field: 'quantity',
-      headerName: 'Quantity',
-      width: 100,
-    },
-    {
-      field: 'price',
-      headerName: 'Price',
-      width: 100,
-      valueGetter: (item: InventoryItem) => `€${item.price.toFixed(2)}`,
-    },
-    {
-      field: 'location',
-      headerName: 'Location',
-      width: 150,
-      valueGetter: (item: InventoryItem) => 
-        `${item.location.aisle}-${item.location.shelf}-${item.location.section}`,
-    },
-    {
-      field: 'dimensions',
-      headerName: 'Dimensions',
-      width: 150,
-      valueGetter: (item: InventoryItem) => 
-        `${item.dimensions.length}x${item.dimensions.width}x${item.dimensions.height}`,
-    },
-    {
-      field: 'addedBy',
-      headerName: 'Added By',
-      width: 150,
-      valueGetter: (item: InventoryItem) => item.metadata.addedBy,
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 150,
-      renderCell: (item: InventoryItem) => (
-        <div className="actions-cell" style={{ width: columns[7].width }}>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedItem(item);
-              setUnitsUsed(1);
-              setShowUseStockModal(true);
-            }} 
-            className="use-button"
-          >
-            Use Stock
-          </button>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEdit(item);
-            }} 
-            className="edit-button"
-          >
-            Edit
-          </button>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete(item.id);
-            }} 
-            className="delete-button"
-          >
-            Delete
-          </button>
-        </div>
-      ),
-    }
-  ];
+  // Update the columns array
+const columns = [
+  {
+    field: 'name',
+    headerName: 'Name',
+    width: '20%'
+  },
+  {
+    field: 'category',
+    headerName: 'Category', 
+    width: '15%'
+  },
+  {
+    field: 'quantity',
+    headerName: 'Quantity',
+    width: '10%'
+  },
+  {
+    field: 'price',
+    headerName: 'Price',
+    width: '10%'
+  },
+  {
+    field: 'location',
+    headerName: 'Location',
+    width: '15%'
+  },
+  {
+    field: 'dimensions',
+    headerName: 'Dimensions',
+    width: '15%'
+  },
+  {
+    field: 'actions',
+    headerName: 'Actions',
+    width: '15%'
+  }
+];
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -308,7 +265,7 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     <div className="inventory-table">
       <div className="table-header">
         {columns.map((col) => (
-          <div key={col.field} className="header-cell" style={{ width: col.width }}>
+          <div key={col.field} className="table-cell" style={{ width: col.width }}>
             {col.headerName}
           </div>
         ))}
@@ -407,10 +364,7 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
                 <div className="table-cell" style={{ width: columns[5].width }}>
                   {`${item.dimensions.length}x${item.dimensions.width}x${item.dimensions.height}`}
                 </div>
-                <div className="table-cell" style={{ width: columns[6].width }}>
-                  {item.metadata.addedBy}
-                </div>
-                <div className="actions-cell" style={{ width: columns[7].width }}>
+                <div className="actions-cell" style={{ width: columns[6].width }}>
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
