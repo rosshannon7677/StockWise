@@ -58,3 +58,47 @@ class EmailService:
         except Exception as e:
             logger.error(f"Error in get_credentials: {str(e)}", exc_info=True)
             raise
+
+    def send_low_stock_alert(self, items):
+        try:
+            creds = self.get_credentials()
+            service = build('gmail', 'v1', credentials=creds)
+
+            message = MIMEMultipart()
+            message["From"] = self.sender_email
+            message["To"] = self.sender_email
+            message["Subject"] = "StockWise: Low Stock Alert"
+
+            # Create HTML table for low stock items
+            html_content = """
+            <h2>Low Stock Alert</h2>
+            <table border="1">
+                <tr>
+                    <th>Item Name</th>
+                    <th>Current Quantity</th>
+                    <th>Days Until Low</th>
+                </tr>
+            """
+
+            for item in items:
+                html_content += f"""
+                <tr>
+                    <td>{item['name']}</td>
+                    <td>{item['current_quantity']}</td>
+                    <td>{item['predicted_days_until_low']}</td>
+                </tr>
+                """
+
+            html_content += "</table>"
+            message.attach(MIMEText(html_content, "html"))
+
+            raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+            message_body = {'raw': raw_message}
+
+            send_message = (service.users().messages().send(userId="me", body=message_body).execute())
+            logger.debug(f"Message Id: {send_message['id']}")
+
+            return True
+        except Exception as e:
+            logger.error(f"Error sending email: {str(e)}", exc_info=True)
+            return False
