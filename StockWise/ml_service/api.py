@@ -109,6 +109,21 @@ async def send_low_stock_alert():
         logger.error(f"Error in send_low_stock_alert: {str(e)}", exc_info=True)
         return {"error": str(e)}
 
+# Add automatic low stock check function
+async def check_low_stock():
+    try:
+        predictions = predictor.predict_stock_levels()
+        low_stock_items = [
+            item for item in predictions 
+            if item['predicted_days_until_low'] < 7
+        ]
+        
+        if low_stock_items:
+            success = email_service.send_low_stock_alert(low_stock_items)
+            logger.info(f"Automatic low stock alert sent: {success}")
+    except Exception as e:
+        logger.error(f"Error in automatic low stock check: {str(e)}", exc_info=True)
+
 
 
 # Make sure this appears at the end of the file
