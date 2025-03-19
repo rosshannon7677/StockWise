@@ -164,17 +164,11 @@ class StockPredictor:
                 current_quantity = item['current_quantity']
                 product_id = item['product_id']
                 
-                # Enhanced debug logging
-                self.logger.debug(f"""
-                    Checking item: {item['name']}
-                    Current quantity: {current_quantity}
-                    Last known quantity: {self.last_known_quantities.get(product_id, 'None')}
-                    Threshold check: {{
-                        'In last_known_quantities': product_id in self.last_known_quantities,
-                        'Last quantity > 10': self.last_known_quantities.get(product_id, 0) > 10,
-                        'Current <= 10': current_quantity <= 10
-                    }}
-                """)
+                # Calculate days until low
+                days_until_low = self._calculate_days_until_low(
+                    {'quantity': current_quantity}, 
+                    item['daily_consumption']
+                )
                 
                 # Check if this item just went below threshold
                 if (product_id in self.last_known_quantities and 
@@ -186,22 +180,12 @@ class StockPredictor:
                 # Update last known quantity
                 self.last_known_quantities[product_id] = current_quantity
                 
-                # Calculate predictions as before
-                days_until_low = self._calculate_days_until_low(
-                    {'quantity': current_quantity}, 
-                    item['daily_consumption']
-                )
-                
                 prediction = {
                     'product_id': product_id,
                     'name': item['name'],
                     'current_quantity': current_quantity,
                     'predicted_days_until_low': days_until_low,
                     'daily_consumption': item['daily_consumption'],
-                    'recommended_quantity': self._calculate_recommended_quantity(
-                        item['current_quantity'], 
-                        item['daily_consumption']
-                    ),
                     'price': float(item['price']),
                     'confidence_score': self._calculate_confidence(item),
                     'recommended_restock_date': (
@@ -210,19 +194,9 @@ class StockPredictor:
                     ).isoformat(),
                     'category': item['category'],
                     'usage_history': item.get('used_stock', []),
-                    'is_low_stock': days_until_low < 7
+                    'is_newly_low': product_id in [i['product_id'] for i in newly_low_items]
                 }
                 predictions.append(prediction)
-            
-            # If any items newly crossed threshold, send alert
-            if newly_low_items:
-                self.logger.debug(f"Sending alert for {len(newly_low_items)} newly low items")
-                success = self.email_service.send_low_stock_alert([{
-                    'name': item['name'],
-                    'current_quantity': item['current_quantity'],
-                    'predicted_days_until_low': 0
-                } for item in newly_low_items])
-                self.logger.debug(f"Email send result: {success}")
             
             return predictions
             
