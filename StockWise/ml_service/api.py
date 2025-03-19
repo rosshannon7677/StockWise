@@ -1,16 +1,20 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from stock_predictor import StockPredictor
 from typing import List
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 import logging
+from EmailService import EmailService  # Adjusted for relative import
+import asyncio
+from firebase_admin import firestore
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="StockWise ML API", debug=True)
+email_service = EmailService()
 
 # Update CORS middleware
 app.add_middleware(
@@ -76,6 +80,36 @@ async def get_consumption_plot(item_name: str):
     except Exception as e:
         print(f"Error generating plot: {e}")  # Debug log
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/send-low-stock-alert")
+async def send_low_stock_alert():
+    try:
+        predictions = predictor.predict_stock_levels()
+        logger.debug(f"Got predictions: {predictions}")
+        
+        # Filter for low stock items
+        low_stock_items = [
+            item for item in predictions 
+            if item['current_quantity'] <= 10  # Use current quantity check
+        ]
+        
+        if low_stock_items:
+            # Actually send the email
+            success = email_service.send_low_stock_alert(low_stock_items)
+            logger.debug(f"Email send attempt result: {success}")
+            return {
+                "message": "Low stock alert email sent" if success else "Failed to send email",
+                "success": success,
+                "items": low_stock_items
+            }
+        else:
+            return {"message": "No low stock items found", "success": True}
+            
+    except Exception as e:
+        logger.error(f"Error in send_low_stock_alert: {str(e)}", exc_info=True)
+        return {"error": str(e)}
+
+
 
 # Make sure this appears at the end of the file
 if __name__ == "__main__":
