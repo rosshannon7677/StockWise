@@ -124,7 +124,36 @@ async def check_low_stock():
     except Exception as e:
         logger.error(f"Error in automatic low stock check: {str(e)}", exc_info=True)
 
+# Create a callback on_snapshot function
+def on_inventory_update(doc_snapshot, changes, read_time):
+    for change in changes:
+        if change.type.name in ['ADDED', 'MODIFIED']:
+            logger.debug(f"Document {change.document.id} was modified")
+            data = change.document.to_dict()
+            current_quantity = data.get('quantity', 0)
+            
+            # Second email triggered here
+            if current_quantity <= 10:
+                logger.debug(f"Low stock detected for {data.get('name')}: {current_quantity}")
+                try:
+                    predictions = predictor.predict_stock_levels()
+                    low_stock_items = [
+                        item for item in predictions 
+                        if item['current_quantity'] <= 10
+                    ]
+                    if low_stock_items:
+                        success = email_service.send_low_stock_alert(low_stock_items)
+                        logger.debug(f"Email alert sent: {success}")
+                except Exception as e:
+                    logger.error(f"Error sending low stock alert: {e}")
 
+# Setup Firestore listener
+@app.on_event("startup")
+async def setup_db_listener():
+    db = firestore.client()
+    inventory_ref = db.collection('inventoryItems')
+    # Watch the collection
+    inventory_ref.on_snapshot(on_inventory_update)
 
 # Make sure this appears at the end of the file
 if __name__ == "__main__":
