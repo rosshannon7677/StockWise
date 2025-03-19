@@ -677,3 +677,18 @@ export const getActivityLogs = (callback: (logs: ActivityLog[]) => void) => {
     callback(logs);
   });
 };
+
+export const sendLowStockAlert = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/send-low-stock-alert', {
+      method: 'POST'
+    });
+    if (!response.ok) {
+      throw new Error('Failed to send low stock alert');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error sending low stock alert:', error);
+    throw error;
+  }
+};
