@@ -2,12 +2,8 @@ import React, { useState } from 'react';
 import { 
   IonPage, 
   IonContent, 
-  IonHeader, 
-  IonTitle, 
-  IonToolbar, 
   IonInput, 
   IonItem, 
-  IonLabel, 
   IonButton,
   IonIcon,
   IonCard,
@@ -22,9 +18,14 @@ import {
   setPersistence,
   browserLocalPersistence
 } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { auth } from '../../../firebaseConfig';
 import { logoGoogle, logoApple } from 'ionicons/icons';
+import type { UserStatus } from '../../types/roles';
 import './Auth.css';
+
+// Initialize Firestore
+const db = getFirestore();
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -34,11 +35,27 @@ const Login: React.FC = () => {
 
   const handleEmailLogin = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setError(null);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Check user status
+      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+      const userData = userDoc.data();
+      
+      if (userData?.status === 'pending') {
+        await auth.signOut();
+        setError('Your account is pending approval.');
+        return;
+      }
+      
+      if (userData?.status === 'inactive') {
+        await auth.signOut();
+        setError('Your account has been deactivated.');
+        return;
+      }
+
       navigate('/home');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 

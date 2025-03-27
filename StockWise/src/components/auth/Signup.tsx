@@ -62,7 +62,10 @@ const Signup: React.FC = () => {
         <div className="auth-container">
           {/* Add admin info banner */}
           <div className="admin-info-banner">
-            <p>Admin Account: rosshannonty@gmail.com</p>
+            <span>
+              Admin Account: rosshannonty@gmail.com
+              <span className="admin-badge">Primary Admin</span>
+            </span>
           </div>
 
           <IonCard className="auth-card">

@@ -147,3 +147,30 @@ ion-input {
   border-radius: 12px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
+
+.admin-info-banner {
+  background: var(--ion-color-primary);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-info-banner span {
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.admin-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  font-size: 0.9rem;
+  color: white;
+}
