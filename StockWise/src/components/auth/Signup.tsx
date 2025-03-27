@@ -24,23 +24,23 @@ const Signup: React.FC = () => {
   const handleSignup = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // After creating the auth user, update their profile with the name
+      
+      // Update profile with name
       await updateProfile(userCredential.user, {
         displayName: name
       });
-      
-      // Set default role
+
+      // Set initial user role as employee
       await setUserRole(userCredential.user.uid, {
         userId: userCredential.user.uid,
         email: email,
-        role: 'employee', // Default role
-        name: name
+        name: name,
+        role: 'employee'
       });
 
-      setError(null);
       navigate('/home');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 

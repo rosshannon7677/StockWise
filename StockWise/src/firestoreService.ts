@@ -279,6 +279,11 @@ export const deleteInventoryItem = async (id: string) => {
 
 export const addSupplier = async (supplier: Omit<Supplier, 'id'>) => {
   try {
+    const userRole = await getUserRole(auth.currentUser?.uid || '');
+    if (!['admin', 'manager'].includes(userRole)) {
+      throw new Error('Only admins and managers can add suppliers');
+    }
+
     await addDoc(collection(db, "suppliers"), {
       ...supplier,
       metadata: {
@@ -305,8 +310,19 @@ export const getSuppliers = (callback: (suppliers: Supplier[]) => void) => {
 
 export const updateSupplier = async (id: string, updatedSupplier: Partial<Supplier>) => {
   try {
+    const userRole = await getUserRole(auth.currentUser?.uid || '');
+    if (!['admin', 'manager'].includes(userRole)) {
+      throw new Error('Only admins and managers can update suppliers');
+    }
+
     const supplierRef = doc(db, "suppliers", id);
-    await updateDoc(supplierRef, updatedSupplier);
+    await updateDoc(supplierRef, {
+      ...updatedSupplier,
+      metadata: {
+        ...updatedSupplier.metadata,
+        lastUpdated: new Date().toISOString()
+      }
+    });
   } catch (error) {
     console.error("Error updating supplier: ", error);
   }
@@ -314,10 +330,16 @@ export const updateSupplier = async (id: string, updatedSupplier: Partial<Suppli
 
 export const deleteSupplier = async (id: string) => {
   try {
+    const userRole = await getUserRole(auth.currentUser?.uid || '');
+    if (!['admin', 'manager'].includes(userRole)) {
+      throw new Error('Only admins and managers can delete suppliers');
+    }
+
     const supplierRef = doc(db, "suppliers", id);
     await deleteDoc(supplierRef);
   } catch (error) {
     console.error("Error deleting supplier: ", error);
+    throw error;
   }
 };
 
@@ -454,7 +476,16 @@ const updateInventoryOnReceival = async (order: SupplierOrder) => {
 export const setUserRole = async (userId: string, userData: UserRoleData) => {
   try {
     const userRef = doc(db, "users", userId);
-    await setDoc(userRef, userData);
+    // Set default role as employee if not specified
+    const roleData = {
+      ...userData,
+      role: userData.role || 'employee',
+      metadata: {
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      }
+    };
+    await setDoc(userRef, roleData);
   } catch (error) {
     console.error("Error setting user role:", error);
     throw error;
