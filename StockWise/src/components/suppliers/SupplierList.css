@@ -446,12 +446,13 @@ color: var(--ion-color-medium);
 }
 
 .supplier-table {
-  width: 95%; /* Reduce from 100% to create margin */
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   border: 1px solid var(--ion-color-medium-tint);
   border-radius: 8px;
   overflow: hidden;
+  background: var(--ion-background-color);
 }
 
 .supplier-basic-info {

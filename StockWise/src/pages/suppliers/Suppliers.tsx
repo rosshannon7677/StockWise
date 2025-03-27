@@ -9,6 +9,7 @@ import { addOutline } from 'ionicons/icons';
 import SupplierList, { Supplier } from '../../components/suppliers/SupplierList';
 import { getSuppliers } from '../../firestoreService';
 import AddSupplier from '../../components/suppliers/AddSupplier';
+import './Suppliers.css';
 
 const Suppliers: React.FC = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -27,25 +28,23 @@ const Suppliers: React.FC = () => {
 
   return (
     <IonContent>
-      <div className="supplier-container">
-        <div className="supplier-section">
-          <div className="search-filter-container">
-            <IonButton
-              onClick={() => setShowAddModal(true)}
-              color="primary"
-              className="add-item-button"
-            >
-              <IonIcon slot="start" icon={addOutline} />
-              Add Supplier
-            </IonButton>
-          </div>
-          <SupplierList suppliers={suppliers} />
+      <div className="suppliers-container">
+        <div className="actions-bar">
+          <IonButton
+            onClick={() => setShowAddModal(true)}
+            color="primary"
+            className="add-supplier-button"
+          >
+            <IonIcon slot="start" icon={addOutline} />
+            Add Supplier
+          </IonButton>
         </div>
+        <SupplierList suppliers={suppliers} />
       </div>
       <IonModal
         isOpen={showAddModal}
         onDidDismiss={() => setShowAddModal(false)}
-        className="add-item-modal"
+        className="add-supplier-modal"
       >
         <AddSupplier onClose={() => setShowAddModal(false)} />
       </IonModal>
