@@ -20,7 +20,7 @@ import {
 } from "firebase/firestore";
 import { app } from "./../firebaseConfig";
 import { auth } from '../firebaseConfig';
-import type { UserRole, UserRoleData } from './types/roles';
+import type { UserRole, UserRoleData, UserStatus } from './types/roles';
 
 // Remove 'partially_received' and 'confirmed' from the type
 export type OrderStatus = 'pending' | 'sent' | 'shipped' | 'received' | 'canceled';
@@ -485,19 +485,23 @@ const updateInventoryOnReceival = async (order: SupplierOrder) => {
   }
 };
 
-export const setUserRole = async (userId: string, userData: UserRoleData) => {
+export const setUserRole = async (userId: string, userData: Partial<UserRoleData>) => {
   try {
     const userRef = doc(db, "users", userId);
-    // Set default role as employee if not specified
-    const roleData = {
-      ...userData,
+    const newUserData: UserRoleData = {
+      userId: userData.userId || userId,
+      email: userData.email || '',
+      name: userData.name || '',
       role: userData.role || 'employee',
+      status: 'pending', // Always set new users to pending
       metadata: {
         createdAt: new Date().toISOString(),
         lastUpdated: new Date().toISOString()
       }
     };
-    await setDoc(userRef, roleData);
+
+    await setDoc(userRef, newUserData);
+    console.log("User role set with pending status");
   } catch (error) {
     console.error("Error setting user role:", error);
     throw error;
@@ -575,11 +579,11 @@ export const getUsers = async (): Promise<UserRoleData[]> => {
     const usersRef = collection(db, "users");
     const snapshot = await getDocs(usersRef);
     return snapshot.docs.map(doc => ({
-      userId: doc.id,
-      ...doc.data()
-    } as UserRoleData));
+      ...doc.data(),
+      userId: doc.id
+    })) as UserRoleData[];
   } catch (error) {
-    console.error("Error getting users:", error);
+    console.error("Error fetching users:", error);
     throw error;
   }
 };
@@ -629,6 +633,28 @@ export const deleteUser = async (userId: string, userEmail: string) => {
     return true;
   } catch (error) {
     console.error("Error deleting user:", error);
+    throw error;
+  }
+};
+
+export const updateUserStatus = async (userId: string, newStatus: UserStatus) => {
+  try {
+    const currentUser = auth.currentUser;
+    const userRole = await getUserRole(currentUser?.uid || '');
+    
+    if (!currentUser || userRole !== 'admin') {
+      throw new Error('Only administrators can approve users');
+    }
+
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      status: newStatus,
+      'metadata.approvedBy': currentUser.email,
+      'metadata.approvedAt': new Date().toISOString(),
+      'metadata.lastUpdated': new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Error updating user status:", error);
     throw error;
   }
 };
