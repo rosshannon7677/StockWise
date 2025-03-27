@@ -19,6 +19,7 @@ const Signup: React.FC = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState(''); // Add name state
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null); // Add message state
   const navigate = useNavigate();
 
   const handleSignup = async () => {
@@ -30,15 +31,26 @@ const Signup: React.FC = () => {
         displayName: name
       });
 
-      // Set initial user role as employee
+      // Set initial user role as pending employee
       await setUserRole(userCredential.user.uid, {
         userId: userCredential.user.uid,
         email: email,
         name: name,
-        role: 'employee'
+        role: 'employee',
+        status: 'pending',
+        metadata: {
+          createdAt: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        }
       });
 
-      navigate('/home');
+      // Sign out immediately after registration
+      await auth.signOut();
+      
+      setMessage("Your account is pending admin approval. You will be notified when approved.");
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
     } catch (error: any) {
       setError(error.message);
     }
@@ -48,10 +60,15 @@ const Signup: React.FC = () => {
     <IonPage>
       <IonContent className="auth-content" fullscreen>
         <div className="auth-container">
+          {/* Add admin info banner */}
+          <div className="admin-info-banner">
+            <p>Admin Account: rosshannonty@gmail.com</p>
+          </div>
+
           <IonCard className="auth-card">
             <IonCardContent>
               <h2 className="auth-title">Create an Account</h2>
-              <p className="auth-subtext">Please fill out the form to sign up.</p>
+              <p className="auth-subtext">Account requires admin approval</p>
 
               <IonItem className="auth-item">
                 <IonInput
@@ -90,6 +107,7 @@ const Signup: React.FC = () => {
               </IonItem>
 
               {error && <p className="error-message">{error}</p>}
+              {message && <p className="message">{message}</p>} {/* Add message display */}
 
               <IonButton 
                 expand="block" 
