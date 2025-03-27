@@ -237,7 +237,7 @@ display: flex;
 background: var(--ion-color-primary);
 color: white;
 font-weight: bold;
-padding: 12px 16px; /* Increased padding */
+padding: 12px 8px;
 width: 100%;
 }
 
@@ -245,6 +245,8 @@ width: 100%;
 background: var(--ion-background-color);
 min-height: calc(100vh - 300px);
 padding: 0 8px; /* Add padding to table body */
+flex: 1;
+overflow-y: auto;
 }
 
 .table-row {
@@ -282,10 +284,10 @@ font-size: 0.9rem;
 
 .actions-cell {
 display: flex;
-gap: 8px;
+gap: 4px; /* Reduced gap between buttons from 8px */
 justify-content: center;
 align-items: center;
-min-width: 140px;
+min-width: 120px; /* Adjusted from 140px */
 padding: 4px;
 }
 
@@ -319,13 +321,13 @@ padding: 4px;
 .cancel-button,
 .edit-button,
 .delete-button {
-padding: 6px 12px;
+padding: 6px 8px; /* Reduced horizontal padding from 12px */
 border: none;
 border-radius: 4px;
 cursor: pointer;
 font-size: 0.9rem;
 font-weight: 500;
-min-width: 60px;
+min-width: 50px; /* Reduced from 60px */
 color: white;
 }
 
@@ -446,13 +448,16 @@ color: var(--ion-color-medium);
 }
 
 .supplier-table {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: calc(100% - 2rem); /* Add padding by reducing width */
+  margin: 0 1rem; /* Center the table with margin */
   border: 1px solid var(--ion-color-medium-tint);
   border-radius: 8px;
   overflow: hidden;
   background: var(--ion-background-color);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 140px); /* Add max-height to enable scrolling */
 }
 
 .supplier-basic-info {
@@ -482,4 +487,103 @@ left: 0;
 right: 0;
 border-top: 1px solid var(--ion-color-light-shade);
 z-index: 1000;
+}
+
+.table-header {
+  display: flex;
+  background: var(--ion-color-primary);
+  color: white;
+  font-weight: bold;
+  padding: 12px 8px;
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.table-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* Required for Firefox */
+  padding: 0 8px;
+}
+
+.table-row {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+/* Set specific widths for cells */
+.header-cell:nth-child(1), .table-cell:nth-child(1) { 
+  width: 15%; 
+  padding-left: 1rem; 
+} /* Name */
+
+.header-cell:nth-child(2), .table-cell:nth-child(2) { 
+  width: 20%; 
+} /* Email */
+
+.header-cell:nth-child(3), .table-cell:nth-child(3) { 
+  width: 15%; 
+  padding-left: 0; /* Remove padding to bring closer to email */
+} /* Phone */
+
+.header-cell:nth-child(4), .table-cell:nth-child(4) { 
+  width: 15%; 
+} /* Category */
+
+.header-cell:nth-child(5), .table-cell:nth-child(5) { 
+  width: 20%; 
+} /* Address - reduced from 25% */
+
+.header-cell:nth-child(6), .table-cell:nth-child(6) { 
+  width: 15%;
+  padding-right: 1rem; 
+} /* Actions */
+
+/* Center align cell content */
+.table-cell {
+  text-align: center;
+  justify-content: center;
+}
+
+/* Make sure actions stay within bounds */
+.actions-cell {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  min-width: auto; /* Remove min-width constraint */
+}
+
+/* Make address cell expandable on hover */
+.address-cell {
+  position: relative;
+}
+
+.address-cell:hover {
+  overflow: visible;
+  white-space: normal;
+  background: var(--ion-background-color);
+  z-index: 1;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-height: 100%;
+}
+
+.pagination-controls {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--ion-background-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+  border-top: 1px solid var(--ion-color-light-shade);
 }
