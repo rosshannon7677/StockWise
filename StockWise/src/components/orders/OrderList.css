@@ -15,6 +15,72 @@
   width: 100%;
 }
 
+/* Align header cells */
+.supplier-cell { 
+  width: 20%;
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.items-cell { 
+  width: 20%;
+  text-align: center; /* Center the Items title */
+}
+
+.total-cell { 
+  width: 15%;
+  text-align: right;
+}
+
+.date-cell { 
+  width: 15%;
+  text-align: right;
+}
+
+.status-cell {
+  width: 15%;
+  text-align: center;
+}
+
+.actions-cell { 
+  width: 15%;
+  text-align: center; /* Center the Actions title */
+  padding-right: 1rem;
+}
+
+/* Align content cells to match headers */
+.table-cell:nth-child(1) { 
+  width: 20%;
+  text-align: left;
+  padding-left: 1rem;
+} /* Supplier */
+
+.table-cell:nth-child(2) { 
+  width: 20%;
+  text-align: center;
+} /* Items */
+
+.table-cell:nth-child(3) { 
+  width: 15%;
+  text-align: right;
+} /* Total */
+
+.table-cell:nth-child(4) { 
+  width: 15%;
+  text-align: right;
+} /* Date */
+
+.table-cell:nth-child(5) { 
+  width: 15%;
+  text-align: center;
+} /* Status */
+
+.table-cell:nth-child(6) { 
+  width: 15%;
+  text-align: center;
+  padding-right: 1rem;
+} /* Actions */
+
 .table-body {
   background: var(--ion-background-color);
   max-height: calc(100vh - 300px);

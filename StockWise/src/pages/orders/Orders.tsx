@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   IonContent, IonButton, IonIcon, IonModal, IonItem, 
-  IonLabel, IonInput, IonSelect, IonSelectOption, IonList
+  IonLabel, IonInput, IonSelect, IonSelectOption, IonList, IonSearchbar
 } from '@ionic/react';
 import { addOutline, addCircleOutline, removeCircleOutline } from 'ionicons/icons';
 import OrderList from '../../components/orders/OrderList';
@@ -14,7 +14,7 @@ const Orders: React.FC = () => {
   const [orders, setOrders] = useState<SupplierOrder[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>(''); // Add this
+  const [selectedCategory, setSelectedCategory] = useState<string>('all'); // Set default to 'all'
   const [selectedSupplier, setSelectedSupplier] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<{
     itemId: string;
@@ -27,6 +27,10 @@ const Orders: React.FC = () => {
       height: number;
     };
   }[]>([]);
+  const [searchText, setSearchText] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('all');  // Keep 'all' as default
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Get unique supplier categories
   const supplierCategories = Array.from(new Set(suppliers.map(s => s.category)));
@@ -126,187 +130,107 @@ const Orders: React.FC = () => {
     setSelectedCategory(''); // Add this
   };
 
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = order.supplier.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      order.items.some(item => item.name.toLowerCase().includes(searchText.toLowerCase()));
+    const matchesCategory = selectedCategory === 'all' || order.supplier.category === selectedCategory;
+    const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
+    
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
+
+  const handleSearchChange = (e: CustomEvent) => {
+    const value = e.detail.value || '';
+    setSearchText(value);
+    
+    if (value.trim()) {
+      const searchSuggestions = orders
+        .flatMap(order => [
+          order.supplier.name,
+          ...order.items.map(item => item.name)
+        ])
+        .filter((name, index, self) => 
+          name.toLowerCase().includes(value.toLowerCase()) && 
+          self.indexOf(name) === index
+        )
+        .slice(0, 5);
+      
+      setSuggestions(searchSuggestions);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectSuggestion = (value: string) => {
+    setSearchText(value);
+    setShowSuggestions(false);
+  };
+
   return (
     <IonContent>
       <div className="orders-container">
-        
         <div className="actions-bar">
           <IonButton onClick={() => setShowModal(true)}>
             <IonIcon slot="start" icon={addOutline} />
             New Order
           </IonButton>
-        </div>
-        <OrderList orders={orders} />
 
-        <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
-          <div className="modal-content">
-            <h2>Create Supply Order</h2>
-            
-            <div className="form-section">
-              <h3>Select Category</h3>
-              <IonItem>
-                <IonLabel position="floating">Category</IonLabel>
-                <IonSelect 
-                  value={selectedCategory} 
-                  onIonChange={e => {
-                    setSelectedCategory(e.detail.value);
-                    setSelectedSupplier(''); // Reset supplier when category changes
-                  }}
-                >
-                  {supplierCategories.map(category => (
-                    <IonSelectOption key={category} value={category}>
-                      {category}
-                    </IonSelectOption>
-                  ))}
-                </IonSelect>
-              </IonItem>
-            </div>
-
-            {selectedCategory && (
-              <div className="form-section">
-                <h3>Select Supplier</h3>
-                <IonItem>
-                  <IonLabel position="floating">Supplier</IonLabel>
-                  <IonSelect 
-                    value={selectedSupplier} 
-                    onIonChange={e => setSelectedSupplier(e.detail.value)}
-                  >
-                    {filteredSuppliers.map(supplier => (
-                      <IonSelectOption key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </IonSelectOption>
-                    ))}
-                  </IonSelect>
-                </IonItem>
-              </div>
-            )}
-
-            {selectedSupplier && (
-              <div className="form-section">
-                <h3>Order Items</h3>
-                <IonButton onClick={handleAddItem} size="small">
-                  <IonIcon slot="start" icon={addCircleOutline} />
-                  Add Item
-                </IonButton>
-                
-                {selectedItems.map((item, index) => (
-                  <div key={index} className="order-item-row">
-                    <div className="item-basic-info">
-                      <div className="input-group">
-                        <label>Item Name</label>
-                        <IonInput
-                          placeholder="Enter item name"
-                          value={item.name}
-                          onIonChange={e => handleItemChange(index, 'name', e.detail.value)}
-                        />
-                      </div>
-                      
-                      <div className="quantity-price-group">
-                        <div className="input-group">
-                          <label>Quantity</label>
-                          <IonInput
-                            type="number"
-                            placeholder="Enter quantity"
-                            value={item.quantity}
-                            onIonChange={e => handleItemChange(index, 'quantity', parseInt(e.detail.value!))}
-                          />
-                        </div>
-                        <div className="input-group">
-                          <label>Price (€)</label>
-                          <IonInput
-                            type="number"
-                            placeholder="Enter price"
-                            value={item.price}
-                            onIonChange={e => handleItemChange(index, 'price', parseFloat(e.detail.value!))}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="dimensions-group">
-                      <h4>Dimensions (cm)</h4>
-                      <div className="dimensions-inputs">
-                        <div className="dimension-input">
-                          <label>Length</label>
-                          <IonInput
-                            type="number"
-                            placeholder="Length"
-                            value={item.dimensions.length}
-                            onIonChange={e => {
-                              const value = parseFloat(e.detail.value || '0');
-                              handleItemChange(index, 'dimensions', {
-                                ...item.dimensions,
-                                length: value
-                              });
-                            }}
-                          />
-                        </div>
-                        <div className="dimension-input">
-                          <label>Width</label>
-                          <IonInput
-                            type="number"
-                            placeholder="Width"
-                            value={item.dimensions.width}
-                            onIonChange={e => {
-                              const value = parseFloat(e.detail.value || '0');
-                              handleItemChange(index, 'dimensions', {
-                                ...item.dimensions,
-                                width: value
-                              });
-                            }}
-                          />
-                        </div>
-                        <div className="dimension-input">
-                          <label>Height</label>
-                          <IonInput
-                            type="number"
-                            placeholder="Height"
-                            value={item.dimensions.height}
-                            onIonChange={e => {
-                              const value = parseFloat(e.detail.value || '0');
-                              handleItemChange(index, 'dimensions', {
-                                ...item.dimensions,
-                                height: value
-                              });
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <IonButton 
-                      fill="clear" 
-                      color="danger"
-                      onClick={() => handleRemoveItem(index)}
+          <div className="filters-group">
+            <div className="search-container">
+              <IonSearchbar
+                value={searchText}
+                onIonChange={handleSearchChange}
+                placeholder="Search orders..."
+                className="search-bar"
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="search-suggestions">
+                  {suggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      className="suggestion-item"
+                      onClick={() => selectSuggestion(suggestion)}
                     >
-                      <IonIcon icon={removeCircleOutline} />
-                    </IonButton>
-                  </div>
-                ))}
-                
-                <div className="order-total">
-                  Total: €{calculateTotal().toFixed(2)}
+                      {suggestion}
+                    </div>
+                  ))}
                 </div>
-              </div>
-            )}
-
-            <div className="modal-actions">
-              <IonButton 
-                fill="outline" 
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </IonButton>
-              <IonButton 
-              
-                onClick={handleCreateOrder}
-                disabled={!selectedSupplier || selectedItems.length === 0}
-              >
-                Submit Order
-              </IonButton>
+              )}
             </div>
+
+            <IonSelect
+              value={selectedStatus}
+              onIonChange={e => setSelectedStatus(e.detail.value)}
+              interface="popover"
+              className="filter-select"
+            >
+              <IonSelectOption value="all">All Orders</IonSelectOption>
+              <IonSelectOption value="pending">Pending</IonSelectOption>
+              <IonSelectOption value="sent">Sent</IonSelectOption>
+              <IonSelectOption value="shipped">Shipped</IonSelectOption>
+              <IonSelectOption value="received">Received</IonSelectOption>
+              <IonSelectOption value="canceled">Canceled</IonSelectOption>
+            </IonSelect>
+
+            <IonSelect
+              value={selectedCategory}
+              onIonChange={e => setSelectedCategory(e.detail.value)}
+              interface="popover"
+              className="filter-select"
+            >
+              <IonSelectOption value="all">All Categories</IonSelectOption>
+              {supplierCategories.map(category => (
+                <IonSelectOption key={category} value={category}>
+                  {category}
+                </IonSelectOption>
+              ))}
+            </IonSelect>
           </div>
-        </IonModal>
+        </div>
+
+        <OrderList orders={filteredOrders} />
       </div>
     </IonContent>
   );

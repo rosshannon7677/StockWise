@@ -86,7 +86,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   const [showStatusAlert, setShowStatusAlert] = useState(false);
   const [newStatus, setNewStatus] = useState<OrderStatus | null>(null);
 
-  // Add state for filter
+  // Remove these lines
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
 
   const toggleOrderExpansion = (orderId: string) => {
@@ -229,27 +229,16 @@ Hannons Kitchens`;
   const currentOrders = visibleOrders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(visibleOrders.length / itemsPerPage);
 
+  // Remove the filters div and update the return statement
   return (
     <div className="orders-container">
-      <div className="filters">
-        <IonSelect 
-          value={statusFilter}
-          onIonChange={e => setStatusFilter(e.detail.value)}
-        >
-          <IonSelectOption value="all">All Orders</IonSelectOption>
-          {Object.keys(statusConfig).map(status => (
-            <IonSelectOption key={status} value={status}>
-              {status.replace('_', ' ').toUpperCase()}
-            </IonSelectOption>
-          ))}
-        </IonSelect>
-      </div>
       <div className="table-header">
-        <div className="header-cell">Supplier</div>
-        <div className="header-cell">Items</div>
-        <div className="header-cell">Total</div>
-        <div className="header-cell">Date</div>
-        <div className="header-cell">Actions</div>
+        <div className="header-cell supplier-cell">Supplier</div>
+        <div className="header-cell items-cell">Items</div>
+        <div className="header-cell total-cell">Total</div>
+        <div className="header-cell date-cell">Date</div>
+        <div className="header-cell status-cell">Status</div>
+        <div className="header-cell actions-cell">Actions</div>
       </div>
       <div className="table-body">
         {currentOrders.map((order) => (

@@ -15,11 +15,13 @@
 
 .actions-bar {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  align-items: center;
   padding: 1rem;
   margin-bottom: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  background: var(--ion-background-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .actions-bar ion-button {
@@ -32,6 +34,39 @@
   --background: var(--ion-color-primary);
   --color: var(--ion-color-light);
   font-weight: 600;
+}
+
+.filters-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  min-width: 150px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-size: 0.9rem;
+}
+
+.sort-select {
+  min-width: 180px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-size: 0.9rem;
+}
+
+.search-bar {
+  max-width: 300px;
+  --box-shadow: none;
+  --border-radius: 8px;
+  --background: var(--ion-color-light);
+  --placeholder-color: var(--ion-color-medium);
 }
 
 .order-grid {
@@ -49,6 +84,21 @@
   .page-title {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
+  }
+
+  .actions-bar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .filters-group {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-bar {
+    width: 100%;
+    max-width: none;
   }
 }
 
@@ -321,4 +371,33 @@ ion-item {
   --background: var(--ion-color-light-tint);
   border-radius: 4px;
   width: 80px;
+}
+
+.search-container {
+  position: relative;
+  flex: 1;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--ion-background-color);
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+  background: var(--ion-color-light);
 }
