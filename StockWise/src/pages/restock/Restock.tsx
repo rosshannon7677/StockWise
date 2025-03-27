@@ -21,7 +21,7 @@ import {
   cartOutline,
   analyticsOutline
 } from 'ionicons/icons';
-import { getInventoryItems, sendLowStockAlert, getStockPredictions, StockPrediction, addOrder, getSuppliers, SupplierOrder, updateInventoryItem, addInventoryItem, getOrders } from '../../firestoreService';
+import { getInventoryItems, sendLowStockAlert, getStockPredictions, getConsumptionPlot, StockPrediction, addOrder, getSuppliers, SupplierOrder, updateInventoryItem, addInventoryItem, getOrders } from '../../firestoreService';
 import { auth } from '../../../firebaseConfig';
 import './Restock.css';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -301,16 +301,18 @@ const Restock: React.FC = () => {
   }, []);
 
   const handleItemClick = async (itemName: string) => {
-    setSelectedItem(itemName);
     try {
-      const response = await fetch(
-        `http://localhost:8000/consumption-plot/${encodeURIComponent(itemName)}`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log(`Fetching plot for ${itemName}`);
+      setSelectedItem(itemName);
+      setPlotData(null); // Reset plot while loading
+      
+      const plotData = await getConsumptionPlot(itemName);
+      if (!plotData) {
+        throw new Error('No plot data received');
       }
-      const data = await response.json();
-      setPlotData(data.plot);
+      
+      console.log('Setting plot data');
+      setPlotData(plotData);
     } catch (error) {
       console.error('Error fetching plot:', error);
       setPlotData(null);
@@ -573,17 +575,24 @@ const Restock: React.FC = () => {
                             {selectedItem === prediction.name && plotData && (
                               <div className="usage-plot">
                                 <h4>Usage Trends</h4>
-                                <img 
-                                  src={`data:image/png;base64,${plotData}`} 
-                                  alt={`Usage trend for ${prediction.name}`}
-                                  style={{ 
-                                    width: '80%',  // Reduced from 100%
-                                    marginTop: '1rem',
-                                    marginLeft: 'auto',
-                                    marginRight: 'auto',
-                                    display: 'block'
-                                  }}
-                                />
+                                <div className="plot-container">
+                                  <img 
+                                    src={`data:image/png;base64,${plotData}`} 
+                                    alt={`Usage trend for ${prediction.name}`}
+                                    onError={(e) => {
+                                      console.error('Error loading plot image');
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                    style={{ 
+                                      maxWidth: '100%',
+                                      height: 'auto',
+                                      margin: '1rem auto',
+                                      display: 'block',
+                                      borderRadius: '8px',
+                                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                    }}
+                                  />
+                                </div>
                               </div>
                             )}
                           </div>

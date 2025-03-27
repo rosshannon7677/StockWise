@@ -25,6 +25,5 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
-// Add these scopes for Google Sign-In
-googleProvider.addScope('https://www.googleapis.com/auth/userinfo.email');
+// Add minimum required scopes
 googleProvider.addScope('https://www.googleapis.com/auth/userinfo.profile');

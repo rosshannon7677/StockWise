@@ -590,16 +590,14 @@ export const deleteUser = async (userId: string, userEmail: string) => {
   }
 };
 
+const ML_SERVICE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://ml-service-151501605989.europe-west1.run.app'
+  : 'http://localhost:8000';
+
 export const getStockPredictions = async (): Promise<StockPrediction[]> => {
   try {
     console.log('Fetching predictions...');
-    // Remove /predictions from the base URL
-    const ML_SERVICE_URL = process.env.NODE_ENV === 'production' 
-      ? 'https://ml-service-519269717450.europe-west1.run.app' // Remove /predictions here
-      : 'http://localhost:8000';
-      
-    const response = await fetch(`${ML_SERVICE_URL}/predictions`); // /predictions is added here
-    
+    const response = await fetch(`${ML_SERVICE_URL}/predictions`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -621,11 +619,7 @@ export const getStockPredictions = async (): Promise<StockPrediction[]> => {
 
 export const getConsumptionPlot = async (itemName: string): Promise<string | null> => {
   try {
-    // Use the same ML service URL as predictions
-    const ML_SERVICE_URL = process.env.NODE_ENV === 'production' 
-      ? 'https://ml-service-519269717450.europe-west1.run.app'
-      : 'http://localhost:8000';
-      
+    console.log(`Requesting plot for ${itemName}`); // Add debug log
     const response = await fetch(`${ML_SERVICE_URL}/consumption-plot/${encodeURIComponent(itemName)}`);
     
     if (!response.ok) {
@@ -633,6 +627,11 @@ export const getConsumptionPlot = async (itemName: string): Promise<string | nul
     }
     
     const data = await response.json();
+    if (!data.plot) {
+      throw new Error('No plot data received');
+    }
+    
+    console.log('Plot data received successfully'); // Add debug log
     return data.plot;
   } catch (error) {
     console.error('Error fetching consumption plot:', error);
@@ -680,13 +679,22 @@ export const getActivityLogs = (callback: (logs: ActivityLog[]) => void) => {
 
 export const sendLowStockAlert = async () => {
   try {
-    const response = await fetch('http://localhost:8000/send-low-stock-alert', {
-      method: 'POST'
+    console.log('Sending low stock alert...');
+    const response = await fetch(`${ML_SERVICE_URL}/send-low-stock-alert`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
+    
     if (!response.ok) {
-      throw new Error('Failed to send low stock alert');
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to send low stock alert');
     }
-    return await response.json();
+    
+    const result = await response.json();
+    console.log('Low stock alert response:', result);
+    return result;
   } catch (error) {
     console.error('Error sending low stock alert:', error);
     throw error;

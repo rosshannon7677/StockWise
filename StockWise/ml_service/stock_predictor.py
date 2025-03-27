@@ -32,10 +32,7 @@ class StockPredictor:
         self.is_trained = False
         self.logger = logging.getLogger(__name__)
         self.last_known_quantities = {}  # Track quantities between checks
-        # Initialize email service at startup
-        from EmailService import EmailService
-        self.email_service = EmailService()
-        
+
     def fetch_inventory_data(self):
         inventory_ref = db.collection('inventoryItems')
         docs = inventory_ref.stream()

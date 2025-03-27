@@ -92,10 +92,13 @@ const Home: React.FC = () => {
   }, []);
 
   const fetchPlot = async (itemName: string) => {
-    console.log(`Fetching plot for: ${itemName}`);  // Debug log
+    console.log(`Fetching plot for: ${itemName}`);
     try {
+      const ML_SERVICE_URL = process.env.NODE_ENV === 'production'
+        ? 'https://ml-service-151501605989.europe-west1.run.app'  // New URL
+        : 'http://localhost:8000';
       const encodedName = encodeURIComponent(itemName);
-      const url = `http://localhost:8000/consumption-plot/${encodedName}`;
+      const url = `${ML_SERVICE_URL}/consumption-plot/${encodedName}`;
       console.log(`Requesting URL: ${url}`);  // Debug log
       
       const response = await fetch(url);

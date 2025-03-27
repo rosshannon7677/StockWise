@@ -371,9 +371,17 @@ ion-content {
 }
 
 .usage-plot {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--ion-color-light-shade);
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--ion-background-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.usage-plot h4 {
+  margin: 0 0 1rem 0;
+  color: var(--ion-color-dark);
+  font-size: 1.1rem;
 }
 
 /* Keep charts full width */
@@ -478,6 +486,13 @@ ion-content {
   margin-top: 0;
   margin-bottom: 1rem;
   color: var(--ion-color-dark);
+}
+
+.plot-container {
+  background: var(--ion-color-light);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
 }
 
 @media (max-width: 768px) {
