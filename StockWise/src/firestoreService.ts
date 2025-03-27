@@ -312,7 +312,7 @@ export const updateSupplier = async (id: string, updatedSupplier: Partial<Suppli
   try {
     const userRole = await getUserRole(auth.currentUser?.uid || '');
     if (!['admin', 'manager'].includes(userRole)) {
-      throw new Error('Only admins and managers can update suppliers');
+      throw new Error('Only managers and admins can update suppliers');
     }
 
     const supplierRef = doc(db, "suppliers", id);
@@ -320,11 +320,13 @@ export const updateSupplier = async (id: string, updatedSupplier: Partial<Suppli
       ...updatedSupplier,
       metadata: {
         ...updatedSupplier.metadata,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        updatedBy: auth.currentUser?.email || 'unknown'
       }
     });
   } catch (error) {
     console.error("Error updating supplier: ", error);
+    throw error;
   }
 };
 
@@ -399,15 +401,25 @@ export const deleteOrder = async (id: string) => {
 
 export const updateOrder = async (id: string, orderData: Partial<SupplierOrder>) => {
   try {
+    const userRole = await getUserRole(auth.currentUser?.uid || '');
+    const isStatusUpdate = 'status' in orderData;
+
+    // Only managers can change order details, but employees can update status
+    if (isStatusUpdate && !['admin', 'manager', 'employee'].includes(userRole)) {
+      throw new Error('Insufficient permissions to update order status');
+    } else if (!isStatusUpdate && !['admin', 'manager'].includes(userRole)) {
+      throw new Error('Only managers and admins can modify order details');
+    }
+
     const orderRef = doc(db, "supplierOrders", id);
     await updateDoc(orderRef, {
       ...orderData,
       metadata: {
         ...orderData.metadata,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        updatedBy: auth.currentUser?.email || 'unknown'
       }
     });
-    console.log("Order updated with ID: ", id);
   } catch (error) {
     console.error("Error updating order:", error);
     throw error;
