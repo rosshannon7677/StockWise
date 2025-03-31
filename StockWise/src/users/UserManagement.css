@@ -52,9 +52,6 @@ ion-item {
   align-items: center;
 }
 
-ion-item:hover {
-  --background: var(--ion-color-light);
-}
 
 /* User Info */
 ion-label h2 {
@@ -214,4 +211,21 @@ ion-content {
 /* Update existing active users section */
 .active-users ion-card-header {
   background: var(--ion-color-medium);
+}
+
+/* Basic approve button style */
+.approve-button {
+  background-color: #2dd36f !important; /* Success green color */
+  color: #fff7f7 !important;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin: 4px;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.approve-button ion-icon {
+  color: #fdfdfd !important;
 }

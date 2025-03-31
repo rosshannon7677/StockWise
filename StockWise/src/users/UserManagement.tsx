@@ -52,8 +52,16 @@ const UserManagement: React.FC = () => {
   };
 
   const handleDeleteUser = async (user: UserRoleData) => {
-    setUserToDelete(user);
-    setShowDeleteAlert(true);
+    try {
+      if (user.email === 'rosshannonty@gmail.com') {
+        setError('Cannot delete admin account');
+        return;
+      }
+      setUserToDelete(user);
+      setShowDeleteAlert(true);
+    } catch (error: any) {
+      setError(error.message);
+    }
   };
 
   const confirmDelete = async () => {
@@ -62,8 +70,8 @@ const UserManagement: React.FC = () => {
     try {
       await deleteUser(userToDelete.userId, userToDelete.email);
       setUsers(users.filter(u => u.userId !== userToDelete.userId));
-      setShowDeleteAlert(false);
       setUserToDelete(null);
+      setShowDeleteAlert(false);
     } catch (error: any) {
       setError(error.message);
     }
@@ -136,6 +144,7 @@ const UserManagement: React.FC = () => {
                     <IonButton
                       onClick={() => handleApproveUser(user.userId)}
                       color="success"
+                      className="approve-button" // Add this class
                     >
                       <IonIcon slot="start" icon={checkmarkCircle} />
                       Approve
@@ -182,6 +191,8 @@ const UserManagement: React.FC = () => {
                       onIonChange={e => handleRoleChange(user.userId, e.detail.value)}
                       interface="popover"
                       disabled={user.email === 'rosshannonty@gmail.com'}
+                      label={`Select role for ${user.name}`} // Add this line
+                      labelPlacement="stacked" // Add this line
                     >
                       <IonSelectOption value="manager">Manager</IonSelectOption>
                       <IonSelectOption value="employee">Employee</IonSelectOption>
@@ -201,6 +212,28 @@ const UserManagement: React.FC = () => {
           </IonCardContent>
         </IonCard>
       </div>
+
+      <IonAlert
+        isOpen={showDeleteAlert}
+        onDidDismiss={() => setShowDeleteAlert(false)}
+        header="Confirm Delete"
+        message="Are you sure you want to delete this user?"
+        buttons={[
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => {
+              setShowDeleteAlert(false);
+              setUserToDelete(null);
+            }
+          },
+          {
+            text: 'Delete',
+            role: 'confirm',
+            handler: confirmDelete
+          }
+        ]}
+      />
 
       {error && (
         <IonAlert
