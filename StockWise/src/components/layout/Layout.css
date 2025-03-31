@@ -4,8 +4,8 @@
 }
 
 ion-split-pane {
-  --side-width: 280px; /* Increased from 200px */
-  --side-max-width: 280px; /* Added to enforce maximum width */
+  --side-width: 300px; /* Increased from 280px */
+  --side-max-width: 300px; /* Increased from 280px */
 }
 
 .menu-container {
@@ -14,8 +14,8 @@ ion-split-pane {
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-width: 280px; /* Added minimum width */
-  max-width: 280px;
+  min-width: 300px; /* Increased from 280px */
+  max-width: 300px; /* Increased from 280px */
   overflow-y: hidden;
 }
 
@@ -45,6 +45,7 @@ ion-page#main {
   --color: var(--ion-color-dark);
   border-radius: 8px;
   margin: 2px 8px; /* Increased margin */
+  position: relative;
 }
 
 .menu-icon {
@@ -149,4 +150,51 @@ ion-page#main {
   text-align: center;
   padding: 1rem;
   color: white;
+}
+
+.notification-badge {
+  border-radius: 50%;
+  padding: 4px; 
+  min-width: 18px;
+  min-height: 18px;
+  font-size: 11px; 
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px; /* Reduced from 8px to move badge left */
+  margin-right: 8px; /* Add right margin to prevent overlap */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: pulse 2s infinite;
+  position: relative; /* Add this */
+  z-index: 2; /* Add this */
+}
+
+/* Update pulse animation with smaller scale */
+@keyframes pulse {
+  0% { 
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05); /* Reduced from 1.1 */
+    opacity: 0.8;
+  }
+  100% { 
+    transform: scale(0.95);
+    opacity: 1;
+  }
+}
+
+/* Specific colors for different notification types */
+ion-badge[color="danger"].notification-badge {
+  --background: #ff4961;
+  --color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+ion-badge[color="warning"].notification-badge {
+  --background: #ffce00;
+  --color: #000;
+  border: 2px solid rgba(0, 0, 0, 0.1);
 }

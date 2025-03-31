@@ -1,7 +1,7 @@
 .orders-container {
-  width: 100%;
+  width: 100%; /* Remove the calc and margin to fill full width */
   border: 1px solid var(--ion-color-medium-tint);
-  border-radius: 8px;
+  border-radius: 0; /* Remove border radius for full edge-to-edge look */
   overflow: hidden;
   margin-bottom: 60px;
 }
@@ -40,12 +40,17 @@
 .status-cell {
   width: 15%;
   text-align: center;
+  padding-right: 0; /* Remove right padding */
 }
 
 .actions-cell { 
   width: 15%;
-  text-align: center; /* Center the Actions title */
+  text-align: center;
   padding-right: 1rem;
+  padding-left: 1rem; /* Add space between status and actions */
+  display: flex;
+  justify-content: center; /* Center the actions buttons */
+  gap: 4px;
 }
 
 /* Align content cells to match headers */
@@ -73,11 +78,14 @@
 .table-cell:nth-child(5) { 
   width: 15%;
   text-align: center;
+  padding-right: 0; /* Remove right padding */
 } /* Status */
 
 .table-cell:nth-child(6) { 
   width: 15%;
-  text-align: center;
+  display: flex;
+  justify-content: center; /* Center the action buttons */
+  gap: 4px;
   padding-right: 1rem;
 } /* Actions */
 
@@ -427,6 +435,7 @@
   border-radius: 1rem;
   font-size: 0.9rem;
   font-weight: 500;
+  margin-right: auto; /* Push badge to the left */
 }
 
 .status-badge.pending {
@@ -462,4 +471,12 @@
 .status-badge.canceled {
   background: var(--ion-color-danger-tint);
   color: var(--ion-color-danger-shade);
+}
+
+.actions-cell-buttons {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  height: 32px;
 }
