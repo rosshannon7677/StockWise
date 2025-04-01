@@ -1,44 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   IonContent,
   IonItem,
   IonLabel,
   IonToggle,
   IonList,
-  IonListHeader
+  IonListHeader,
+  IonSelect,
+  IonSelectOption,
+  IonButton,
+  IonIcon
 } from '@ionic/react';
+import { languageOutline } from 'ionicons/icons';
 import './Settings.css';
+import { useApp } from '../../contexts/AppContext';
 
 const Settings: React.FC = () => {
-  const [darkMode, setDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState(true);
-
-  const handleDarkModeToggle = () => {
-    setDarkMode(!darkMode);
-    document.body.classList.toggle('dark', !darkMode);
-  };
+  const { 
+    defaultView, 
+    setDefaultView, 
+    itemsPerPage, 
+    setItemsPerPage
+  } = useApp();
 
   return (
     <IonContent>
       <div className="settings-container">
-        <h1 className="settings-title">Settings</h1>
-        
         <IonList className="settings-list">
-          <IonListHeader>Appearance</IonListHeader>
+          <IonListHeader>
+            <IonIcon icon={languageOutline} />
+            <IonLabel>Preferences</IonLabel>
+          </IonListHeader>
+
           <IonItem>
-            <IonLabel>Dark Mode</IonLabel>
-            <IonToggle 
-              checked={darkMode} 
-              onIonChange={handleDarkModeToggle}
-            />
+            <IonLabel>Default View</IonLabel>
+            <IonSelect
+              value={defaultView}
+              onIonChange={e => setDefaultView(e.detail.value)}
+              interface="popover"
+            >
+              <IonSelectOption value="inventory">Inventory</IonSelectOption>
+              <IonSelectOption value="orders">Orders</IonSelectOption>
+              <IonSelectOption value="suppliers">Suppliers</IonSelectOption>
+              <IonSelectOption value="restock">Restock</IonSelectOption>
+            </IonSelect>
           </IonItem>
 
           <IonItem>
-            <IonLabel>Notifications</IonLabel>
-            <IonToggle 
-              checked={notifications} 
-              onIonChange={e => setNotifications(e.detail.checked)}
-            />
+            <IonLabel>Items Per Page</IonLabel>
+            <IonSelect
+              value={String(itemsPerPage)}
+              onIonChange={e => setItemsPerPage(parseInt(e.detail.value))}
+              interface="popover"
+            >
+              <IonSelectOption value="5">5</IonSelectOption>
+              <IonSelectOption value="10">10</IonSelectOption>
+              <IonSelectOption value="20">20</IonSelectOption>
+              <IonSelectOption value="50">50</IonSelectOption>
+            </IonSelect>
           </IonItem>
         </IonList>
       </div>

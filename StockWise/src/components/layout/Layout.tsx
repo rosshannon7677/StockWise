@@ -44,11 +44,10 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-// Add interfaces for type safety
 interface Notifications {
   restock: number;
   orders: number;
-  pendingUsers: number;  // Add this
+  pendingUsers: number;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -60,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notifications>({
     restock: 0,
     orders: 0,
-    pendingUsers: 0  // Add this
+    pendingUsers: 0
   });
 
   useEffect(() => {
@@ -71,59 +70,50 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // Get restock suggestions count - Show urgent items that need restocking
-    const fetchRestockCount = async () => {
-      const predictions = await getStockPredictions();
-      const restockCount = predictions.filter((pred: StockPrediction) => {
-        const currentQuantity = Number(pred.current_quantity) || 0;
-        const dailyConsumption = Number(pred.daily_consumption) || 0;
-        const daysUntilLow = Number(pred.predicted_days_until_low) || 0;
-        
-        // Calculate target stock (10 days worth)
-        const targetStock = Math.ceil(dailyConsumption * 10);
-        
-        // Show count when:
-        // 1. Days until low is less than 7 OR
-        // 2. Current stock is below target stock level
-        return daysUntilLow < 7 || currentQuantity < targetStock;
-      }).length;
-      
-      setNotifications(prev => ({ ...prev, restock: restockCount }));
+    const fetchNotifications = async () => {
+      try {
+        // Get restock suggestions count - Update this logic
+        const predictions = await getStockPredictions();
+        const restockCount = predictions.filter((pred: StockPrediction) => {
+          const currentQuantity = Number(pred.current_quantity) || 0;
+          const dailyConsumption = Number(pred.daily_consumption) || 0;
+          const daysUntilLow = Number(pred.predicted_days_until_low) || 0;
+          
+          // Calculate target stock (10 days worth)
+          const targetStock = Math.ceil(dailyConsumption * 10);
+          
+          // Show count when:
+          // 1. Days until low is less than 7 OR
+          // 2. Current stock is below target stock level
+          return daysUntilLow < 7 || currentQuantity < targetStock;
+        }).length;
+
+        // Get pending orders count
+        const ordersUnsubscribe = getOrders((orders: SupplierOrder[]) => {
+          const pendingCount = orders.filter(order => 
+            order.status !== 'received' && order.status !== 'canceled'
+          ).length;
+          setNotifications(prev => ({ ...prev, orders: pendingCount }));
+        });
+
+        // Get pending users count
+        const users = await getUsers();
+        const pendingCount = users.filter(user => user.status === 'pending').length;
+
+        setNotifications(prev => ({
+          ...prev,
+          restock: restockCount,
+          pendingUsers: pendingCount
+        }));
+
+        return () => ordersUnsubscribe();
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
     };
 
-    // Get pending orders count - Show all non-received orders
-    const fetchPendingOrdersCount = () => {
-      getOrders((orders: SupplierOrder[]) => {
-        const pendingCount = orders.filter((order: SupplierOrder) => 
-          // Changed condition to show all orders except 'received' and 'canceled'
-          order.status !== 'received' && order.status !== 'canceled'
-        ).length;
-        setNotifications(prev => ({ ...prev, orders: pendingCount }));
-      });
-    };
-
-    // Add new function to fetch pending users count with proper types
-    const fetchPendingUsersCount = () => {
-      getUsers().then((users: UserRoleData[]) => {
-        const pendingCount = users.filter((user: UserRoleData) => 
-          user.status === 'pending'
-        ).length;
-        setNotifications(prev => ({ ...prev, pendingUsers: pendingCount }));
-      }).catch((error: Error) => {
-        console.error('Error fetching pending users:', error);
-      });
-    };
-
-    fetchRestockCount();
-    fetchPendingOrdersCount();
-    fetchPendingUsersCount(); // Add this
-
-    // Refresh every 5 minutes
-    const interval = setInterval(() => {
-      fetchRestockCount();
-      fetchPendingOrdersCount();
-      fetchPendingUsersCount(); // Add this
-    }, 300000);
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 300000); // Refresh every 5 minutes
 
     return () => clearInterval(interval);
   }, []);
