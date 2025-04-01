@@ -26,6 +26,7 @@ import {
 } from '../../firestoreService';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { useApp } from '../../contexts/AppContext';
 import autoTable from 'jspdf-autotable';
 import { getFirestore } from 'firebase/firestore';
 import { app } from '../../../firebaseConfig';
@@ -62,6 +63,7 @@ interface OrderListProps {
 }
 
 const OrderList: React.FC<OrderListProps> = ({ orders }) => {
+  const { itemsPerPage } = useApp();  // Add this line
   const [currentPage, setCurrentPage] = useState(1);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingOrder, setEditingOrder] = useState<SupplierOrder | null>(null);
@@ -96,7 +98,6 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
         : [...prev, orderId]
     );
   };
-  const itemsPerPage = 10;
 
   const handleEdit = async (order: SupplierOrder) => {
     setEditingOrder(order);

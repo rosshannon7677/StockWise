@@ -4,6 +4,7 @@ import { addSupplier, updateSupplier, deleteSupplier } from '../../firestoreServ
 import { IonIcon, IonModal, IonInput, IonSelect, IonSelectOption, IonButton, IonTextarea, IonAlert } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
 import { getSupplierLocation, GOOGLE_MAPS_API_KEY, WORKSHOP_LOCATION } from '../../services/mapsService';
+import { useApp } from '../../contexts/AppContext';
 
 // Change from 'interface Supplier' to 'export interface Supplier'
 export interface Supplier {
@@ -25,6 +26,9 @@ interface SupplierListProps {
 }
 
 const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
+  const { itemsPerPage } = useApp(); // Add this line
+  const [currentPage, setCurrentPage] = useState(1);
+  // Remove the hardcoded itemsPerPage constant
   const [editSupplierId, setEditSupplierId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -32,10 +36,8 @@ const SupplierList: React.FC<SupplierListProps> = ({ suppliers = [] }) => {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [category, setCategory] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
-  const itemsPerPage = 10;
 
   const [showMap, setShowMap] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);

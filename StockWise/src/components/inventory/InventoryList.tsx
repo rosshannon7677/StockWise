@@ -5,6 +5,7 @@ import { addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../.
 import { auth } from '../../../firebaseConfig';
 import { IonIcon, IonModal, IonInput, IonButton, IonAlert } from '@ionic/react';
 import { chevronForwardOutline, chevronBackOutline } from 'ionicons/icons';
+import { useApp } from '../../contexts/AppContext';
 
 interface InventoryItem {
   id: string;
@@ -40,6 +41,7 @@ interface InventoryListProps {
 }
 
 const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = [] }) => {
+  const { itemsPerPage } = useApp(); // Add this line
   const [editItemId, setEditItemId] = useState<string | null>(null);
   const [updatedItem, setUpdatedItem] = useState<Partial<InventoryItem>>({});
   const [name, setName] = useState("");
@@ -58,7 +60,7 @@ const InventoryList: React.FC<InventoryListProps> = ({ items = [], categories = 
     section: ""
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  // Remove the hardcoded itemsPerPage constant
 
   const [showUseStockModal, setShowUseStockModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
@@ -256,6 +258,7 @@ const columns = [
   }
 ];
 
+  // Update pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
