@@ -12,7 +12,11 @@ import {
   IonBadge,
   IonButton,
   IonRouterOutlet,
-  useIonRouter
+  useIonRouter,
+  IonSearchbar,
+  IonList,
+  IonItem,
+  IonLabel
 } from '@ionic/react';
 import { 
   alertCircleOutline,
@@ -149,6 +153,10 @@ const Restock: React.FC = () => {
     return new Set(savedItems ? JSON.parse(savedItems) : []);
   });
   const router = useIonRouter();
+
+  // Remove the searchbar state
+  
+  const [selectedPrediction, setSelectedPrediction] = useState<StockPrediction | null>(null);
 
   useEffect(() => {
     const fetchPredictions = async () => {
@@ -498,111 +506,101 @@ const Restock: React.FC = () => {
                     <IonCardTitle>ML Stock Insights & Usage History</IonCardTitle>
                   </IonCardHeader>
                   <IonCardContent>
-                    {predictions.length > 0 ? (
-                      <div className="predictions-list">
+                    <div className="predictions-select">
+                      <IonList>
                         {predictions.map((prediction) => (
-                          <div 
-                            key={prediction.product_id} 
-                            className={`prediction-item ${
-                              prediction.predicted_days_until_low < 7 ? 'urgent' : 
-                              prediction.predicted_days_until_low < 14 ? 'warning' : 'normal'
-                            }`}
-                            onClick={() => handleItemClick(prediction.name)}
+                          <IonItem 
+                            key={prediction.product_id}
+                            button
+                            onClick={() => setSelectedPrediction(prediction)}
+                            className={selectedPrediction?.product_id === prediction.product_id ? 'selected-item' : ''}
                           >
-                            <div className="prediction-info">
-                              <h1>{prediction.name}</h1>
-                              
-                              <div className="tables-container">
-                                {/* Stock Information Table */}
-                                <div className="table-section">
-                                <h4>Stock Information</h4>
-                                  <table className="info-table">
-                                    <thead>
-                                      <tr>
-                                        <th>Metric</th>
-                                        <th>Value</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <tr>
-                                        <td>Current Stock:</td>
-                                        <td>{prediction.current_quantity}</td>
-                                      </tr>
-                                      <tr>
-                                        <td>Daily Usage:</td>
-                                        <td>{prediction.daily_consumption?.toFixed(2)} units</td>
-                                      </tr>
-                                      <tr>
-                                        <td>Days until Low:</td>
-                                        <td>{prediction.predicted_days_until_low}</td>
-                                      </tr>
-                                      <tr>
-                                        <td>Confidence:</td>
-                                        <td>{(prediction.confidence_score * 100).toFixed(0)}%</td>
-                                      </tr>
-                                      <tr>
-                                        <td>Restock by:</td>
-                                        <td>{new Date(prediction.recommended_restock_date).toLocaleDateString()}</td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                                </div>
+                            <IonLabel>
+                              <h2>{prediction.name}</h2>
+                              <p>Current Stock: {prediction.current_quantity}</p>
+                            </IonLabel>
+                            <IonBadge color={prediction.predicted_days_until_low < 7 ? 'danger' : 'warning'}>
+                              {prediction.predicted_days_until_low} days
+                            </IonBadge>
+                          </IonItem>
+                        ))}
+                      </IonList>
 
-                                {/* Usage History Table */}
-                                {prediction.usage_history && prediction.usage_history.length > 0 && (
-                                  <div className="table-section">
-                                    <h4>Recent Usage History</h4>
-                                    <table className="usage-table">
-                                      <thead>
-                                        <tr>
-                                          <th>Date</th>
-                                          <th>Units Used</th>
+                      {selectedPrediction && (
+                        <div className="prediction-details">
+                          <div className="tables-container">
+                            <div className="table-section">
+                              <h4>Stock Information</h4>
+                              <table className="info-table">
+                                <tbody>
+                                  <tr>
+                                    <th>Name</th>
+                                    <td>{selectedPrediction.name}</td>
+                                  </tr>
+                                  <tr>
+                                    <th>Current Stock</th>
+                                    <td>{selectedPrediction.current_quantity}</td>
+                                  </tr>
+                                  <tr>
+                                    <th>Daily Usage</th>
+                                    <td>{selectedPrediction.daily_consumption.toFixed(2)} units</td>
+                                  </tr>
+                                  <tr>
+                                    <th>Days Until Low</th>
+                                    <td>{selectedPrediction.predicted_days_until_low}</td>
+                                  </tr>
+                                  <tr>
+                                    <th>Confidence Score</th>
+                                    <td>{(selectedPrediction.confidence_score * 100).toFixed(0)}%</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+
+                            <div className="table-section">
+                              <h4>Usage History</h4>
+                              <div className="usage-table-container">
+                                <table className="usage-table">
+                                  <tbody>
+                                    {selectedPrediction.usage_history
+                                      ?.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Sort by most recent
+                                      ?.map((usage, index) => (
+                                        <tr key={index}>
+                                          <td>{new Date(usage.date).toLocaleDateString()}</td>
+                                          <td>{usage.quantity} units</td>
                                         </tr>
-                                      </thead>
-                                      <tbody>
-                                        {prediction.usage_history.slice(-5).map((usage: UsageRecord, index: number) => (
-                                          <tr key={index}>
-                                            <td>{new Date(usage.date).toLocaleDateString()}</td>
-                                            <td>-{usage.quantity}</td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                )}
+                                      ))}
+                                  </tbody>
+                                </table>
                               </div>
                             </div>
-                            {selectedItem === prediction.name && plotData && (
-                              <div className="usage-plot">
-                                <h4>Usage Trends</h4>
-                                <div className="plot-container">
-                                  <img 
-                                    src={`data:image/png;base64,${plotData}`} 
-                                    alt={`Usage trend for ${prediction.name}`}
-                                    onError={(e) => {
-                                      console.error('Error loading plot image');
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                    style={{ 
-                                      maxWidth: '100%',
-                                      height: 'auto',
-                                      margin: '1rem auto',
-                                      display: 'block',
-                                      borderRadius: '8px',
-                                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            )}
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="no-predictions">
-                        <p>No stock predictions available yet. Use inventory items to generate predictions.</p>
-                      </div>
-                    )}
+
+                          <IonButton
+                            className="show-trend-button"
+                            onClick={() => handleItemClick(selectedPrediction.name)}
+                          >
+                            Show Usage Trend
+                          </IonButton>
+
+                          {selectedItem === selectedPrediction.name && plotData && (
+                            <div className="usage-plot">
+                              <h4>Usage Trends</h4>
+                              <div className="plot-container">
+                                <img 
+                                  src={`data:image/png;base64,${plotData}`} 
+                                  alt={`Usage trend for ${selectedPrediction.name}`}
+                                  onError={(e) => {
+                                    console.error('Error loading plot image');
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </IonCardContent>
                 </IonCard>
               </IonCol>

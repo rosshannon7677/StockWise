@@ -1,5 +1,5 @@
 .main-content {
-  --padding-top: 46px;
+  --padding-top: 56px; /* Match header height */
   --padding-bottom: 80px;
 }
 
@@ -8,14 +8,15 @@ ion-split-pane {
   --side-max-width: 300px; /* Increased from 280px */
 }
 
+/* Update menu container padding */
 .menu-container {
   --background: #f0f8ff;
-  --padding-top: 20px;
+  --padding-top: 40px;
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-width: 300px; /* Increased from 280px */
-  max-width: 300px; /* Increased from 280px */
+  min-width: 300px;
+  max-width: 300px;
   overflow-y: hidden;
 }
 
@@ -89,8 +90,9 @@ ion-page#main {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Adjust header toolbar height if needed */
 .header-toolbar {
-  min-height: 46px;
+  min-height: 56px; /* Make sure this matches main-content padding-top */
   --background: var(--ion-color-primary);
   --color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

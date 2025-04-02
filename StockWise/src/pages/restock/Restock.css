@@ -3,21 +3,23 @@
   --padding-top: 56px; /* Height of header */
 }
 
+/* Update restock list grid */
 .restock-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  padding: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(3, 1fr); /* Force 3 columns */
+  gap: 1rem;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
 }
 
+/* Make cards more compact */
 .restock-item {
   display: flex;
   flex-direction: column;
   background: var(--ion-background-color);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   border: 2px solid transparent;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -63,19 +65,21 @@
   flex: 1;
 }
 
+/* Adjust text sizes and spacing */
 .item-info h3 {
   color: var(--ion-color-dark);
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--ion-color-light-shade);
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
 }
 
 .item-info p {
   display: flex;
   justify-content: space-between;
-  margin: 0.5rem 0;
+  margin: 0.25rem 0;
   color: var(--ion-color-medium);
+  font-size: 0.85rem;
 }
 
 .item-info p strong {
@@ -85,30 +89,31 @@
 .item-actions {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--ion-color-light-shade);
 }
 
 .confidence-score {
   text-align: center;
-  padding: 0.5rem;
+  padding: 0.25rem;
   border-radius: 8px;
   background: var(--ion-color-light);
   font-weight: 500;
+  font-size: 0.8rem;
 }
 
 .cost {
   text-align: right;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: var(--ion-color-dark);
   font-weight: 600;
 }
 
 .unit-price {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--ion-color-medium);
   margin-top: 0.25rem;
 }
@@ -157,8 +162,7 @@ ion-button {
 }
 
 .dashboard-container {
-  padding: 1rem 2rem;
-  padding-bottom: 80px; /* Increased padding at bottom */
+  padding: 1rem 2rem 80px;
   max-width: 1200px;
   margin: 0 auto;
   height: calc(100% - 80px); /* Adjust for footer space */
@@ -298,7 +302,7 @@ ion-content {
 }
 
 .prediction-card.urgent {
-  border-left-color: var (--ion-color-danger);
+  border-left-color: var(--ion-color-danger);
 }
 
 .prediction-card.warning {
@@ -446,18 +450,9 @@ ion-content {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Make tables more compact and visually appealing */
-.tables-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin: 1rem 0;
-  padding: 1rem;
-  background: var(--ion-color-light-tint);
-  border-radius: 12px;
-}
 
 .table-section {
+  flex: 1;
   background: var(--ion-background-color);
   padding: 1.5rem;
   border-radius: 8px;
@@ -499,4 +494,70 @@ ion-content {
   .tables-container {
     flex-direction: column;
   }
+}
+
+/* Remove the insights-search styles */
+
+/* Update predictions-select styling */
+.predictions-select {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* Update predictions list container style */
+.predictions-select ion-list {
+  flex: 0 0 250px;
+  border-right: 1px solid var(--ion-color-light-shade);
+  max-height: 400px; /* Height for approximately 5 items */
+  overflow-y: auto;
+}
+
+/* Add scrollbar styling */
+.predictions-select ion-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.predictions-select ion-list::-webkit-scrollbar-track {
+  background: var(--ion-color-light);
+  border-radius: 4px;
+}
+
+.predictions-select ion-list::-webkit-scrollbar-thumb {
+  background: var(--ion-color-medium);
+  border-radius: 4px;
+}
+
+.prediction-details {
+  flex: 1;
+  padding: 1rem;
+  min-width: 0; /* Add this to prevent flex item overflow */
+}
+
+/* Make trend button smaller */
+.show-trend-button {
+  margin-top: 1rem;
+  width: auto !important; /* Override ion-button default width */
+  min-width: 120px !important; /* Set minimum width */
+  --padding-start: 1rem !important;
+  --padding-end: 1rem !important;
+  height: 36px !important; /* Make button shorter */
+  font-size: 0.9rem !important;
+}
+
+.plot-container img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Add container for scrollable table */
+.usage-table-container {
+  max-height: 200px; /* Height for 5 rows approximately */
+  overflow-y: auto;
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 8px;
 }
