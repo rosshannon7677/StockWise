@@ -25,7 +25,7 @@ import {
   cartOutline,
   analyticsOutline
 } from 'ionicons/icons';
-import { getInventoryItems, sendLowStockAlert, getStockPredictions, getConsumptionPlot, StockPrediction, addOrder, getSuppliers, SupplierOrder, updateInventoryItem, addInventoryItem, getOrders } from '../../firestoreService';
+import { getStockPredictions, getConsumptionPlot, StockPrediction, addOrder, getSuppliers, SupplierOrder, updateInventoryItem, addInventoryItem, getOrders } from '../../firestoreService';
 import { auth } from '../../../firebaseConfig';
 import './Restock.css';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -289,23 +289,6 @@ const Restock: React.FC = () => {
     const interval = setInterval(checkOrderStatus, 5000); // Check every 5 seconds
 
     return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
-
-  useEffect(() => {
-    const checkLowStock = async () => {
-      try {
-        const response = await sendLowStockAlert();
-        console.log('Low stock alert response:', response);
-      } catch (error) {
-        console.error('Failed to send low stock alert:', error);
-      }
-    };
-
-    // Check for low stock items every hour
-    checkLowStock();
-    const interval = setInterval(checkLowStock, 3600000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const handleItemClick = async (itemName: string) => {

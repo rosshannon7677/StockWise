@@ -134,8 +134,14 @@ const Orders: React.FC = () => {
     const matchesSearch = order.supplier.name.toLowerCase().includes(searchText.toLowerCase()) ||
       order.items.some(item => item.name.toLowerCase().includes(searchText.toLowerCase()));
     const matchesCategory = selectedCategory === 'all' || order.supplier.category === selectedCategory;
-    const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
     
+    // Hide received orders when viewing "all" orders
+    if (selectedStatus === 'all') {
+      return matchesSearch && matchesCategory && order.status !== 'received';
+    }
+    
+    // Show orders matching the selected status
+    const matchesStatus = order.status === selectedStatus;
     return matchesSearch && matchesStatus && matchesCategory;
   });
 

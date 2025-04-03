@@ -89,7 +89,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   const [newStatus, setNewStatus] = useState<OrderStatus | null>(null);
 
   // Remove these lines
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
+  
 
   const toggleOrderExpansion = (orderId: string) => {
     setExpandedOrders(prev => 
@@ -215,20 +215,13 @@ Hannons Kitchens`;
   };
 
   // Filter orders before pagination
-  const filteredOrders = orders.filter(order => 
-    statusFilter === 'all' || order.status === statusFilter
-  );
+  
 
-  // By default, hide received orders
-  const visibleOrders = filteredOrders.filter(order => 
-    order.status !== 'received' || statusFilter === 'received'
-  );
-
-  // Update pagination to use visibleOrders
+  // Update pagination to use filteredOrders directly
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentOrders = visibleOrders.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(visibleOrders.length / itemsPerPage);
+  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(orders.length / itemsPerPage);
 
   // Remove the filters div and update the return statement
   return (
@@ -411,13 +404,22 @@ Hannons Kitchens`;
                 <IonSelect
                   value={editingOrder.status}
                   onIonChange={e => handleStatusChange(e.detail.value)}
+                  disabled={editingOrder.status === 'received'} // Disable if already received
                 >
-                  {Object.keys(statusConfig).map(status => (
-                    <IonSelectOption key={status} value={status}>
-                      <IonIcon icon={statusConfig[status as OrderStatus].icon} />
-                      {status.replace('_', ' ').toUpperCase()}
-                    </IonSelectOption>
-                  ))}
+                  {Object.keys(statusConfig)
+                    .filter(status => 
+                      // Don't show other status options if order is received
+                      editingOrder.status === 'received' 
+                        ? status === 'received' 
+                        : true
+                    )
+                    .map(status => (
+                      <IonSelectOption key={status} value={status}>
+                        <IonIcon icon={statusConfig[status as OrderStatus].icon} />
+                        {status.replace('_', ' ').toUpperCase()}
+                      </IonSelectOption>
+                    ))
+                  }
                 </IonSelect>
                 <IonInput
                   placeholder="Add status notes (optional)"
