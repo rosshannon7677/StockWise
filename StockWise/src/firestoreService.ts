@@ -428,7 +428,6 @@ export const updateOrder = async (id: string, orderData: Partial<SupplierOrder>)
 
 export const updateOrderStatus = async (orderId: string, newStatus: OrderStatus, notes?: string) => {
   try {
-    // Change from "orders" to "supplierOrders" to match the collection name
     const orderRef = doc(db, "supplierOrders", orderId);
     const orderDoc = await getDoc(orderRef);
     
@@ -437,6 +436,11 @@ export const updateOrderStatus = async (orderId: string, newStatus: OrderStatus,
     }
     
     const currentOrder = { id: orderDoc.id, ...orderDoc.data() } as SupplierOrder;
+
+    // Prevent changing status if order is already received
+    if (currentOrder.status === 'received') {
+      throw new Error('Cannot change status of received orders');
+    }
 
     const statusUpdate = {
       status: newStatus,
@@ -659,27 +663,69 @@ export const updateUserStatus = async (userId: string, newStatus: UserStatus) =>
   }
 };
 
+// Update the ML_SERVICE_URL constant
 const ML_SERVICE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://ml-service-151501605989.europe-west1.run.app'
-  : 'http://localhost:8000';
+  : 'https://ml-service-151501605989.europe-west1.run.app'; // Use production URL for both
 
+// Update the query in getStockPredictions
 export const getStockPredictions = async (): Promise<StockPrediction[]> => {
   try {
-    console.log('Fetching predictions...');
-    const response = await fetch(`${ML_SERVICE_URL}/predictions`);
+    const ordersRef = collection(db, "supplierOrders");
+    // Change the query to match the index we created
+    const q = query(
+      ordersRef, 
+      where("status", "==", "received"),
+      orderBy("metadata.lastUpdated", "asc") // Change to ascending to match the index
+    );
+    
+    const recentOrders = await getDocs(q);
+    const recentlyReceivedItems = new Map();
+    
+    // Filter by date in memory
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString();
+    
+    recentOrders.docs.forEach(doc => {
+      const order = doc.data() as SupplierOrder;
+      if (order.metadata?.lastUpdated >= yesterdayStr) {
+        order.items.forEach(item => {
+          const current = recentlyReceivedItems.get(item.name) || 0;
+          recentlyReceivedItems.set(item.name, current + item.quantity);
+        });
+      }
+    });
+
+    // Get predictions from ML service
+    const response = await fetch(`${ML_SERVICE_URL}/predictions`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+    
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error('ML service response not OK:', await response.text());
+      return [];
     }
     
     const predictions = await response.json();
-    console.log('Raw predictions response:', predictions);
-    
-    const validatedPredictions = predictions.map((p: Partial<StockPrediction>) => ({
-      ...p,
-      daily_consumption: Number(p.daily_consumption) || 0
-    }));
-    
-    return validatedPredictions as StockPrediction[];
+
+    return predictions.map((pred: StockPrediction) => {
+      const recentlyReceived = recentlyReceivedItems.get(pred.name) || 0;
+      const adjustedQuantity = pred.current_quantity + recentlyReceived;
+      const adjustedDays = Math.ceil((adjustedQuantity - 10) / pred.daily_consumption);
+      const recommendedQuantity = Math.max(0, (pred.daily_consumption * 10) - adjustedQuantity);
+
+      return {
+        ...pred,
+        current_quantity: adjustedQuantity,
+        predicted_days_until_low: adjustedDays,
+        recommended_quantity: recommendedQuantity
+      };
+    });
   } catch (error) {
     console.error('Error fetching predictions:', error);
     return [];
@@ -744,28 +790,4 @@ export const getActivityLogs = (callback: (logs: ActivityLog[]) => void) => {
     })) as ActivityLog[];
     callback(logs);
   });
-};
-
-export const sendLowStockAlert = async () => {
-  try {
-    console.log('Sending low stock alert...');
-    const response = await fetch(`${ML_SERVICE_URL}/send-low-stock-alert`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to send low stock alert');
-    }
-    
-    const result = await response.json();
-    console.log('Low stock alert response:', result);
-    return result;
-  } catch (error) {
-    console.error('Error sending low stock alert:', error);
-    throw error;
-  }
 };
