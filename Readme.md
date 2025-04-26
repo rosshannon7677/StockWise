@@ -75,7 +75,6 @@ uvicorn api:app --reload --port 8000
 
 **StockWise Frontend hosted:**
 - https://stockwise-8351f.web.app/restock
-**StockWise Machine Learning hosted:**
 - https://ml-service-519269717450.europe-west1.run.app/predictions
 
 ## Project Structure
