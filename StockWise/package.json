@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test.e2e": "cypress run",
     "test.unit": "vitest",
-    "lint": "eslint"
+    "lint": "eslint",
+    "setup": "powershell .\\setup.ps1",
+    "start": "powershell .\\start.ps1"
   },
   "dependencies": {
     "@capacitor/app": "6.0.1",
