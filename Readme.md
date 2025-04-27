@@ -113,6 +113,18 @@ pip install -r requirements.txt.
 - **Real-Time Updates:** All changes reflect instantly through Firebase syncing.
 - **Role-Based Access:** Admins, Managers, and Employees have different access permissions.
 
+## Users 
+### Admin:
+Username: rosshannonty@gmail.com 
+
+### Employee
+Username: donaldtrump12@gmail.com
+Password: donaldtrump12
+
+### Manager
+Usrename: user123@gmail.com
+Password: user123
+
 ## Acknowledgments
 - Special thanks to my supervisor for their continued guidance and support.
 - Thanks to everyone who provided feedback and testing throughout development.
