@@ -118,16 +118,19 @@ pip install -r requirements.txt.
 Username: rosshannonty@gmail.com 
 
 ### Employee
-Username: donaldtrump12@gmail.com
-Password: donaldtrump12
+- Username: donaldtrump12@gmail.com
+- Password: donaldtrump12
 
 ### Manager
-Usrename: user123@gmail.com
-Password: user123
+- Username: user123@gmail.com
+- Password: user123
 
 ## Acknowledgments
 - Special thanks to my supervisor for their continued guidance and support.
 - Thanks to everyone who provided feedback and testing throughout development.
+
+## Screencast
+- https://www.youtube.com/watch?v=g-QFwO2XuKQ
 
 ## Contact
 For any inquiries or further information, you can reach me at:
