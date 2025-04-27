@@ -617,6 +617,11 @@ export const updateUserRole = async (userId: string, newRole: UserRole) => {
 
 export const deleteUser = async (userId: string, userEmail: string) => {
   try {
+    // Prevent deleting the admin account
+    if (userEmail === 'rosshannonty@gmail.com') {
+      throw new Error('Cannot delete admin account');
+    }
+    
     // Check if current user is admin
     const currentUser = auth.currentUser;
     const userRole = await getUserRole(currentUser?.uid || '');
@@ -625,10 +630,6 @@ export const deleteUser = async (userId: string, userEmail: string) => {
       throw new Error('Only administrators can delete users');
     }
     
-    // Prevent deleting the admin account
-    if (userEmail === 'rosshannonty@gmail.com') {
-      throw new Error('Cannot delete admin account');
-    }
 
     // Delete user document from Firestore
     const userRef = doc(db, "users", userId);
